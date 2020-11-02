@@ -1,0 +1,31 @@
+beta = (paramList[0]['beta1']+paramList[0]['beta2'])/2.
+
+nv1 = [2,6,18,20,21] # Suben
+nv2 = [0,7,8,10,12,14,15,16,17,18,19,21] # Suben y Bajan / Constantes
+nv3 = [1,3,4,11,12,13,17,19] # Bajan
+nv = [1,22]
+
+f1 = plt.figure()
+f2 = plt.figure()
+f3 = plt.figure()
+
+ax1 = f1.add_subplot(111)
+for i in nv1:
+	a2 = paramList[i]['a2']
+	print len(a2)
+	ax1.plot(beta,a2)
+
+ax2 = f2.add_subplot(111)
+for i in nv2:
+	a2 = paramList[i]['a2']
+	print len(a2)
+	ax2.plot(beta,a2)
+
+ax3 = f3.add_subplot(111)
+for i in nv3:
+	a2 = paramList[i]['a2']
+	print len(a2)
+	plt.plot(beta,a2)
+
+plt.show()
+
