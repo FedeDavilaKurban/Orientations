@@ -171,6 +171,67 @@ def ranOrientations(n_iter):
 
     return xmean,ymean,ystd
 
+def orientations(rmins,rmaxs,sections,ran_iter):
+    """
+    Calculates orientations of disks, their ecdf, and fits.
+    
+    Writes files "fits_sec{}_rmin{}_rmax{}".format(sec,rmin,rmax)
+    and
+    "randomfits_sec{}_rmin{}_rmax{}".format(sec,rmin,rmax)
+
+    """
+    global xv,yv,zv,rv, N
+
+    for rmin in rmins:
+        print(rmin)
+        for rmax in rmaxs:
+            print(rmax)
+            for sec in sections:
+                cos = []
+                print('sec =',sec)
+                for nv in range(len(voids)):
+                    #if nv%10==0: print('nv=',nv)
+                    xv,yv,zv,rv = voids['x','y','z','r'][nv]
+                    if units=='kpc':
+                        xv*=1000.
+                        yv*=1000.
+                        zv*=1000.
+                        rv*=1000.
+
+                    idx1 = tree.query_ball_point([xv,yv,zv],rv*rmax)
+                    idx2 = tree.query_ball_point([xv,yv,zv],rv*rmin)
+                    shell = [g for g in idx1 if g not in idx2]
+                    gals = gxs[shell]
+                    #print('N of galaxies in shell:',len(gals))
+
+                    """
+                    Spin-Mass linear regression 
+                    Determine section of interest with 'sec'
+                    """
+                    gals_h = JvsM(sec,gals,plot=False)
+                    #N_gals.append(len(gals_h))
+
+                    #print('N of galaxies of interest:',len(gals_h))
+                    """
+                    Cosines
+                    """
+                    cos.append( cosines(gals_h) )
+                    #print(np.shape(cos))
+
+                cos_flattened = [y for x in cos for y in x]
+                N = len(cos_flattened)
+                #print(N) #N/2 seria el numero de galaxias estudiadas
+
+                #ECDF, fits
+                cos,y,ecdf,yfit,d_yfit,a2 = fits(cos_flattened)
+                ascii.write(Table(np.column_stack([cos,ecdf(cos),y,yfit,d_yfit])),'../data/fits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['cos','ecdf','y','yfit','d_yfit'],overwrite=True)
+
+                #Random Sample
+                
+                xmean, ymean, ystd = ranOrientations(ran_iter)
+                ascii.write(Table(np.column_stack([xmean,ymean,ystd])),'../data/randomfits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['xmean','ymean','ystd'],overwrite=True)
+
+
 # %%
 """
 Read Voids, Galaxies, and create cKDTree
@@ -195,89 +256,16 @@ tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsiz
 
 # %%
 """
-Determine void shell and galaxies therein
+Orentations
 """
+
 #nv = 0
-rmax = 1.2
-rmin = 0.7
-#sec = 3
+rmaxs = [1.2]
+rmins = [0.7]
+sec = [3]
 allsections = [1,2,3,12,23,123,4,5,6,45,56,456]
+ran_iter = 100
 
-for rmin in [0.5,0.6,0.7,0.8,0.9]:
-    print(rmin)
-    for rmax in [1.2]:
-        print(rmax)
-        for sec in allsections:
-            cos = []
-            print('sec =',sec)
-            for nv in range(len(voids)):
-                #if nv%10==0: print('nv=',nv)
-                xv,yv,zv,rv = voids['x','y','z','r'][nv]
-                if units=='kpc':
-                    xv*=1000.
-                    yv*=1000.
-                    zv*=1000.
-                    rv*=1000.
-
-                idx1 = tree.query_ball_point([xv,yv,zv],rv*rmax)
-                idx2 = tree.query_ball_point([xv,yv,zv],rv*rmin)
-                shell = [g for g in idx1 if g not in idx2]
-                gals = gxs[shell]
-                #print('N of galaxies in shell:',len(gals))
-
-                """
-                Spin-Mass linear regression 
-                Determine section of interest with 'sec'
-                """
-                gals_h = JvsM(sec,gals,plot=False)
-                #N_gals.append(len(gals_h))
-
-                #print('N of galaxies of interest:',len(gals_h))
-                """
-                Cosines
-                """
-                cos.append( cosines(gals_h) )
-                #print(np.shape(cos))
-
-            cos_flattened = [y for x in cos for y in x]
-            N = len(cos_flattened)
-            #print(N) #N/2 seria el numero de galaxias estudiadas
-
-            #ECDF, fits
-            cos,y,ecdf,yfit,d_yfit,a2 = fits(cos_flattened)
-            ascii.write(Table(np.column_stack([cos,ecdf(cos),y,yfit,d_yfit])),'../data/fits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['cos','ecdf','y','yfit','d_yfit'],overwrite=True)
-
-            #Random Sample
-            
-            xmean, ymean, ystd = ranOrientations(100)
-            ascii.write(Table(np.column_stack([xmean,ymean,ystd])),'../data/randomfits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['xmean','ymean','ystd'],overwrite=True)
-
-            # #Plots
-            # fig, (ax1,ax2,ax3) = plt.subplots(3, 1,figsize=(5,6))
-            # ax1.set_title('Sec={}'.format(sec))
-
-            # ax1.hist(cos,bins=40,density=True,histtype='stepfilled',cumulative=False,alpha=1)#,alpha=30)
-            # ax1.plot(cos,d_yfit+.5,'r--')
-
-            # ax2.plot(cos,ecdf(cos))
-            # ax2.plot(cos,(cos+1.)/2.,'b--')
-            # ax2.plot(cos,yfit+(cos+1.)/2.,'r--')
-
-            # ax3.step(cos,y)
-            # ax3.plot(cos,yfit,'r--')
-            # ax3.fill_between(xmean,ymean-ystd,ymean+ystd,color='k',alpha=.6,label=r'$1\sigma$')
-            # ax3.fill_between(xmean,ymean-2*ystd,ymean+2*ystd,color='k',alpha=.4,label=r'$2\sigma$')
-            # ax3.legend()
-
-            # #ax3.text(-.75,.0,'a2=%.3f'%(a2))
-
-            # # ax1.set_title('Cos (Mirrored)',size=12)
-            # # ax2.set_title('ECDF',size=12)
-            # # ax3.set_title('Residues',size=12)
-
-            # plt.tight_layout()
-            # plt.savefig('../plots/cosines_{}.png'.format(sec),dpi=300)
-            # plt.show()
-
+orientations(rmins,rmaxs,sec,ran_iter)
 
 # %%
