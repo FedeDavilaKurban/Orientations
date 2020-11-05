@@ -31,11 +31,8 @@ def readVoids(minrad=None,maxrad=None):
 def readTNG():
     """
     This function reads subhalos in the TNG300-1 simulation and returns 
-    lbox: size of box in specified units
-    Ntotal: num of galaxies
-    gxs: an ascii Table with the fields and filters I usually need
 
-    units=['Mpc','kpc']
+    gxs: an ascii Table with the fields and filters I usually need for this: Position, Mass, Spin
 
     """
     basePath = '/home/fede/TNG300-1/output/'
@@ -104,7 +101,7 @@ def cosines(gals_h):
     Calculates absolute value of cosine of the angle between spin vector J 
     and void-centric direction.
     
-    Returns: cosines
+    Returns: array of the cosines (will be double the amount of gals_h because it's duplicated with negative signs)
     """
     cos1 = []
     for i in range(len(gals_h)):
