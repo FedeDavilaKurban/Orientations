@@ -7,9 +7,9 @@ from astropy.table import Table
 
 allsections = [1,2,3,123,12,23,45,56,4,5,6,456]
 rmin, rmax = .7, 1.2
-for rmin in [0.5,.6,.8,.9]:
+for rmin in [0.7]:
     print(rmin)
-    for rmax in [1.2,]:
+    for rmax in [1.2]:
         print(rmax)
         fig, axes = plt.subplots(3, 4,figsize=(8,6),sharex=True,sharey=True)
 
