@@ -46,7 +46,7 @@ def readTNG():
 
     return gxs
 
-def JvsM(sec,gals,plot=True):
+def JvsM(sec,gals,gxs,plot=True):
     """
     Performs linear regression of the Mass-Spin relation
     Determines galaxies of interest with 'sec'
@@ -93,7 +93,7 @@ def JvsM(sec,gals,plot=True):
 
     return gals_h
 
-def cosines(gals_h,units,s5=0):
+def cosCalc(gals_h,units,s5=0):
     """
     Calculates absolute value of cosine of the angle between spin vector J 
     and void-centric direction.
@@ -159,7 +159,7 @@ def fits(cos_list,verbose=False):
 
     return cos1,y,ecdf,yfit,d_yfit,a2
 
-def ranOrientations(n_iter):
+def ranOrientations(n_iter,N):
     """
     Generate random orientations, calculate mean and standard deviations
     Returns: xmean (the random "cosines") , ymean (mean value of the fits), ystd (stand dev of fits)
@@ -188,67 +188,32 @@ def ranOrientations(n_iter):
 
     return xmean,ymean,ystd
 
-def orientations(rmins,rmaxs,sections,s5,ran_iter,write=True,ranfits=True):
+def orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     """
-    Calculates orientations of disks, their ecdf, and fits.
-    
-    Writes files "fits_sec{}_rmin{}_rmax{}".format(sec,rmin,rmax)
-    and
-    "randomfits_sec{}_rmin{}_rmax{}".format(sec,rmin,rmax)
-
+    Determines galaxies of interest in the shell of the void 
+    Returns cosine of angles of disks and void centric direction    
     """
     import numpy as np
     from astropy.table import Table
 
-    global xv,yv,zv,rv, N
+    global xv,yv,zv,rv,cos
 
-    for rmin in rmins:
-        print(rmin)
-        for rmax in rmaxs:
-            print(rmax)
-            for sec in sections:
-                cos = []
-                print('sec =',sec)
-                for nv in range(len(voids)):
-                    #if nv%10==0: print('nv=',nv)
-                    xv,yv,zv,rv = voids['x','y','z','r'][nv]
-                    if units=='kpc':
-                        xv*=1000.
-                        yv*=1000.
-                        zv*=1000.
-                        rv*=1000.
+    xv,yv,zv,rv = voids['x','y','z','r'][nv]
+    if units=='kpc':
+        xv*=1000.
+        yv*=1000.
+        zv*=1000.
+        rv*=1000.
 
-                    idx1 = tree.query_ball_point([xv,yv,zv],rv*rmax)
-                    idx2 = tree.query_ball_point([xv,yv,zv],rv*rmin)
-                    shell = [g for g in idx1 if g not in idx2]
-                    gals = gxs[shell]
-                    #print('N of galaxies in shell:',len(gals))
+    idx1 = tree.query_ball_point([xv,yv,zv],rv*rmax)
+    idx2 = tree.query_ball_point([xv,yv,zv],rv*rmin)
+    shell = [g for g in idx1 if g not in idx2]
+    gals = gxs[shell]
+    #print('N of galaxies in shell:',len(gals))
 
-                    """
-                    Spin-Mass linear regression 
-                    Determine section of interest with 'sec'
-                    """
-                    gals_h = JvsM(sec,gals,plot=False)
-                    #N_gals.append(len(gals_h))
+    gals_h = JvsM(sec,gals,gxs,plot=False) #Determine galaxies of interest (involves rmin,rmax,sec,s5)
 
-                    #print('N of galaxies of interest:',len(gals_h))
-                    """
-                    Cosines
-                    """
-                    cos.append( cosines(gals_h,units,s5) )
-                    #print(np.shape(cos))
+    cos = cosCalc(gals_h,units,s5) #Calculate the cosines of angle of J and void direction
 
-                cos_flattened = [y for x in cos for y in x]
-                N = len(cos_flattened)
-                #print(N) #N/2 seria el numero de galaxias estudiadas
+    return cos 
 
-                #ECDF, fits
-                cos,y,ecdf,yfit,d_yfit,a2 = fits(cos_flattened)
-                print(a2)
-                a2string="{:.3f}".format(a2)
-                if write: ascii.write(Table(np.column_stack([cos,ecdf(cos),y,yfit,d_yfit])),'../data/fits_sec{}_rmin{}_rmax{}_s5:{}'.format(sec,rmin,rmax,s5),names=['cos','ecdf','y','yfit','d_yfit'],overwrite=True)
-
-                #Random Sample
-                if ranfits:
-                    xmean, ymean, ystd = ranOrientations(ran_iter)
-                    if write: ascii.write(Table(np.column_stack([xmean,ymean,ystd])),'../data/randomfits_sec{}_rmin{}_rmax{}_s5:{}'.format(sec,rmin,rmax,s5),names=['xmean','ymean','ystd'],overwrite=True)

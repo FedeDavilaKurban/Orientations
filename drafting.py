@@ -12,6 +12,7 @@ def orientations(rmins,rmaxs,sections,s5,ran_iter,write=True,ranfits=True):
 
     global xv,yv,zv,rv, N
 
+    print('nv=',nv)
     for rmin in rmins:
         print(rmin)
         for rmax in rmaxs:
@@ -19,34 +20,33 @@ def orientations(rmins,rmaxs,sections,s5,ran_iter,write=True,ranfits=True):
             for sec in sections:
                 cos = []
                 print('sec =',sec)
-                for nv in range(len(voids)):
-                    #if nv%10==0: print('nv=',nv)
-                    xv,yv,zv,rv = voids['x','y','z','r'][nv]
-                    if units=='kpc':
-                        xv*=1000.
-                        yv*=1000.
-                        zv*=1000.
-                        rv*=1000.
 
-                    idx1 = tree.query_ball_point([xv,yv,zv],rv*rmax)
-                    idx2 = tree.query_ball_point([xv,yv,zv],rv*rmin)
-                    shell = [g for g in idx1 if g not in idx2]
-                    gals = gxs[shell]
-                    #print('N of galaxies in shell:',len(gals))
+                xv,yv,zv,rv = voids['x','y','z','r'][nv]
+                if units=='kpc':
+                    xv*=1000.
+                    yv*=1000.
+                    zv*=1000.
+                    rv*=1000.
 
-                    """
-                    Spin-Mass linear regression 
-                    Determine section of interest with 'sec'
-                    """
-                    gals_h = JvsM(sec,gals,plot=False)
-                    #N_gals.append(len(gals_h))
+                idx1 = tree.query_ball_point([xv,yv,zv],rv*rmax)
+                idx2 = tree.query_ball_point([xv,yv,zv],rv*rmin)
+                shell = [g for g in idx1 if g not in idx2]
+                gals = gxs[shell]
+                #print('N of galaxies in shell:',len(gals))
 
-                    #print('N of galaxies of interest:',len(gals_h))
-                    """
-                    Cosines
-                    """
-                    cos.append( cosines(gals_h,units,s5) )
-                    #print(np.shape(cos))
+                """
+                Spin-Mass linear regression 
+                Determine section of interest with 'sec'
+                """
+                gals_h = JvsM(sec,gals,plot=False)
+                #N_gals.append(len(gals_h))
+
+                #print('N of galaxies of interest:',len(gals_h))
+                """
+                Cosines
+                """
+                cos.append( cosines(gals_h,units,s5) )
+                #print(np.shape(cos))
 
                 cos_flattened = [y for x in cos for y in x]
                 N = len(cos_flattened)
