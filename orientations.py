@@ -70,6 +70,7 @@ cos_flattened = np.concatenate(cos).ravel()
 print(cos_flattened)
 N = len(cos_flattened) #N/2 is the number of galaxies of interest
 
+#%%
 #ECDF, fits
 cos,y,ecdf,yfit,d_yfit,a2 = fits(cos_flattened)
 print(a2)
