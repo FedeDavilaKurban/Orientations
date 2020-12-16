@@ -19,15 +19,16 @@ plt.hist(cos1,color='g',alpha=.8)
 plt.show()
 
 cos,y,ecdf,yfit,d_yfit,a2 = fits(cos0)
-print(a2)
+print('a2=',a2)
 ascii.write(Table(np.column_stack([cos,ecdf(cos),y,yfit,d_yfit])),'../data/fits_ones',names=['cos','ecdf','y','yfit','d_yfit'],overwrite=True)
 plt.step(cos,y,'b-')
 plt.plot(cos,yfit,'k--')
 
 cos,y,ecdf,yfit,d_yfit,a2 = fits(cos1)
-print(a2)
+print('a2=',a2)
 ascii.write(Table(np.column_stack([cos,ecdf(cos),y,yfit,d_yfit])),'../data/fits_zeros',names=['cos','ecdf','y','yfit','d_yfit'],overwrite=True)
 plt.step(cos,y,'g-')
 plt.plot(cos,yfit,'k--')
 plt.show()
 # %%
+

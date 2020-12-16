@@ -30,10 +30,11 @@ tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsiz
 
 # %%
 """
-Orentations per void
+Orentations (cosines) per void
 """
 nvs = 0
-rmaxs = [1.2]
+nvs = range(len(voids))
+rmaxs = [1.4]
 rmins = [0.7]
 
 #Choose one of the following as parameter in orientations()
@@ -47,7 +48,7 @@ s5 = 0 #Sigma5; considera sólo galaxias con sigma5 <= s5. Poner s5=0 para desac
 for nv in nvs:
     for rmin in rmins:
         for rmax in rmaxs:
-            for sec in secs:
+            for sec in allsections:
                 print('nv, rmin, rmax, sec:',nv,rmin,rmax,sec)
 
                 cos = orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5)
