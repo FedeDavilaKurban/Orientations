@@ -125,19 +125,26 @@ def cosCalc(gals_h,units,s5=0):
                 
     return cos_list
 
-def fits(cos_list,verbose=False):
+def ecdf_residues(cos_list,verbose=False):
     """
     Calculates ECDF and residues. Fits the residues.
     Returns: ecdf, fit, derivative of fit, and coefficient a2
     """
     import numpy as np
     from statsmodels.distributions.empirical_distribution import ECDF
-    from scipy.optimize import curve_fit
 
     cos_neg=-1*np.array(cos_list)
     cos1 = np.sort(np.concatenate([cos_list,cos_neg]))
     ecdf = ECDF(cos1) # Empirical cumulated distribution function
     y = ecdf(cos1)-(cos1+1.)/2. # Para cuando tomamos el valor verdadero de cos (no el absoluto) 
+
+    return cos1,ecdf,y
+
+def fits(cos1,y,verbose=False):
+    "Perform fits on the residues of the ecdf"
+    
+    import numpy as np
+    from scipy.optimize import curve_fit
 
     def func(x,a,b,c,d,e):
         return a + b*np.sin( np.pi*(x+1.)/2. ) + c*np.sin( 2.*np.pi*(x+1.)/2. ) + d*np.sin( 3.*np.pi*(x+1.)/2. ) + e*np.sin( 4.*np.pi*(x+1.)/2. )
@@ -157,7 +164,7 @@ def fits(cos_list,verbose=False):
     a4 = coeffs[4]
     if verbose==True: print('a1=',a1,'; a2=',a2,'; a3=',a3,'; a4=',a4)
 
-    return cos1,y,ecdf,yfit,d_yfit,a2
+    return yfit,d_yfit,a2
 
 def ranOrientations(n_iter,N):
     """
@@ -177,7 +184,8 @@ def ranOrientations(n_iter,N):
         rancos_neg = rancos_pos*-1
         rancos = np.concatenate((rancos_pos,rancos_neg))
 
-        cos_,y_,ecdf_,yfit_,d_yfit_,a2_ = fits(rancos)
+        cos_,ecdf_,y_ = ecdf_residues(rancos)
+        yfit_,d_yfit_,a2_ = fits(cos_,y_)
         #a2_ran.append(a2_)
         yran_fit.append(yfit_)
         xran_fit.append(cos_)
@@ -217,3 +225,36 @@ def orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
 
     return cos 
 
+def jk_mean_sd(N_linspace,sec,rmin,rmax):
+    """
+    Read N-1 JK curves
+    Choose N_linspace random values of 'x' between 0-1 to evaluate mean and SD of the JK curves
+    """
+    import numpy as np
+    from astropy.io import ascii
+
+    dataList=[]
+    for jk in range(81):
+        dataList.append( ascii.read('../data/ecdf_sec{}_rmin{}_rmax{}_jk{}'.format(sec,rmin,rmax,jk),names=['cos','ecdf','y']) )
+        #plt.plot(dataList[-1]['cos'],dataList[-1]['y'],alpha=.01,color='k')
+
+    #I need to create an array of x values where I will 
+    #evaluate the variance of the JK resampling
+    x_ran = np.linspace(-1,1,N_linspace)
+    y_var = []
+    y_mean = []
+    for j in range(len(x_ran)):
+        yList=[]
+        for i in range(len(dataList)):
+            x,y = dataList[i]['cos'], dataList[i]['y']
+            yList.append( np.interp(x_ran[j],x,y) )
+
+        y_var.append( np.var(yList,ddof=1) )
+        y_mean.append( np.mean(yList) )
+
+    #Get Standard Deviation from Variance
+    y_sd = np.sqrt(y_var)
+
+    return dataList, x_ran, y_var, y_mean, y_sd
+
+# %%
