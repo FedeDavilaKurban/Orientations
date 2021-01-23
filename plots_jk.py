@@ -14,45 +14,24 @@ from astropy.table import Table
 sec = 3 
 rmin, rmax = .7, 1.4
 
+random = ascii.read('../data/randomfits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['xmean','ymean','ystd'])
+xmean, ymean, sigma = random['xmean'],random['ymean'],random['ystd']
+
+data = ascii.read('../data/jackknifeValues_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['x_ran','y_var','y_mean','y_sd'])
+x_ran,y_var,y_mean,y_sd = data['x_ran'],data['y_var'],data['y_mean'],data['y_sd']
+
+fits = ascii.read('../data/fits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['yfit','d_yfit'])
+yfit, d_yfit = fits['yfit'],fits['d_yfit']
+
 dataList=[]
 for jk in range(81):
-    dataList.append( ascii.read('../data/fits_sec{}_rmin{}_rmax{}_jk{}'.format(sec,rmin,rmax,jk),names=['cos','ecdf','y','yfit','d_yfit']) )
+    dataList.append( ascii.read('../data/ecdf_sec{}_rmin{}_rmax{}_jk{}'.format(sec,rmin,rmax,jk),names=['cos','ecdf','y']) )
     plt.plot(dataList[-1]['cos'],dataList[-1]['y'],alpha=.01,color='k')
 
-#plt.plot(dataList[-1]['cos'],dataList[-1]['y'],alpha=1.)
+plt.fill_between(x_ran,y_mean-y_sd,y_mean+y_sd,alpha=.8,color='r')
+plt.plot(x_ran,yfit)
 
-#I need to create an array of x values where I will 
-#evaluate the variance of the JK resampling
-x_Var = np.linspace(0,1,100)
-y_Var = []
-y_Mean = []
-for j in range(len(x_Var)):
-    yList=[]
-    for i in range(len(dataList)):
-        x,y = dataList[i]['cos'], dataList[i]['y']
-        yList.append( np.interp(x_Var[j],x,y) )
-
-    y_Var.append( np.var(yList,ddof=1) )
-    y_Mean.append( np.mean(yList) )
-
-#Get Standard Deviation from Variance
-y_sd = np.sqrt(y_Var)
-
-#Actual plot
-plt.fill_between(x_Var,y_Mean-y_sd,y_Mean+y_sd,alpha=.8,color='r')
-plt.fill_between(-1*np.array(x_Var),-1*np.array(y_Mean)-y_sd,-1*np.array(y_Mean)+y_sd,alpha=.8,color='r')
-
+plt.fill_between(xmean,ymean-sigma,ymean+sigma,color='k',alpha=.6,label=r'$1\sigma$')
+plt.fill_between(xmean,ymean-2*sigma,ymean+2*sigma,color='k',alpha=.4,label=r'$2\sigma$')
+plt.legend()
 plt.show()
-
-# ax.set_title('Sec={}'.format(sec))
-# #ax.step(cos,y)
-# ax.plot(cos,yfit,'r--')
-# ax.fill_between(xmean,ymean-ystd,ymean+ystd,color='k',alpha=.6,label=r'$1\sigma$')
-# ax.fill_between(xmean,ymean-2*ystd,ymean+2*ystd,color='k',alpha=.4,label=r'$2\sigma$')
-# #ax.legend()
-
-# axes[0,0].legend(loc=2)
-# plt.tight_layout()
-# plt.savefig('../plots/cosines_allsections_rmin{}_rmax{}.png'.format(rmin,rmax),dpi=300)
-# plt.show()
-# %%

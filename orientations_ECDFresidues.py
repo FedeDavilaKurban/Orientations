@@ -20,9 +20,7 @@ ran_iter = 100
 s5 = 0 #Sigma5; considera sólo galaxias con sigma5 <= s5. Poner s5=0 para desactivar
 
 """
-ECDF and residue fits
 """
-#Read cosines of galaxies in shells of voids of interest
 
 for jk in nvs:
     print('jk: {}/{}'.format(jk,len(nvs)-1))
@@ -36,10 +34,10 @@ for jk in nvs:
                     cos.append( cosTable['cos'].data )
 
     cos_flattened = np.concatenate(cos).ravel()
-    #print(cos_flattened)
+
     N = len(cos_flattened) #N/2 is the number of galaxies of interest
 
-    #ECDF, fits
+    #ECDF
     cos,ecdf,y = ecdf_residues(cos_flattened)
 
     #ascii.write(Table(np.column_stack([cos,ecdf(cos),y,yfit,d_yfit])),'../data/fits_sec{}_rmin{}_rmax{}_jk{}'.format(sec,rmin,rmax,jk),names=['cos','ecdf','y','yfit','d_yfit'],overwrite=True)
@@ -50,14 +48,16 @@ for rmin in rmins:
         for sec in secs:
             dataList, x_ran, y_var, y_mean, y_sd = jk_mean_sd(1000,sec,rmin,rmax) #El argumento es el numero de valores random del eje x para evaluar mean y SD de las curvas JK
 
-#Fits the mean values of the JK curves corresponding to the x_ran
-yfit,d_yfit,a2 = fits(x_ran,y_mean)
+            #Fits the mean values of the JK curves corresponding to the x_ran
+            yfit,d_yfit,a2 = fits(x_ran,y_mean)
+            #OJO!!! calculo el a2 pero no lo estoy escribiendo
+
+            ascii.write(Table(np.column_stack([yfit,d_yfit])),'../data/fits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['yfit','d_yfit'],overwrite=True)
+            ascii.write(Table(np.column_stack([x_ran,y_var,y_mean,y_sd])),'../data/jackknifeValues_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['x_ran','y_var','y_mean','y_sd'],overwrite=True)
 
 
 
-#IN PROGRESS
 #Random Sample
-
 n_forsum = []
 for nv in nvs:
     for rmin in rmins:
@@ -67,19 +67,6 @@ for nv in nvs:
                 n_forsum.append( len(cosTable['cos'].data) )
 
 N_forRandom = np.sum(n_forsum) #Equals to the number of gxs in all the voids considered 
-xmean, ymean, ystd = ranOrientations(ran_iter,N_forRandom)
-ascii.write(Table(np.column_stack([xmean,ymean,ystd])),'../data/randomfits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['xmean','ymean','ystd'],overwrite=True)
+xmean, ymean, sigma = ranOrientations(ran_iter,N_forRandom)
+ascii.write(Table(np.column_stack([xmean,ymean,sigma])),'../data/randomfits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['xmean','ymean','ystd'],overwrite=True)
 
-#PLOTS
-import matplotlib.pyplot as plt
-for i in range(len(dataList)):
-    plt.plot(dataList[i]['cos'],dataList[i]['y'],alpha=.01,color='k')
-
-plt.fill_between(x_ran,y_mean-y_sd,y_mean+y_sd,alpha=.8,color='r')
-plt.plot(x_ran,yfit)
-
-plt.fill_between(xmean,ymean-ystd,ymean+ystd,color='k',alpha=.6,label=r'$1\sigma$')
-plt.fill_between(xmean,ymean-2*ystd,ymean+2*ystd,color='k',alpha=.4,label=r'$2\sigma$')
-plt.legend()
-plt.show()
-# %%
