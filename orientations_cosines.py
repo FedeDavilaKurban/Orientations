@@ -1,5 +1,7 @@
 #%%
-
+"""
+Gets the cosines of the orientations of the galaxies in void shells 
+"""
 import numpy as np
 from scipy import spatial
 from astropy.table import Table
