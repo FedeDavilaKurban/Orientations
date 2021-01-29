@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from astropy.io import ascii
 from astropy.table import Table
 #%%
+
+nvs = range(81)
 rmin, rmax = .7, 1.4
 allsections = [1,2,3,12,23,123,4,5,6,45,56,456]
 
@@ -24,20 +26,25 @@ for sec in allsections:
     fits = ascii.read('../data/fits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['yfit','d_yfit'])
     yfit, d_yfit = fits['yfit'],fits['d_yfit']
 
+    for nv in nvs:
+        filename = '../data/ecdf_sec{}_rmin{}_rmax{}_void{}'.format(sec,rmin,rmax,nv)
+        void_curve = ascii.read(filename,names=['cos','ecdf','y'])
+        plt.plot(void_curve['cos'],void_curve['y'],alpha=.025,color='k')
+
     #dataList=[]
     #for jk in range(81):
     #    dataList.append( ascii.read('../data/ecdf_sec{}_rmin{}_rmax{}_jk{}'.format(sec,rmin,rmax,jk),names=['cos','ecdf','y']) )
     #    plt.plot(dataList[-1]['cos'],dataList[-1]['y'],alpha=.01,color='k')
 
     plt.fill_between(x_ran,y_mean-y_sd,y_mean+y_sd,alpha=.8,color='r')
-    plt.plot(x_ran,yfit)
+    #plt.plot(x_ran,yfit)
 
     plt.fill_between(xmean,ymean-sigma,ymean+sigma,color='k',alpha=.4,label=r'$1\sigma$')
     plt.fill_between(xmean,ymean-2*sigma,ymean+2*sigma,color='k',alpha=.3,label=r'$2\sigma$')
     plt.fill_between(xmean,ymean-3*sigma,ymean+3*sigma,color='k',alpha=.2,label=r'$3\sigma$')
     plt.legend()
-    plotname = 'sec{}_rmin{}_rmax{}.png'.format(sec,rmin,rmax)
+    plotname = '../plots/sec{}_rmin{}_rmax{}.png'.format(sec,rmin,rmax)
     print(plotname)
-    plt.savefig(plotname)
-    plt.show()
+    plt.savefig(plotname,dpi=1000)
+    #plt.show()
     plt.close()
