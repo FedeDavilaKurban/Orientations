@@ -16,6 +16,7 @@ def readVoids(minrad=None,maxrad=None):
     
     return voids
 
+# ----------------------------------------------------------------------------------------------
 def readTNG():
     """
     This function reads subhalos in the TNG300-1 simulation and returns 
@@ -46,6 +47,7 @@ def readTNG():
 
     return gxs
 
+# ----------------------------------------------------------------------------------------------
 def JvsM(sec,gals,gxs,plot=True):
     """
     Performs linear regression of the Mass-Spin relation
@@ -93,7 +95,8 @@ def JvsM(sec,gals,gxs,plot=True):
 
     return gals_h
 
-def cosCalc(gals_h,units,s5=0):
+# ----------------------------------------------------------------------------------------------
+def cosCalc(gals_h,units,tree,s5=0):
     """
     Calculates absolute value of cosine of the angle between spin vector J 
     and void-centric direction.
@@ -101,6 +104,7 @@ def cosCalc(gals_h,units,s5=0):
     Returns: array of the cosines (will be double the amount of gals_h because it's duplicated with negative signs)
     """
     import numpy as np
+    from scipy import spatial
 
     cos_list = []
     #sigma5 = []
@@ -125,6 +129,7 @@ def cosCalc(gals_h,units,s5=0):
                 
     return cos_list
 
+# ----------------------------------------------------------------------------------------------
 def ecdf_residues(cos_list,verbose=False):
     """
     Calculates ECDF and residues. Fits the residues.
@@ -140,6 +145,7 @@ def ecdf_residues(cos_list,verbose=False):
 
     return cos1,ecdf,y
 
+# ----------------------------------------------------------------------------------------------
 def fits(cos1,y,verbose=False):
     "Perform fits on the residues of the ecdf"
     
@@ -166,6 +172,7 @@ def fits(cos1,y,verbose=False):
 
     return yfit,d_yfit,a2
 
+# ----------------------------------------------------------------------------------------------
 def ranOrientations(n_iter,N):
     """
     Generate random orientations, calculate mean and standard deviations
@@ -196,6 +203,7 @@ def ranOrientations(n_iter,N):
 
     return xmean,ymean,ystd
 
+# ----------------------------------------------------------------------------------------------
 def orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     """
     Determines galaxies of interest in the shell of the void 
@@ -221,21 +229,23 @@ def orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
 
     gals_h = JvsM(sec,gals,gxs,plot=False) #Determine galaxies of interest (involves rmin,rmax,sec,s5)
 
-    cos = cosCalc(gals_h,units,s5) #Calculate the cosines of angle of J and void direction
+    cos = cosCalc(gals_h,units,tree,s5) #Calculate the cosines of angle of J and void direction
 
     return cos 
 
-def jk_mean_sd(N_linspace,sec,rmin,rmax):
+# ----------------------------------------------------------------------------------------------
+def jk_mean_sd(N_linspace,sec,rmin,rmax,exp):
     """
     Read N-1 JK curves
     Choose N_linspace random values of 'x' between 0-1 to evaluate mean and SD of the JK curves
     """
     import numpy as np
     from astropy.io import ascii
+    from config import writePath
 
     dataList=[]
     for jk in range(81):
-        dataList.append( ascii.read('../data/ecdf_sec{}_rmin{}_rmax{}_jk{}'.format(sec,rmin,rmax,jk),names=['cos','ecdf','y']) )
+        dataList.append( ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/ecdf_jk{}.dat'.format(jk),names=['cos','ecdf','y']) )
         #plt.plot(dataList[-1]['cos'],dataList[-1]['y'],alpha=.01,color='k')
 
     #I need to create an array of x values where I will 
@@ -258,3 +268,26 @@ def jk_mean_sd(N_linspace,sec,rmin,rmax):
     return dataList, x_ran, y_var, y_mean, y_sd
 
 # %%
+# ----------------------------------------------------------------------------------------------
+def readExp(exp):
+    import sys
+    from pyexcel_ods import get_data  
+
+    print('Codename of experiment:', exp)
+
+    data = get_data('../exps/experiments.ods')
+
+    test = exp in (item for sublist in data['Sheet1'] for item in sublist)
+    if test==False:
+        print('ERROR: No experiment "{}"'.format(exp))
+        quit()
+
+    exp, minradVoid, rmin, rmax, sec, fxa = next(row for row in data['Sheet1'] if row[0] == exp) 
+
+    print('minradVoid = {}Mpc'.format(minradVoid))
+    print('rmin = {}Rvoid'.format(rmin))
+    print('rmax = {}Rvoid'.format(rmax))
+    print('sec =',sec)
+    print('fxa =',fxa)
+
+    return str(exp),minradVoid, rmin, rmax, sec, fxa

@@ -8,8 +8,20 @@ from scipy import spatial
 from astropy.table import Table
 from astropy.io import ascii
 from orientationsTools import *
+import random
 
-voids = readVoids(7.)
+minradV = 7.
+
+#for minradV in [5.,6.,7.,8.,9.,10.]:
+print(minradV)
+voids = readVoids(minradV)
+
+#I DO THIS FOR DISK SPACE REASONS
+if len(voids)>500:
+    print('Too many voids!')
+    voids = voids[random.choices(list(range(len(voids))),k=200)]
+
+print('Num of voids with minradVoid={}Mpc :'.format(minradV),len(voids))
 
 nvs = range(len(voids))
 rmax = 1.4
@@ -26,14 +38,14 @@ secs = [1,2,3]
 ran_iter = 100
 s5 = 0 #Sigma5; considera sólo galaxias con sigma5 <= s5. Poner s5=0 para desactivar
 
+
 for sec in allsections:
-    print(sec)
+    #print(sec)
     for jk in nvs:
-        #print('jk: {}/{}'.format(jk,len(nvs)-1))
         cos = []
         for nv in nvs:
             if jk==nv: continue
-            cosTable = ascii.read('../data/cos_nv{}_sec{}_rmin{}_rmax{}_s5:{}'.format(nv,sec,rmin,rmax,s5),names=['cos'])
+            cosTable = ascii.read('/media/fede/TOSHIBA EXT/Proyectos/Orientations/data/minradVoid{}/cos_nv{}_sec{}_rmin{}_rmax{}_s5:{}'.format(int(minradV),nv,sec,rmin,rmax,s5),names=['cos'])
             cos.append( cosTable['cos'].data )
 
         cos_flattened = np.concatenate(cos).ravel()
@@ -43,7 +55,7 @@ for sec in allsections:
         #ECDF
         cos,ecdf,y = ecdf_residues(cos_flattened)
 
-        filename = '../data/ecdf_sec{}_rmin{}_rmax{}_jk{}'.format(sec,rmin,rmax,jk)
+        filename = '/media/fede/TOSHIBA EXT/Proyectos/Orientations/data/minradVoid{}/ecdf_sec{}_rmin{}_rmax{}_s5:{}_jk{}'.format(int(minradV),sec,rmin,rmax,s5,jk)
         #print(filename)
         ascii.write(Table(np.column_stack([cos,ecdf(cos),y])),filename,names=['cos','ecdf','y'],overwrite=True)
 
@@ -53,8 +65,8 @@ for sec in allsections:
     yfit,d_yfit,a2 = fits(x_ran,y_mean)
     #OJO!!! calculo el a2 pero no lo estoy escribiendo
 
-    ascii.write(Table(np.column_stack([yfit,d_yfit])),'../data/fits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['yfit','d_yfit'],overwrite=True)
-    ascii.write(Table(np.column_stack([x_ran,y_var,y_mean,y_sd])),'../data/jackknifeValues_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['x_ran','y_var','y_mean','y_sd'],overwrite=True)
+    ascii.write(Table(np.column_stack([yfit,d_yfit])),'/media/fede/TOSHIBA EXT/Proyectos/Orientations/data/minradVoid{}/fits_sec{}_rmin{}_rmax{}_s5:{}'.format(int(minradV),sec,rmin,rmax,s5),names=['yfit','d_yfit'],overwrite=True)
+    ascii.write(Table(np.column_stack([x_ran,y_var,y_mean,y_sd])),'/media/fede/TOSHIBA EXT/Proyectos/Orientations/data/minradVoid{}/jackknifeValues_sec{}_rmin{}_rmax{}_s5:{}'.format(int(minradV),sec,rmin,rmax,s5),names=['x_ran','y_var','y_mean','y_sd'],overwrite=True)
 
 
 
@@ -62,12 +74,12 @@ for sec in allsections:
     n_forsum = []
     for nv in nvs:
         #print(nv)
-        cosTable = ascii.read('../data/cos_nv{}_sec{}_rmin{}_rmax{}_s5:{}'.format(nv,sec,rmin,rmax,s5),names=['cos'])
+        cosTable = ascii.read('/media/fede/TOSHIBA EXT/Proyectos/Orientations/data/minradVoid{}/cos_nv{}_sec{}_rmin{}_rmax{}_s5:{}'.format(int(minradV),nv,sec,rmin,rmax,s5),names=['cos'])
         n_forsum.append( len(cosTable['cos'].data) )
 
     N_forRandom = np.sum(n_forsum) #Equals to the number of gxs in all the voids considered 
     xmean, ymean, sigma = ranOrientations(ran_iter,N_forRandom)
-    ascii.write(Table(np.column_stack([xmean,ymean,sigma])),'../data/randomfits_sec{}_rmin{}_rmax{}'.format(sec,rmin,rmax),names=['xmean','ymean','ystd'],overwrite=True)
+    ascii.write(Table(np.column_stack([xmean,ymean,sigma])),'/media/fede/TOSHIBA EXT/Proyectos/Orientations/data/minradVoid{}/randomfits_sec{}_rmin{}_rmax{}_s5:{}'.format(int(minradV),sec,rmin,rmax,s5),names=['xmean','ymean','ystd'],overwrite=True)
 
 
-# %%
+    # %%

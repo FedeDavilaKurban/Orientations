@@ -1,0 +1,66 @@
+#%%
+"""
+Gets the cosines of the orientations of the galaxies in void shells 
+"""
+import sys
+import numpy as np
+from scipy import spatial
+from astropy.table import Table
+from astropy.io import ascii
+from orientationsTools import *
+import random
+from config import writePath, units
+
+# %%
+"""
+Read Voids, Galaxies, and create cKDTree
+"""
+
+# minradV = 7.
+# rmaxs = [1.4]
+# rmins = [0.7]
+# #Choose one of the following as parameter in orientations()
+# secs = [3]
+# sections = [4,5,45,56,456]
+# allsections = [1,2,3,12,23,123,4,5,6,45,56,456]
+# s5 = 0 #Sigma5; considera sólo galaxias con sigma5 <= s5. Poner s5=0 para desactivar
+
+minradV, rmin, rmax, sec, fxa = readExp(sys.argv[1])
+
+voids = readVoids(minrad=minradV)
+print('Num of voids:',len(voids))
+
+#I DO THIS FOR DISK SPACE REASONS
+if len(voids)>500:
+    print('Too many voids!')
+    voids = voids[random.choices(list(range(len(voids))),k=200)]
+
+print('Num of voids with minradVoid={}Mpc :'.format(minradV),len(voids))
+
+gxs = readTNG()
+
+if units=='Mpc': 
+    lbox=205.
+    for col in ['x','y','z']:
+        gxs[col]/=1000.
+if units=='kpc': 
+    lbox=205000.
+
+#Applying some filters
+gxs.remove_row(np.where(gxs['y']==lbox)[0][0])
+gxs.remove_row(np.where(gxs['x']<0.)[0][0])
+
+tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsize=lbox)
+
+"""
+Orentations (cosines) per void
+"""
+#nvs = 0
+nvs = range(len(voids))
+
+ran_iter = 100
+
+for nv in nvs:
+    cos = orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5)
+    ascii.write(Table(np.reshape(cos,(len(cos),1))),writePath+'Proyectos/Orientations/data/minradVoid{}/cos_nv{}_sec{}_rmin{}_rmax{}_s5:{}'.format(int(minradV),nv,sec,rmin,rmax,s5),names=['cos'],overwrite=True)
+

@@ -9,11 +9,21 @@ from astropy.table import Table
 from astropy.io import ascii
 from orientationsTools import *
 import matplotlib.pyplot as plt
+import random
 
+minradV = 7.
+#for minradV in [5.,6.,7.,8.,9.,10.]:
+voids = readVoids(minradV)
 
-voids = readVoids(7.)
+#I DO THIS FOR DISK SPACE REASONS
+if len(voids)>500:
+    print('Too many voids!')
+    voids = voids[random.choices(list(range(len(voids))),k=200)]
+
+print('Num of voids with minradVoid={}Mpc :'.format(minradV),len(voids))
 
 nvs = range(len(voids))
+
 rmax = 1.4
 rmin = 0.7
 #sec = 3
@@ -31,7 +41,7 @@ s5 = 0 #Sigma5; considera sólo galaxias con sigma5 <= s5. Poner s5=0 para desac
 for sec in allsections:
     print(sec)
     for nv in nvs:
-        cosTable = ascii.read('../data/cos_nv{}_sec{}_rmin{}_rmax{}_s5:{}'.format(nv,sec,rmin,rmax,s5),names=['cos'])
+        cosTable = ascii.read('/media/fede/TOSHIBA EXT/Proyectos/Orientations/data/minradVoid{}/cos_nv{}_sec{}_rmin{}_rmax{}_s5:{}'.format(int(minradV),nv,sec,rmin,rmax,s5),names=['cos'])
         cosArray = cosTable['cos'].data 
 
         #cos_flattened = np.concatenate(cos).ravel()
@@ -43,9 +53,9 @@ for sec in allsections:
 
         #plt.plot(cos,y,alpha=.01,color='k')
 
-        filename = '../data/ecdf_sec{}_rmin{}_rmax{}_void{}'.format(sec,rmin,rmax,nv)
+        filename = '/media/fede/TOSHIBA EXT/Proyectos/Orientations/data/minradVoid{}/ecdf_sec{}_rmin{}_rmax{}_s5:{}_void{}'.format(int(minradV),sec,rmin,rmax,s5,nv)
         print(filename)
         ascii.write(Table(np.column_stack([cos,ecdf(cos),y])),filename,names=['cos','ecdf','y'],overwrite=True)
 
 
-# %%
+    # %%
