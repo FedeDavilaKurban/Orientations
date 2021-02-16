@@ -83,6 +83,11 @@ def JvsM(sec,gals,gxs,plot=True):
     if sec == 56: gals_h = gals[(M < -.7)&(S < M*m+b)] # Solo limite inferior
     if sec == 456: gals_h = gals[(S < M*m+b)] # Solo limite en Spin
 
+    #Solo Masa
+    if sec == 14: gals_h = gals[(M < -.7)] 
+    if sec == 25: gals_h = gals[(M > -.7)&(M < -.3)] 
+    if sec == 36: gals_h = gals[(M > -.3)]
+
     if plot:
         plt.scatter(M,S,c='gray', label='Galaxies Not Being Analyzed')
         plt.scatter(np.log10(gals_h['mass']),np.log10(gals_h['sp_n']),c='blue', label='Galaxies Being Analyzed')
@@ -234,7 +239,7 @@ def orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     return cos 
 
 # ----------------------------------------------------------------------------------------------
-def jk_mean_sd(N_linspace,sec,rmin,rmax,exp):
+def jk_mean_sd(N_linspace,sec,rmin,rmax,exp,n_voids):
     """
     Read N-1 JK curves
     Choose N_linspace random values of 'x' between 0-1 to evaluate mean and SD of the JK curves
@@ -244,7 +249,7 @@ def jk_mean_sd(N_linspace,sec,rmin,rmax,exp):
     from config import writePath
 
     dataList=[]
-    for jk in range(81):
+    for jk in range(n_voids):
         dataList.append( ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/ecdf_jk{}.dat'.format(jk),names=['cos','ecdf','y']) )
         #plt.plot(dataList[-1]['cos'],dataList[-1]['y'],alpha=.01,color='k')
 
@@ -273,8 +278,6 @@ def readExp(exp):
     import sys
     from pyexcel_ods import get_data  
 
-    print('Codename of experiment:', exp)
-
     data = get_data('../exps/experiments.ods')
 
     test = exp in (item for sublist in data['Sheet1'] for item in sublist)
@@ -283,11 +286,5 @@ def readExp(exp):
         quit()
 
     exp, minradVoid, rmin, rmax, sec, fxa = next(row for row in data['Sheet1'] if row[0] == exp) 
-
-    print('minradVoid = {}Mpc'.format(minradVoid))
-    print('rmin = {}Rvoid'.format(rmin))
-    print('rmax = {}Rvoid'.format(rmax))
-    print('sec =',sec)
-    print('fxa =',fxa)
 
     return str(exp),minradVoid, rmin, rmax, sec, fxa

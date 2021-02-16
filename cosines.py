@@ -22,6 +22,12 @@ Cosines
 """)
 
 exp, minradV, rmin, rmax, sec, fxa = readExp(sys.argv[1])
+print('Codename of experiment:', exp)
+print('minradVoid = {}Mpc'.format(minradV))
+print('rmin = {}Rvoid'.format(rmin))
+print('rmax = {}Rvoid'.format(rmax))
+print('sec =',sec)
+print('fxa =',fxa)
 
 voids = readVoids(minrad=minradV)
 print('Num of voids:',len(voids))
@@ -29,7 +35,7 @@ print('Num of voids:',len(voids))
 #I DO THIS FOR DISK SPACE REASONS
 if len(voids)>500:
     print('Too many voids!')
-    voids = voids[random.choices(list(range(len(voids))),k=200)]
+    voids = voids[random.choices(list(range(len(voids))),k=300)]
 
     print('Num of voids: ',len(voids))
 
@@ -56,10 +62,17 @@ nvs = range(len(voids))
 
 ran_iter = 100
 
+n_total = 0 
 for nv in nvs:
     cos = orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,fxa)
-    filename = writePath+'Proyectos/Orientations/data/'+exp+'/cos.dat'
+    filename = writePath+'Proyectos/Orientations/data/'+exp+'/cos_void{}.dat'.format(nv)
     ascii.write(Table(np.reshape(cos,(len(cos),1))),filename,names=['cos'],overwrite=True)
+    
+    print('Num of gxs in Void{}:'.format(nv),len(cos))
+
+    n_total += len(cos)
 print('Written up to', filename)
 
-print('N_total of gxs: ',len(cos)/2)
+print('N_total of gxs: ',n_total)
+
+print('N_avg of gxs: ',float(n_total)/len(voids))

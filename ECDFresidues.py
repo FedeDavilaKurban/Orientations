@@ -18,12 +18,19 @@ ECDF and Residues for stacked Voids
 """)
 
 exp, minradV, rmin, rmax, sec, fxa = readExp(sys.argv[1])
+print('Codename of experiment:', exp)
+print('minradVoid = {}Mpc'.format(minradV))
+print('rmin = {}Rvoid'.format(rmin))
+print('rmax = {}Rvoid'.format(rmax))
+print('sec =',sec)
+print('fxa =',fxa)
+
 voids = readVoids(minradV)
 
 #I DO THIS FOR DISK SPACE REASONS
 if len(voids)>500:
     print('Too many voids!')
-    voids = voids[random.choices(list(range(len(voids))),k=200)]
+    voids = voids[random.choices(list(range(len(voids))),k=300)]
 
     print('Num of voids:',len(voids))
 
@@ -36,12 +43,12 @@ for jk in nvs:
     cos = []
     for nv in nvs:
         if jk==nv: continue
-        cosTable = ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/cos.dat',names=['cos'])
+        cosTable = ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/cos_void{}.dat'.format(nv),names=['cos'])
         cos.append( cosTable['cos'].data )
 
     cos_flattened = np.concatenate(cos).ravel()
 
-    N = len(cos_flattened) #N/2 is the number of galaxies of interest
+    #N = len(cos_flattened) #number of galaxies of interest
 
     #ECDF
     cos,ecdf,y = ecdf_residues(cos_flattened)
@@ -52,12 +59,16 @@ for jk in nvs:
 
 print('Written files up to:',filename)
 
-dataList, x_ran, y_var, y_mean, y_sd = jk_mean_sd(1000,sec,rmin,rmax,exp) #El argumento es el numero de valores random del eje x para evaluar mean y SD de las curvas JK
+dataList, x_ran, y_var, y_mean, y_sd = jk_mean_sd(1000,sec,rmin,rmax,exp,len(voids)) #El argumento es el numero de valores random del eje x para evaluar mean y SD de las curvas JK
 
 #Fits the mean values of the JK curves corresponding to the x_ran
 yfit,d_yfit,a2 = fits(x_ran,y_mean)
 
-print('a2=',a2)
+print("""
+------------
+a2 = {}
+-----------
+""".format(a2))
 #OJO!!! calculo el a2 pero no lo estoy escribiendo
 
 fitsfilename = writePath+'Proyectos/Orientations/data/'+exp+'/fits.dat'
@@ -71,10 +82,12 @@ ascii.write(Table(np.column_stack([x_ran,y_var,y_mean,y_sd])),jkfilename,names=[
 
 #Random Sample
 print('Random sample...')
+#Esto lo hago solo para saber cuantas galaxias de interes hay (en el stacking de voids)
+#Seguro hay otra forma mejor de sacar ese numero porque ya lo tengo de antes solo que no lo escribo en ningun lado
 n_forsum = []
 for nv in nvs:
     #print(nv)
-    cosTable = ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/cos.dat',names=['cos'])
+    cosTable = ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/cos_void{}.dat'.format(nv),names=['cos'])
     n_forsum.append( len(cosTable['cos'].data) )
 
 N_forRandom = np.sum(n_forsum) #Equals to the number of gxs in all the voids considered 
@@ -84,4 +97,4 @@ randomfitsfilename = writePath+'Proyectos/Orientations/data/'+exp+'/randomfits.d
 print('Writing',randomfitsfilename)
 ascii.write(Table(np.column_stack([xmean,ymean,sigma])),randomfitsfilename,names=['xmean','ymean','ystd'],overwrite=True)
 
-
+print('END')
