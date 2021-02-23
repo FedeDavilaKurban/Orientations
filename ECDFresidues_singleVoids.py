@@ -18,15 +18,16 @@ ECDF and Residues for single Voids
 ####################################
 """)
 
-exp, minradV, rmin, rmax, sec, fxa = readExp(sys.argv[1])
+exp, minradV, rmin, rmax, sec, fxa, vtype = readExp(sys.argv[1])
 print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
 print('rmin = {}Rvoid'.format(rmin))
 print('rmax = {}Rvoid'.format(rmax))
 print('sec =',sec)
 print('fxa =',fxa)
+print('vtype =',vtype)
 
-voids = readVoids(minradV)
+voids = readVoids(minradV,vtype=vtype)
 
 #I DO THIS FOR DISK SPACE REASONS
 if len(voids)>500:
@@ -37,10 +38,8 @@ if len(voids)>500:
 
 nvs = range(len(voids))
 
-ran_iter = 100
-
 for nv in nvs:
-    cosTable = ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/cos_void{}.dat'.format(nv),names=['cos'])
+    cosTable = ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/cos_void{}_{}.dat'.format(nv,vtype),names=['cos'])
     cosArray = cosTable['cos'].data 
 
     #N = len(cosArray) 
@@ -48,7 +47,7 @@ for nv in nvs:
     #ECDF
     cos,ecdf,y = ecdf_residues(cosArray)
 
-    filename = writePath+'Proyectos/Orientations/data/'+exp+'/ecdf_void{}'.format(nv)
+    filename = writePath+'Proyectos/Orientations/data/'+exp+'/ecdf_void{}_{}'.format(nv,vtype)
     #print(filename)
     ascii.write(Table(np.column_stack([cos,ecdf(cos),y])),filename,names=['cos','ecdf','y'],overwrite=True)
 

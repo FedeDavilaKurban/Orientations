@@ -1,9 +1,10 @@
+import sys
+sys.path.append('/home/fede/')
 import illustris_python as il
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import ascii
 from astropy.table import Table
-import illustris_python as il
 import numpy as np
 from scipy import spatial
 import seaborn
@@ -38,8 +39,10 @@ for i in range(len(voids)):
 plt.loglog(voids['r'],N,'.')
 plt.xlabel('R')
 plt.ylabel('N_gal')
-plt.savefig('NvsR.png')
+plt.savefig('NvsR1.png')
+plt.close()
 
 plt.hist(voids['r'],bins=50)
 plt.xlabel('R')
-plt.savefig('Rvoids_hist.png')
+plt.yscale('log')
+plt.savefig('Rvoids_hist1.png')

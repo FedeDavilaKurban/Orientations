@@ -21,15 +21,16 @@ Cosines
 ##################
 """)
 
-exp, minradV, rmin, rmax, sec, fxa = readExp(sys.argv[1])
+exp, minradV, rmin, rmax, sec, fxa, vtype = readExp(sys.argv[1])
 print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
 print('rmin = {}Rvoid'.format(rmin))
 print('rmax = {}Rvoid'.format(rmax))
 print('sec =',sec)
 print('fxa =',fxa)
+print('vtype =',vtype)
 
-voids = readVoids(minrad=minradV)
+voids = readVoids(minrad=minradV,vtype=vtype)
 print('Num of voids:',len(voids))
 
 #I DO THIS FOR DISK SPACE REASONS
@@ -60,12 +61,14 @@ Orentations (cosines) per void
 #nvs = 0
 nvs = range(len(voids))
 
-ran_iter = 100
-
 n_total = 0 
 for nv in nvs:
     cos = orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,fxa)
-    filename = writePath+'Proyectos/Orientations/data/'+exp+'/cos_void{}.dat'.format(nv)
+
+    if exp=='shl_019':
+        cos = random.choices(cos,k=int(len(cos)/10))
+
+    filename = writePath+'Proyectos/Orientations/data/'+exp+'/cos_void{}_{}.dat'.format(nv,vtype)
     ascii.write(Table(np.reshape(cos,(len(cos),1))),filename,names=['cos'],overwrite=True)
     
     print('Num of gxs in Void{}:'.format(nv),len(cos))

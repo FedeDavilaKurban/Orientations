@@ -1,6 +1,6 @@
 
 #%%
-def readVoids(minrad=None,maxrad=None):
+def readVoids(minrad=None,maxrad=None,vtype='a'):
     """
     This function reads the file tng300-1_voids.dat
     'minrad': filter by a minimum radius (Mpc). Optional.
@@ -8,11 +8,21 @@ def readVoids(minrad=None,maxrad=None):
     """
     from astropy.io import ascii
     import numpy as np
+    from config import writePath
 
     voids=ascii.read('../data/tng300-1_voids.dat',names=['r','x','y','z','vx','vy','vz','deltaint_1r','maxdeltaint_2-3r','log10Poisson','Nrecenter'])#,usecols=['r','x','y','z'])
 
     if minrad != None: voids=voids[np.where(voids['r']>=minrad)]
     if maxrad != None: voids=voids[np.where(voids['r']<=maxrad)]
+
+    #Selection by type R or S
+    if vtype!='a':
+        filename = writePath+'Proyectos/Orientations/data/vtype/minradV{}_vtype.dat'.format(float(minrad))
+        names = ['id','type']
+        vtypes = ascii.read(filename,names=names)
+
+        vtype_id = np.where(vtypes['type']==vtype)
+        voids = voids[vtype_id]
     
     return voids
 
@@ -68,20 +78,20 @@ def JvsM(sec,gals,gxs,plot=True):
     S = np.log10(gals['sp_n'])
 
     #Alto Spin
-    if sec == 1: gals_h = gals[(M < -.7)&(S > M*m+b)] # Solo limite superior
-    if sec == 2: gals_h = gals[(M > -.7)&(M < -.3)&(S > M*m+b)] # Limite superior e inferior en el espacio Spin-Masa
-    if sec == 3: gals_h = gals[(M > -.3)&(S > M*m+b)] # Solo limite inferior
-    if sec == 12: gals_h = gals[(M < -.3)&(S > M*m+b)] # Solo limite superior
-    if sec == 23: gals_h = gals[(M < -.7)&(S > M*m+b)] # Solo limite inferior
-    if sec == 123: gals_h = gals[(S > M*m+b)] # Solo limite en Spin
+    if sec == 1: gals_h = gals[(M < -.7)&(S > M*m+b)]  
+    if sec == 2: gals_h = gals[(M > -.7)&(M < -.3)&(S > M*m+b)]  
+    if sec == 3: gals_h = gals[(M > -.3)&(S > M*m+b)]  
+    if sec == 12: gals_h = gals[(M < -.3)&(S > M*m+b)]  
+    if sec == 23: gals_h = gals[(M > -.7)&(S > M*m+b)]  
+    if sec == 123: gals_h = gals[(S > M*m+b)]  
 
     #Bajo Spin
-    if sec == 4: gals_h = gals[(M < -.7)&(S < M*m+b)] # Solo limite superior
-    if sec == 5: gals_h = gals[(M > -.7)&(M < -.3)&(S < M*m+b)] # Limite superior e inferior en el espacio Spin-Masa
-    if sec == 6: gals_h = gals[(M > -.3)&(S < M*m+b)] # Solo limite inferior
-    if sec == 45: gals_h = gals[(M < -.3)&(S < M*m+b)] # Solo limite superior
-    if sec == 56: gals_h = gals[(M < -.7)&(S < M*m+b)] # Solo limite inferior
-    if sec == 456: gals_h = gals[(S < M*m+b)] # Solo limite en Spin
+    if sec == 4: gals_h = gals[(M < -.7)&(S < M*m+b)]  
+    if sec == 5: gals_h = gals[(M > -.7)&(M < -.3)&(S < M*m+b)]  
+    if sec == 6: gals_h = gals[(M > -.3)&(S < M*m+b)]  
+    if sec == 45: gals_h = gals[(M < -.3)&(S < M*m+b)]  
+    if sec == 56: gals_h = gals[(M > -.7)&(S < M*m+b)]  
+    if sec == 456: gals_h = gals[(S < M*m+b)] 
 
     #Solo Masa
     if sec == 14: gals_h = gals[(M < -.7)] 
@@ -239,7 +249,7 @@ def orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     return cos 
 
 # ----------------------------------------------------------------------------------------------
-def jk_mean_sd(N_linspace,sec,rmin,rmax,exp,n_voids):
+def jk_mean_sd(N_linspace,sec,rmin,rmax,exp,n_voids,vtype):
     """
     Read N-1 JK curves
     Choose N_linspace random values of 'x' between 0-1 to evaluate mean and SD of the JK curves
@@ -250,7 +260,7 @@ def jk_mean_sd(N_linspace,sec,rmin,rmax,exp,n_voids):
 
     dataList=[]
     for jk in range(n_voids):
-        dataList.append( ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/ecdf_jk{}.dat'.format(jk),names=['cos','ecdf','y']) )
+        dataList.append( ascii.read(writePath+'Proyectos/Orientations/data/'+exp+'/ecdf_jk{}_{}.dat'.format(jk,vtype),names=['cos','ecdf','y']) )
         #plt.plot(dataList[-1]['cos'],dataList[-1]['y'],alpha=.01,color='k')
 
     #I need to create an array of x values where I will 
@@ -285,6 +295,6 @@ def readExp(exp):
         print('ERROR: No experiment "{}"'.format(exp))
         quit()
 
-    exp, minradVoid, rmin, rmax, sec, fxa = next(row for row in data['Sheet1'] if row[0] == exp) 
+    exp, minradVoid, rmin, rmax, sec, fxa, vtype = next(row for row in data['Sheet1'] if row[0] == exp) 
 
-    return str(exp),minradVoid, rmin, rmax, sec, fxa
+    return str(exp),minradVoid, rmin, rmax, sec, fxa, str(vtype)
