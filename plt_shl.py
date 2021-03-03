@@ -8,12 +8,12 @@ import random
 from config import writePath
 
 #%%
-fig , ax = plt.subplots(nrows = 5, ncols = 3, sharex=True, sharey=True, figsize=(8,12))
+fig , ax = plt.subplots(nrows = 3, ncols = 5, sharex=True, sharey=True, figsize=(18,9))
 
 id_int = 0
 
-for i in range(0,5):
-    for j in range(0,3):
+for i in range(0,3):
+    for j in range(0,5):
         id_int+=1
         id_str = str('{:03d}'.format(id_int))
 
@@ -42,7 +42,7 @@ for i in range(0,5):
 
 #plt.suptitle('MinradV={}Mpc, sec={}, fxa={}'.format(minradV,sec,fxa))
 plt.ylim(-.015,.015)
-#plt.tight_layout()
+plt.tight_layout()
 plt.savefig('../plots/shl_1.png')
 plt.show(block=False)
 

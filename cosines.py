@@ -21,16 +21,17 @@ Cosines
 ##################
 """)
 
-exp, minradV, rmin, rmax, sec, fxa, vtype = readExp(sys.argv[1])
+exp, minradV, maxradV, rmin, rmax, sec, fxa, vtype = readExp(sys.argv[1])
 print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
+print('maxradVoid = {}Mpc'.format(maxradV))
 print('rmin = {}Rvoid'.format(rmin))
 print('rmax = {}Rvoid'.format(rmax))
 print('sec =',sec)
 print('fxa =',fxa)
 print('vtype =',vtype)
 
-voids = readVoids(minrad=minradV,vtype=vtype)
+voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 print('Num of voids:',len(voids))
 
 #I DO THIS FOR DISK SPACE REASONS
@@ -67,6 +68,7 @@ for nv in nvs:
 
     if exp=='shl_019':
         cos = random.choices(cos,k=int(len(cos)/10))
+
 
     filename = writePath+'Proyectos/Orientations/data/'+exp+'/cos_void{}_{}.dat'.format(nv,vtype)
     ascii.write(Table(np.reshape(cos,(len(cos),1))),filename,names=['cos'],overwrite=True)

@@ -1,3 +1,4 @@
+#%%
 import sys
 sys.path.append('/home/fede/')
 import illustris_python as il
@@ -27,22 +28,24 @@ gxs.remove_row(np.where(gxs['y']==205.0)[0][0])
 gxs.remove_row(np.where(gxs['x']<0.)[0][0])
 
 tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsize=lbox)
-
 voids = ascii.read('../data/tng300-1_voids.dat',names=['r','x','y','z','vx','vy','vz','deltaint_1r','maxdeltaint_2-3r','log10Poisson','Nrecenter'])
+#%%
 
-N=[]
-for i in range(len(voids)):
-	if i%1000==0: print(i)
-	x,y,z,r = voids['x','y','z','r'][i]
-	N.append(len(tree.query_ball_point([x,y,z],r)))
+# N=[]
+# for i in range(len(voids)):
+# 	if i%1000==0: print(i)
+# 	x,y,z,r = voids['x','y','z','r'][i]
+# 	N.append(len(tree.query_ball_point([x,y,z],r)))
 	
-plt.loglog(voids['r'],N,'.')
-plt.xlabel('R')
-plt.ylabel('N_gal')
-plt.savefig('NvsR1.png')
-plt.close()
+# plt.loglog(voids['r'],N,'.')
+# plt.xlabel('R')
+# plt.ylabel('N_gal')
+# #plt.savefig('NvsR1.png')
+# plt.close()
 
-plt.hist(voids['r'],bins=50)
+plt.hist(voids[voids['r']>=5.]['r'],bins=30,cumulative=-1)
 plt.xlabel('R')
 plt.yscale('log')
-plt.savefig('Rvoids_hist1.png')
+#plt.savefig('Rvoids_hist1.png')
+
+# %%

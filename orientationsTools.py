@@ -1,6 +1,6 @@
 
 #%%
-def readVoids(minrad=None,maxrad=None,vtype='a'):
+def readVoids(minrad=0.,maxrad=0.,vtype='a'):
     """
     This function reads the file tng300-1_voids.dat
     'minrad': filter by a minimum radius (Mpc). Optional.
@@ -12,8 +12,8 @@ def readVoids(minrad=None,maxrad=None,vtype='a'):
 
     voids=ascii.read('../data/tng300-1_voids.dat',names=['r','x','y','z','vx','vy','vz','deltaint_1r','maxdeltaint_2-3r','log10Poisson','Nrecenter'])#,usecols=['r','x','y','z'])
 
-    if minrad != None: voids=voids[np.where(voids['r']>=minrad)]
-    if maxrad != None: voids=voids[np.where(voids['r']<=maxrad)]
+    if minrad != 0.: voids=voids[np.where(voids['r']>=minrad)]
+    if maxrad != 0.: voids=voids[np.where(voids['r']<=maxrad)]
 
     #Selection by type R or S
     if vtype!='a':
@@ -98,6 +98,10 @@ def JvsM(sec,gals,gxs,plot=True):
     if sec == 25: gals_h = gals[(M > -.7)&(M < -.3)] 
     if sec == 36: gals_h = gals[(M > -.3)]
 
+    #Todas
+    if sec == 0: gals_h = gals
+
+
     if plot:
         plt.scatter(M,S,c='gray', label='Galaxies Not Being Analyzed')
         plt.scatter(np.log10(gals_h['mass']),np.log10(gals_h['sp_n']),c='blue', label='Galaxies Being Analyzed')
@@ -111,7 +115,7 @@ def JvsM(sec,gals,gxs,plot=True):
     return gals_h
 
 # ----------------------------------------------------------------------------------------------
-def cosCalc(gals_h,units,tree,s5=0):
+def cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5=0):
     """
     Calculates absolute value of cosine of the angle between spin vector J 
     and void-centric direction.
@@ -120,6 +124,8 @@ def cosCalc(gals_h,units,tree,s5=0):
     """
     import numpy as np
     from scipy import spatial
+
+    #global xv,yv,zv,rv,cos
 
     cos_list = []
     #sigma5 = []
@@ -295,6 +301,6 @@ def readExp(exp):
         print('ERROR: No experiment "{}"'.format(exp))
         quit()
 
-    exp, minradVoid, rmin, rmax, sec, fxa, vtype = next(row for row in data['Sheet1'] if row[0] == exp) 
+    exp, minradVoid, maxradVoid, rmin, rmax, sec, fxa, vtype = next(row for row in data['Sheet1'] if row[0] == exp) 
 
-    return str(exp),minradVoid, rmin, rmax, sec, fxa, str(vtype)
+    return str(exp), minradVoid, maxradVoid, rmin, rmax, sec, fxa, str(vtype)

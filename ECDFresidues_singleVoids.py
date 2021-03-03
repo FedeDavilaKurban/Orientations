@@ -18,16 +18,17 @@ ECDF and Residues for single Voids
 ####################################
 """)
 
-exp, minradV, rmin, rmax, sec, fxa, vtype = readExp(sys.argv[1])
+exp, minradV, maxradV, rmin, rmax, sec, fxa, vtype = readExp(sys.argv[1])
 print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
+print('maxradVoid = {}Mpc'.format(maxradV))
 print('rmin = {}Rvoid'.format(rmin))
 print('rmax = {}Rvoid'.format(rmax))
 print('sec =',sec)
 print('fxa =',fxa)
 print('vtype =',vtype)
 
-voids = readVoids(minradV,vtype=vtype)
+voids = readVoids(minradV,maxradV,vtype=vtype)
 
 #I DO THIS FOR DISK SPACE REASONS
 if len(voids)>500:

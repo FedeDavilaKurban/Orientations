@@ -9,7 +9,10 @@ from orientationsTools import readTNG, readVoids, readExp
 #import random
 from config import writePath, units
 #%%
-voids = ascii.read('../data/tng300-1_voids.dat',names=['r','x','y','z','vx','vy','vz','deltaint_1r','maxdeltaint_2-3r','log10Poisson','Nrecenter'])
+voidsfilename = '../data/tng300-1_voids.dat'
+names = ['r','x','y','z','vx','vy','vz','deltaint_1r','maxdeltaint_2-3r','log10Poisson','Nrecenter']
+voids = ascii.read(voidsfilename,names=names)
+voids = voids[voids['r']>=5.]
 
 gxs = readTNG()
 lbox=205.
@@ -29,12 +32,13 @@ for i in range(len(voids)):
 fig , ax = plt.subplots(nrows = 2, ncols = 2, sharex=False, sharey=False, figsize=(10,8))
 
 #Ngal vs R
-ax[0][0].loglog(voids['r'],N,'.')
+ax[0][0].scatter(voids['r'],np.log10(N))
 ax[0][0].set_xlabel('Void Radius')
-ax[0][0].set_ylabel(r'$N_{gal}$')
+ax[0][0].set_ylabel(r'$\mathrm{log}_{10}N_{gal}$')
+ax[0][0].set_xscale('log')
 
 #Histogram Void Radius
-ax[0][1].hist(voids['r'],bins=30)
+ax[0][1].hist(voids['r'],bins=30,cumulative=-1)
 ax[0][1].set_xlabel('Void Radius (Mpc)')
 ax[0][1].set_yscale('log')
 
@@ -49,7 +53,7 @@ for nv in range(len(voids[voids['r']>=minradV])):
 ax[1][0].set_ylabel(r'$\rho/\bar{\rho}-1$')
 ax[1][0].set_xlabel('r (Mpc)')
 
-xv,yv,zv,rv = voids[voids['r']>=9.]['x','y','z','r'][0]
+xv,yv,zv,rv = voids[voids['r']>=7.]['x','y','z','r'][0]
 
 idx1 = tree.query_ball_point([xv,yv,zv],rv*1.2)
 idx2 = tree.query_ball_point([xv,yv,zv],rv*0.9)
@@ -69,12 +73,12 @@ ax[1][1].plot(np.log10(gals['mass']),np.log10(gals['mass'])*m+b,ls='-',color='or
 ax[1][1].vlines(-.7, np.min(np.log10(gals['sp_n'])), np.max(np.log10(gals['sp_n'])),colors='orange',linestyles=':')
 ax[1][1].vlines(-.3, np.min(np.log10(gals['sp_n'])), np.max(np.log10(gals['sp_n'])),colors='orange',linestyles=':')
 
-ax[1][1].text(-0.95, 1.6, '1', fontsize=18, color='orange')
-ax[1][1].text(-0.6, 1.75, '2', fontsize=18, color='orange')
-ax[1][1].text(-0.2, 1.9, '3', fontsize=18, color='orange')
-ax[1][1].text(-0.95, 1., '4', fontsize=18, color='orange')
-ax[1][1].text(-0.6, 1.2, '5', fontsize=18, color='orange')
-ax[1][1].text(-0.2, 1.4, '6', fontsize=18, color='orange')
+ax[1][1].text(-0.99, 1.6, 'H-L', fontsize=15, color='orange')
+ax[1][1].text(-0.64, 1.75, 'H-I', fontsize=15, color='orange')
+ax[1][1].text(-0.25, 1.9, 'H-H', fontsize=15, color='orange')
+ax[1][1].text(-0.99, 1.05, 'L-L', fontsize=15, color='orange')
+ax[1][1].text(-0.64, 1.25, 'L-I', fontsize=15, color='orange')
+ax[1][1].text(-0.25, 1.45, 'L-H', fontsize=15, color='orange')
 ax[1][1].legend(loc ='lower right')
 
 plt.tight_layout()
