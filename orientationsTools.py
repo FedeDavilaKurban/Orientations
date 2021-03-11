@@ -35,12 +35,11 @@ def readTNG():
 
     """
     import sys
-    sys.path.append('/home/fede/')
+    from config import basePath, illustrisPath
+    sys.path.append(illustrisPath)
     import illustris_python as il
     import numpy as np
     from astropy.table import Table
-
-    basePath = '/home/fede/TNG300-1/output/'
 
     mass = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloMass'])                                                                                                                      
     ids = np.where((np.log10(mass)>-1.)&(np.log10(mass)<3.))
@@ -115,7 +114,7 @@ def JvsM(sec,gals,gxs,plot=True):
     return gals_h
 
 # ----------------------------------------------------------------------------------------------
-def cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5=0):
+def cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5):
     """
     Calculates absolute value of cosine of the angle between spin vector J 
     and void-centric direction.
@@ -127,19 +126,24 @@ def cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5=0):
 
     #global xv,yv,zv,rv,cos
 
-    cos_list = []
     #sigma5 = []
+    #print('In cosCalc, prior to s5: len(gals_h)=',len(gals_h))
+    if s5!=0:
+        gals_h = sigma5(gals_h,tree,s5)
+
+    cos_list = []
 
     for i in range(len(gals_h)):
-        if s5!=0:
-            #Cuento cantidad de vecinos a un radio de 5Mpc, si es mayor a s5, rompo el loop
-            if units=='kpc': rad = 5000.
-            if units=='Mpc': rad = 5.
+        # if s5!=0:
+        #     #Cuento cantidad de vecinos a un radio de 5Mpc, si es mayor a s5, rompo el loop
+        #     if units=='kpc': rad = 5000.
+        #     if units=='Mpc': rad = 5.
 
-            sigma5 = len( tree.query_ball_point([gals_h[i]['x'],gals_h[i]['y'],gals_h[i]['z']],rad))
-            #print(sigma5)
-            if sigma5>=s5: continue
-            #print("sigue")
+        #     sigma5 = len( tree.query_ball_point([gals_h[i]['x'],gals_h[i]['y'],gals_h[i]['z']],rad))
+        #     #print(sigma5)
+        #     if sigma5>=s5: continue
+        #     #print("sigue")
+
 
         #Calculo el coseno
         u = [gals_h[i]['x']-xv,gals_h[i]['y']-yv,gals_h[i]['z']-zv]
@@ -149,6 +153,30 @@ def cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5=0):
         #cos_list.append( -c )
                 
     return cos_list
+# ----------------------------------------------------------------------------------------------
+
+def sigma5(gals_h,tree,s5):
+    """
+    Reads galaxy sample of interest
+    Returns isolated galaxies, i.e. with a Sigma5 above the 90th percentile 
+    """
+    import numpy as np
+
+    data = np.column_stack((gals_h['x'],gals_h['y'],gals_h['z']))
+    nearest_dist, nearest_ind = tree.query(data, k=6)  # k1 = identity
+    dists = nearest_dist[:, 1]                         # drop id
+    inds = nearest_ind[:, 1]
+    if s5=='p10':
+        p10 = np.percentile(dists,q=10)
+        idx = np.where(dists<p10)  # idx are the locations of isolated gxs 
+                                # with s5 above the 90th percentile    
+    if s5=='p90':
+        p90 = np.percentile(dists,q=90)
+        idx = np.where(dists>p90)  # idx are the locations of isolated gxs 
+                                # with s5 above the 90th percentile
+    gals_h = gals_h[idx]
+
+    return gals_h
 
 # ----------------------------------------------------------------------------------------------
 def ecdf_residues(cos_list,verbose=False):
@@ -248,9 +276,9 @@ def orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     gals = gxs[shell]
     #print('N of galaxies in shell:',len(gals))
 
-    gals_h = JvsM(sec,gals,gxs,plot=False) #Determine galaxies of interest (involves rmin,rmax,sec,s5)
+    gals_h = JvsM(sec,gals,gxs,plot=False) #Determine galaxies of interest (involves rmin,rmax,sec)
 
-    cos = cosCalc(gals_h,units,tree,s5) #Calculate the cosines of angle of J and void direction
+    cos = cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5) #Calculate the cosines of angle of J and void direction
 
     return cos 
 
@@ -301,6 +329,6 @@ def readExp(exp):
         print('ERROR: No experiment "{}"'.format(exp))
         quit()
 
-    exp, minradVoid, maxradVoid, rmin, rmax, sec, fxa, vtype = next(row for row in data['Sheet1'] if row[0] == exp) 
+    exp, minradVoid, maxradVoid, rmin, rmax, sec, s5, vtype = next(row for row in data['Sheet1'] if row[0] == exp) 
 
-    return str(exp), minradVoid, maxradVoid, rmin, rmax, sec, fxa, str(vtype)
+    return str(exp), minradVoid, maxradVoid, rmin, rmax, sec, s5, str(vtype)

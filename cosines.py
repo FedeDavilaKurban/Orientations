@@ -21,14 +21,14 @@ Cosines
 ##################
 """)
 
-exp, minradV, maxradV, rmin, rmax, sec, fxa, vtype = readExp(sys.argv[1])
+exp, minradV, maxradV, rmin, rmax, sec, s5, vtype = readExp(sys.argv[1])
 print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
 print('maxradVoid = {}Mpc'.format(maxradV))
 print('rmin = {}Rvoid'.format(rmin))
 print('rmax = {}Rvoid'.format(rmax))
 print('sec =',sec)
-print('fxa =',fxa)
+print('s5 =',s5)
 print('vtype =',vtype)
 
 voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
@@ -64,7 +64,7 @@ nvs = range(len(voids))
 
 n_total = 0 
 for nv in nvs:
-    cos = orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,fxa)
+    cos = orientations(gxs,tree,units,voids,nv,rmin,rmax,sec,s5)
 
     if exp=='shl_019':
         cos = random.choices(cos,k=int(len(cos)/10))

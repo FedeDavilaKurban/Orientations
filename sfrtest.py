@@ -4,9 +4,9 @@ import numpy as np
 from scipy import spatial
 from astropy.table import Table
 from astropy.io import ascii
-from orientationsTools import cosCalc, readVoids, JvsM
+from orientationsTools import cosCalc, readVoids, JvsM, readExp
 import random
-from config import writePath, units
+from config import writePath, illustrisPath, units
 import matplotlib.pyplot as plt
 
 def readTNG_():
@@ -17,12 +17,11 @@ def readTNG_():
 
     """
     import sys
-    sys.path.append('/home/fede/')
+    from config import basePath, illustrisPath
+    sys.path.append(illustrisPath)
     import illustris_python as il
     import numpy as np
     from astropy.table import Table
-
-    basePath = '/home/fede/TNG300-1/output/'
 
     mass = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloMass'])                                                                                                                      
     ids = np.where((np.log10(mass)>-1.)&(np.log10(mass)<3.))
@@ -52,6 +51,7 @@ def orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     from astropy.table import Table
 
     #global xv,yv,zv,rv,cos
+    #nonlocal gals_h
 
     xv,yv,zv,rv = voids['x','y','z','r'][nv]
     if units=='kpc':
@@ -69,13 +69,23 @@ def orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     gals_h = JvsM(sec,gals,gxs,plot=False) #Determine galaxies of interest (involves rmin,rmax,sec,s5)
     sfr_h = gals_h['sfr']
 
-    cos = cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5) #Calculate the cosines of angle of J and void direction
+    cos = cosCalc(gals_h,units,tree,xv,yv,zv,rv,fxa) #Calculate the cosines of angle of J and void direction
 
     return cos,sfr_h 
 
 #··············································
 #%%
-print('Reading TNG')
+exp, minradV, maxradV, rmin, rmax, sec, fxa, vtype = readExp(sys.argv[1])
+print('Codename of experiment:', exp)
+print('minradVoid = {}Mpc'.format(minradV))
+print('maxradVoid = {}Mpc'.format(maxradV))
+print('rmin = {}Rvoid'.format(rmin))
+print('rmax = {}Rvoid'.format(rmax))
+print('sec =',sec)
+print('fxa =',fxa)
+print('vtype =',vtype)
+
+#print('Reading TNG')
 gxs = readTNG_()
 
 if units=='Mpc': 
@@ -92,7 +102,8 @@ gxs.remove_row(np.where(gxs['x']<0.)[0][0])
 tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsize=lbox)
 #%%
 print('Reading Voids')
-voids = readVoids(7.,0.,'a')
+voids = readVoids(minradV,maxradV,vtype)
+#voids = voids[:5]
 print('Num of voids:',len(voids))
 
 #%%
@@ -101,7 +112,7 @@ cos_list=[]
 sfr_list=[]
 for nv in range(len(voids)):
     #print(nv,'/',len(voids))
-    cos, sfr = orientations_(gxs,tree,units,voids,nv,rmin=0.9,rmax=1.7,sec=0,s5=0)
+    cos, sfr = orientations_(gxs,tree,units,voids,nv,rmin=rmin,rmax=rmax,sec=sec,s5=fxa)
     cos_list.append(cos)
     sfr_list.append(sfr)
 
@@ -116,12 +127,15 @@ sfr_array = np.array(sfr_flatlist)
 cos = cos_array[sfr_array>0.]
 sfr = sfr_array[sfr_array>0.]
 
-fig, ax = plt.subplots() 
-plt.hist2d(cos,np.log10(sfr),bins=[10,10])
+filename = '../data/'+exp+'/sfr_cos.dat'
+ascii.write(Table(np.column_stack([cos,sfr])),filename,names=['cos','sfr'],overwrite=True)
 
-plt.xlabel(r'$\mathrm{cos}\theta$')
-plt.ylabel('SFR')
-plt.colorbar() 
-plt.savefig('../plots/sfr.png')
+# fig, ax = plt.subplots() 
+# plt.hist2d(cos,np.log10(sfr),bins=[10,10])
 
+# plt.xlabel(r'$\mathrm{cos}\theta$')
+# plt.ylabel('SFR')
+# plt.colorbar() 
+# plt.savefig('../plots/{}.png'.format(exp))
+print('END')
 # %%
