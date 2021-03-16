@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import axes3d
 from orientationsTools import ecdf_residues, fits
 
 import localdev as tools
-
+#%%
 # Generar vectores de "spin" randoms dentro de una esfera de radio 3
 # En la region 1<r<2, hay un exceso hacia el centro
 
@@ -61,10 +61,10 @@ ax = fig.gca(projection='3d')
 ax.quiver(x, y, z, Sx, Sy, Sz, length=0.2, arrow_length_ratio=0.2)
 
 
-fig.savefig('plot1.png')
-plt.close('all')
+#fig.savefig('plot1.png')
+#plt.close('all')
 
-
+#%%
 # ------------------------------------------------------------------
 
 # Tradicional: histograma de los cosenos
@@ -78,8 +78,8 @@ for i in range(N):
     coso = coso / np.sqrt(np.dot([Sx[i], Sy[i], Sz[i]], [Sx[i], Sy[i], Sz[i]]))
     cosenos.append(coso)
 
-#cosenos = np.absolute(cosenos)
-#cosenos = np.concatenate(cosenos, -cosenos)
+cosenos = np.absolute(cosenos)
+cosenos = np.concatenate((cosenos, -cosenos))
 
  
 fig = plt.figure()
@@ -89,12 +89,12 @@ Nbins = int(np.sqrt(300))
 ax.hist(cosenos, bins=Nbins)
 ax.set_xlim(a, b)
 
-fig.savefig('plot2.png')
-plt.close('all')
+#fig.savefig('plot2.png')
+#plt.close('all')
 
 
 # ------------------------------------------------------------------
-
+#%%
 # Ahora aplicamos el procedimiento
 
 
@@ -117,11 +117,11 @@ ax.plot(cos_grid, cos_grid_cdf)
 ax.set_xlim(a, b)
 ax.grid()
 
-fig.savefig('plot3.png')
-plt.close('all')     
+#fig.savefig('plot3.png')
+#plt.close('all')     
 
  
-
+#%%
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 
@@ -129,9 +129,9 @@ ax.plot(cos, res)
 ax.set_xlim(a, b)
 ax.grid()
 
-fig.savefig('plot4.png')
-plt.close('all')     
-                             
+#fig.savefig('plot4.png')
+#plt.close('all')     
+#%%                            
 
 
 fig = plt.figure()
@@ -142,11 +142,11 @@ ax.scatter(cos, res)
 ax.set_xlim(a, b)
 ax.grid()
 
-fig.savefig('plot5.png')
-plt.close('all')     
+# fig.savefig('plot5.png')
+# plt.close('all')     
 
         
-
+#%%
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 
@@ -154,10 +154,10 @@ ax.plot(cos_grid, d_yfit)
 ax.set_xlim(a, b)
 ax.grid()
 
-fig.savefig('plot6.png')
-plt.close('all')     
+# fig.savefig('plot6.png')
+# plt.close('all')     
  
-
+#%%
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
  
@@ -173,8 +173,10 @@ y = yfit + refcdf
 ax.plot(cos, y)
 
 
-fig.savefig('plot7.png')
-plt.close('all')     
+#fig.savefig('plot7.png')
+#plt.close('all')     
 
  
                          
+
+# %%

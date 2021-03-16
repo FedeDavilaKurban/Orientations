@@ -164,8 +164,8 @@ def sigma5(gals_h,tree,s5):
 
     data = np.column_stack((gals_h['x'],gals_h['y'],gals_h['z']))
     nearest_dist, nearest_ind = tree.query(data, k=6)  # k1 = identity
-    dists = nearest_dist[:, 1]                         # drop id
-    inds = nearest_ind[:, 1]
+    dists = nearest_dist[:, 5]                         # choose 5th neighbour
+    #inds = nearest_ind[:, 1]
     if s5=='p10':
         p10 = np.percentile(dists,q=10)
         idx = np.where(dists<p10)  # idx are the locations of isolated gxs 
@@ -202,10 +202,16 @@ def fits(cos1,y,verbose=False):
     from scipy.optimize import curve_fit
 
     def func(x,a,b,c,d,e):
-        return a + b*np.sin( np.pi*(x+1.)/2. ) + c*np.sin( 2.*np.pi*(x+1.)/2. ) + d*np.sin( 3.*np.pi*(x+1.)/2. ) + e*np.sin( 4.*np.pi*(x+1.)/2. )
+        return a \
+            + b*np.sin( np.pi*(x+1.)/2. ) \
+            + c*np.sin( 2.*np.pi*(x+1.)/2. ) \
+            + d*np.sin( 3.*np.pi*(x+1.)/2. ) \
+            + e*np.sin( 4.*np.pi*(x+1.)/2. )
     def dfunc(x,b,c,d,e):
-        return np.pi/2.*b*np.cos( np.pi*(x+1.)/2. ) + np.pi*c*np.cos( 2.*np.pi*(x+1.)/2. ) + np.pi*3./2.*d*np.cos( 3.*np.pi*(x+1.)/2. ) + np.pi*2.*e*np.cos( 4.*np.pi*(x+1.)/2. )
-
+        return np.pi/2.*b*np.cos( np.pi*(x+1.)/2. ) \
+            + np.pi*c*np.cos( 2.*np.pi*(x+1.)/2. ) \
+            + np.pi*3./2.*d*np.cos( 3.*np.pi*(x+1.)/2. ) \
+            + np.pi*2.*e*np.cos( 4.*np.pi*(x+1.)/2. )
 
     x = np.array(cos1)
 
@@ -219,6 +225,7 @@ def fits(cos1,y,verbose=False):
     a4 = coeffs[4]
     if verbose==True: print('a1=',a1,'; a2=',a2,'; a3=',a3,'; a4=',a4)
 
+    del x, cov
     return yfit,d_yfit,a2
 
 # ----------------------------------------------------------------------------------------------
@@ -236,12 +243,11 @@ def ranOrientations(n_iter,N):
     xran_fit = []
     for _ in range(n_iter):
         np.random.seed(_)
-        rancos_pos = np.random.uniform(0.,1.,int(N/2))
-        rancos_neg = rancos_pos*-1
-        rancos = np.concatenate((rancos_pos,rancos_neg))
+        rancos = np.random.uniform(0.,1.,int(N/2))
 
         cos_,ecdf_,y_ = ecdf_residues(rancos)
         yfit_,d_yfit_,a2_ = fits(cos_,y_)
+
         #a2_ran.append(a2_)
         yran_fit.append(yfit_)
         xran_fit.append(cos_)
@@ -249,6 +255,8 @@ def ranOrientations(n_iter,N):
     xmean = np.mean(xran_fit,axis=0)
     ymean = np.mean(yran_fit,axis=0)
     ystd = np.std(yran_fit,axis=0)
+
+    del cos_, ecdf_, y_, yfit_, d_yfit_, a2_, yran_fit, xran_fit
 
     return xmean,ymean,ystd
 
@@ -314,7 +322,8 @@ def jk_mean_sd(N_linspace,sec,rmin,rmax,exp,n_voids,vtype):
     #Get Standard Deviation from Variance
     y_sd = np.sqrt(y_var)
 
-    return dataList, x_ran, y_var, y_mean, y_sd
+    del dataList, yList
+    return x_ran, y_var, y_mean, y_sd
 
 # %%
 # ----------------------------------------------------------------------------------------------

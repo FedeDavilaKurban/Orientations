@@ -43,13 +43,13 @@ if units=='kpc':
 gxs.remove_row(np.where(gxs['y']==lbox)[0][0])
 gxs.remove_row(np.where(gxs['x']<0.)[0][0])
 
-gxs = gxs[:1000]
+gxs = gxs[:100]
 data = np.column_stack((gxs['x'],gxs['y'],gxs['z']))
 tree = spatial.cKDTree(data=data, boxsize=lbox)
 
-nearest_dist, nearest_ind = tree.query(data, k=2)  # k=2 nearest neighbors where k1 = identity
-dists = nearest_dist[:, 1]    # drop id; assumes sorted -> see args!
-inds = nearest_ind[:, 1]
+nearest_dist, nearest_ind = tree.query(data, k=6)  # k=2 nearest neighbors where k1 = identity
+dists = nearest_dist[:, 5]    # drop id; assumes sorted -> see args!
+#inds = nearest_ind[:, 5]
 # %%
 p10=np.percentile(dists,q=10)
 p90=np.percentile(dists,q=90)

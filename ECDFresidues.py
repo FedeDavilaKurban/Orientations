@@ -62,7 +62,7 @@ for jk in nvs:
 
 print('Written files up to:',filename)
 
-dataList, x_ran, y_var, y_mean, y_sd = jk_mean_sd(1000,sec,rmin,rmax,exp,len(voids),vtype) #El argumento es el numero de valores random del eje x para evaluar mean y SD de las curvas JK
+x_ran, y_var, y_mean, y_sd = jk_mean_sd(1000,sec,rmin,rmax,exp,len(voids),vtype) #El argumento es el numero de valores random del eje x para evaluar mean y SD de las curvas JK
 
 #Fits the mean values of the JK curves corresponding to the x_ran
 yfit,d_yfit,a2 = fits(x_ran,y_mean)
@@ -70,7 +70,7 @@ yfit,d_yfit,a2 = fits(x_ran,y_mean)
 print("""
 ------------
 a2 = {}
------------
+------------
 """.format(a2))
 #OJO!!! calculo el a2 pero no lo estoy escribiendo
 
