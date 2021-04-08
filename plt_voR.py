@@ -10,13 +10,11 @@ from config import writePath
 #%%
 fig , ax = plt.subplots(7, sharex=True, sharey=True, figsize=(8,10))
 
-nvs = range(len(readVoids(7.)))
-
 id_int = 0
 
 for i in range(0,7):
-    id_int+=1
-    id_str = str('{:03d}'.format(id_int))
+    #id_int+=1
+    id_str = str('{:03d}'.format(i+1))
 
     exp, minradV, maxradV, rmin, rmax, sec, fxa, vtype = readExp('voR_'+id_str)
 
@@ -44,7 +42,7 @@ for i in range(0,7):
 
 #plt.suptitle('MinradV={}Mpc, sec={}, fxa={}'.format(minradV,sec,fxa))
 plt.tight_layout()
-plt.savefig('../plots/voR1.png')
+#plt.savefig('../plots/voR2.png')
 plt.show(block=False)
 
 # %%

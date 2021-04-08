@@ -33,7 +33,7 @@ voids = readVoids(minradV,maxradV,vtype=vtype)
 #I DO THIS FOR DISK SPACE REASONS
 if len(voids)>500:
     print('Too many voids!')
-    voids = voids[random.choices(list(range(len(voids))),k=300)]
+    voids = voids[random.choices(list(range(len(voids))),k=500)]
 
     print('Num of voids: ',len(voids))
 
