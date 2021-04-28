@@ -47,16 +47,17 @@ minradV = 7.
 for nv in range(len(voids[voids['r']>=minradV])):
     filename = writePath+'Proyectos/Orientations/data/profiles/minradV{}_void{}.dat'.format(minradV,nv)
     profile = ascii.read(filename,names=['r','rho'])
-    ax[1][0].plot(profile['r'],profile['rho'])
+    if nv==38: profile = profile[1:]
+    ax[1][0].plot(profile['r'],profile['rho'],c='C0',alpha=0.2)
 
 
 ax[1][0].set_ylabel(r'$\rho/\bar{\rho}-1$')
 ax[1][0].set_xlabel('r (Mpc)')
 
-xv,yv,zv,rv = voids[voids['r']>=7.]['x','y','z','r'][0]
+xv,yv,zv,rv = voids[voids['r']>=8.]['x','y','z','r'][0]
 
-idx1 = tree.query_ball_point([xv,yv,zv],rv*1.2)
-idx2 = tree.query_ball_point([xv,yv,zv],rv*0.9)
+idx1 = tree.query_ball_point([xv,yv,zv],rv*1.4)
+idx2 = tree.query_ball_point([xv,yv,zv],rv*0.8)
 shell = [g for g in idx1 if g not in idx2]
 gals = gxs[shell]
 
@@ -65,23 +66,64 @@ m1 = -1./m
 b1 = -.7*(m-m1)+b
 b2 = -.3*(m-m1)+b
 
+from matplotlib.colors import LogNorm
+color='k'
 
-ax[1][1].scatter(np.log10(gals['mass']),np.log10(gals['sp_n']))
+filter = np.where(np.log10(gals['mass'])<=2)
+x = np.log10(gals['mass'])
+y = np.log10(gals['sp_n'])
+
+ax[1][1].scatter(x[filter],y[filter],s=5)
+h = ax[1][1].hist2d(x[filter], y[filter], bins=50, norm=LogNorm(), cmap=plt.cm.Blues, cmin=3)
+fig.colorbar(h[3], ax=ax[1][1], orientation='horizontal')
+
+#ax[1][1].scatter(np.log10(gals['mass']),np.log10(gals['sp_n']),edgecolor='blue',facecolor='none')
+
+# ax[1][1].scatter(np.log10(gals['mass']),np.log10(gals['sp_n']),s=5)
+# h = ax[1][1].hexbin(np.log10(gals['mass']),np.log10(gals['sp_n']),\
+#     bins=100,norm=LogNorm(),mincnt=2,cmap=plt.cm.Blues)
+# fig.colorbar(h, ax=ax[1][1], orientation='horizontal')
+
 ax[1][1].set_xlabel(r'$\mathrm{log_{10}}M/M_{\odot}$')
 ax[1][1].set_ylabel(r'$\mathrm{log_{10}}|\vec{J}|$')
-ax[1][1].plot(np.log10(gals['mass']),np.log10(gals['mass'])*m+b,ls='-',color='orange',label='Linear regression')
-ax[1][1].vlines(-.7, np.min(np.log10(gals['sp_n'])), np.max(np.log10(gals['sp_n'])),colors='orange',linestyles=':')
-ax[1][1].vlines(-.3, np.min(np.log10(gals['sp_n'])), np.max(np.log10(gals['sp_n'])),colors='orange',linestyles=':')
+ax[1][1].plot(x, x*m+b,ls='-',color=color,label='Linear regression')
+ax[1][1].vlines(-.7, np.min(np.log10(gals['sp_n'])), \
+    np.max(y),colors=color,linestyles=':')
+ax[1][1].vlines(-.3, np.min(np.log10(gals['sp_n'])), \
+    np.max(y),colors=color,linestyles=':')
 
-ax[1][1].text(-0.99, 1.6, 'H-L', fontsize=15, color='orange')
-ax[1][1].text(-0.64, 1.75, 'H-I', fontsize=15, color='orange')
-ax[1][1].text(-0.25, 1.9, 'H-H', fontsize=15, color='orange')
-ax[1][1].text(-0.99, 1.05, 'L-L', fontsize=15, color='orange')
-ax[1][1].text(-0.64, 1.25, 'L-I', fontsize=15, color='orange')
-ax[1][1].text(-0.25, 1.45, 'L-H', fontsize=15, color='orange')
+ax[1][1].text(-0.95, 2.25, 'H-L', fontsize=15, color=color)
+ax[1][1].text(-0.64, 2.4, 'H-I', fontsize=15, color=color)
+ax[1][1].text(-0.25, 2.5, 'H-H', fontsize=15, color=color)
+ax[1][1].text(-0.95, 0.5, 'L-L', fontsize=15, color=color)
+ax[1][1].text(-0.64, 0.65, 'L-I', fontsize=15, color=color)
+ax[1][1].text(-0.25, 0.8, 'L-H', fontsize=15, color=color)
 ax[1][1].legend(loc ='lower right')
 
 plt.tight_layout()
 plt.savefig('../plots/data.png')
+# %%
 
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import kde
+ 
+# create data
+x = np.log10(gals['mass'])
+y = np.log10(gals['sp_n'])
+ 
+# Evaluate a gaussian kde on a regular grid of nbins x nbins over data extents
+nbins=100
+k = kde.gaussian_kde([x,y])
+xi, yi = np.mgrid[x.min():x.max():nbins*1j, y.min():y.max():nbins*1j]
+zi = k(np.vstack([xi.flatten(), yi.flatten()]))
+ 
+# Make the plot
+plt.pcolormesh(xi, yi, zi.reshape(xi.shape), shading='auto')
+plt.colorbar()
+plt.show()
+ 
+# Change color palette
+# plt.pcolormesh(xi, yi, zi.reshape(xi.shape), shading='auto', cmap=plt.cm.Greens_r)
+# plt.show()
 # %%

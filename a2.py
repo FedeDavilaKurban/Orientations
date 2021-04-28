@@ -1,5 +1,4 @@
 #%%
-
 import sys
 import numpy as np
 from scipy import spatial
@@ -9,6 +8,7 @@ from orientationsTools import *
 import random
 from config import writePath, units
 import matplotlib.pyplot as plt
+
 # %%
 def ranOrientations_(n_iter,N, a2):
     """

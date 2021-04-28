@@ -18,7 +18,7 @@ a2_ran_mean = []
 a2_ran_std = []
 
 exp_name = 'voR'
-exp_ids = ["{0:03}".format(i) for i in range(1,8)]
+exp_ids = ["{0:03}".format(i) for i in range(1,7)]
 
 my_xticks = []
 pvalues = []
@@ -65,7 +65,9 @@ plt.xticks(x, my_xticks)
 
 plt.legend(fontsize=14,ncol=2,loc='upper left')
 
-plt.savefig('../plots/a2_voR.png')
+#plt.savefig('../plots/a2_voR.png')
 
+
+# %%
 
 # %%

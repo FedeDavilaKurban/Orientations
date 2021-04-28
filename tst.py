@@ -60,7 +60,7 @@ ax = fig.gca(projection='3d')
 
 ax.quiver(x, y, z, Sx, Sy, Sz, length=0.2, arrow_length_ratio=0.2)
 
-
+plt.show()
 #fig.savefig('plot1.png')
 #plt.close('all')
 

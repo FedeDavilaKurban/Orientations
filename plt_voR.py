@@ -8,11 +8,11 @@ import random
 from config import writePath
 
 #%%
-fig , ax = plt.subplots(7, sharex=True, sharey=True, figsize=(8,10))
+fig , ax = plt.subplots(6, sharex=True, sharey=True, figsize=(8,10))
 
 id_int = 0
 
-for i in range(0,7):
+for i in range(0,6):
     #id_int+=1
     id_str = str('{:03d}'.format(i+1))
 
@@ -42,7 +42,7 @@ for i in range(0,7):
 
 #plt.suptitle('MinradV={}Mpc, sec={}, fxa={}'.format(minradV,sec,fxa))
 plt.tight_layout()
-#plt.savefig('../plots/voR2.png')
+plt.savefig('../plots/voR3.png')
 plt.show(block=False)
 
 # %%

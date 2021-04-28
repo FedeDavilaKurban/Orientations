@@ -54,9 +54,9 @@ cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ax[0].fill_between(x,a2_ran_mean-a2_ran_std,a2_ran_mean+a2_ran_std,alpha=0.4,color=cycle[0],label=r'$\sigma_{\langle a2 \rangle_{Ran}}$')
 ax[0].fill_between(x,a2_ran_mean-2*a2_ran_std,a2_ran_mean+2*a2_ran_std,alpha=0.4,color=cycle[0])
 ax[0].fill_between(x,a2_ran_mean-3*a2_ran_std,a2_ran_mean+3*a2_ran_std,alpha=0.4,color=cycle[0])
-ax[0].plot(x,a2_ran_mean,color=cycle[0],label=r'$\langle a2 \rangle_{Ran}$')
+ax[0].plot(x,a2_ran_mean,color=cycle[0],label=r'$\langle a2 \rangle_{Ran}$',marker='o',markerfacecolor='none')
 ax[0].fill_between(x,a2_mean-a2_std,a2_mean+a2_std,alpha=0.6,color=cycle[1],label=r'$\sigma_{\langle a2 \rangle}$')
-ax[0].plot(x,a2_mean,color=cycle[1],label=r'$\langle a2 \rangle$')
+ax[0].plot(x,a2_mean,color=cycle[1],label=r'$\langle a2 \rangle$',marker='o',markerfacecolor='none')
 
 for i in range(len(x)):
     ax[0].text(x[i]-.1,-0.005,'p='+str(pvalues[i]))
@@ -102,9 +102,9 @@ cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ax[1].fill_between(x,a2_ran_mean-a2_ran_std,a2_ran_mean+a2_ran_std,alpha=0.4,color=cycle[0])
 ax[1].fill_between(x,a2_ran_mean-2*a2_ran_std,a2_ran_mean+2*a2_ran_std,alpha=0.4,color=cycle[0])
 ax[1].fill_between(x,a2_ran_mean-3*a2_ran_std,a2_ran_mean+3*a2_ran_std,alpha=0.4,color=cycle[0])
-ax[1].plot(x,a2_ran_mean,color=cycle[0])
+ax[1].plot(x,a2_ran_mean,color=cycle[0],marker='o',markerfacecolor='none')
 ax[1].fill_between(x,a2_mean-a2_std,a2_mean+a2_std,alpha=0.6,color=cycle[1])
-ax[1].plot(x,a2_mean,color=cycle[1])
+ax[1].plot(x,a2_mean,color=cycle[1],marker='o',markerfacecolor='none')
 ax[1].set_xticks(x)
 ax[1].set_xticklabels(my_xticks)
 
@@ -145,18 +145,19 @@ a2_std = np.array(a2_std)
 a2_ran_mean = np.array(a2_ran_mean)
 a2_ran_std = np.array(a2_ran_std)
 
-x=[int(i) for i in exp_ids]
-
+x=np.array([int(i) for i in exp_ids])
+xp=x+(.5)
 #plt.figure(figsize=(15, 5))
+
 cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-ax[2].fill_between(x,a2_ran_mean-a2_ran_std,a2_ran_mean+a2_ran_std,alpha=0.4,color=cycle[0])
-ax[2].fill_between(x,a2_ran_mean-2*a2_ran_std,a2_ran_mean+2*a2_ran_std,alpha=0.4,color=cycle[0])
-ax[2].fill_between(x,a2_ran_mean-3*a2_ran_std,a2_ran_mean+3*a2_ran_std,alpha=0.4,color=cycle[0])
-ax[2].plot(x,a2_ran_mean,color=cycle[0])
-ax[2].fill_between(x,a2_mean-a2_std,a2_mean+a2_std,alpha=0.6,color=cycle[1])
-ax[2].plot(x,a2_mean,color=cycle[1])
-for i in range(len(x)):
-    ax[2].text(x[i]-.1,-0.005,'p='+str(pvalues[i]))
+ax[2].fill_between(xp,a2_ran_mean-a2_ran_std,a2_ran_mean+a2_ran_std,alpha=0.4,color=cycle[0])
+ax[2].fill_between(xp,a2_ran_mean-2*a2_ran_std,a2_ran_mean+2*a2_ran_std,alpha=0.4,color=cycle[0])
+ax[2].fill_between(xp,a2_ran_mean-3*a2_ran_std,a2_ran_mean+3*a2_ran_std,alpha=0.4,color=cycle[0])
+ax[2].plot(xp,a2_ran_mean,color=cycle[0],marker='o',markerfacecolor='none')
+ax[2].fill_between(xp,a2_mean-a2_std,a2_mean+a2_std,alpha=0.6,color=cycle[1])
+ax[2].plot(xp,a2_mean,color=cycle[1],marker='o',markerfacecolor='none')
+for i in range(len(xp)):
+    ax[2].text(xp[i]-.1,0.025,'p='+str(pvalues[i]))
 
 ax[2].set_xticks(x)
 ax[2].set_xticklabels(my_xticks)
@@ -165,9 +166,9 @@ ax[0].set_title('Increasing inner radius', fontsize=14)
 ax[1].set_title('Increasing outer radius', fontsize=14)
 ax[2].set_title('Increasing both radii', fontsize=14)
 
-ax[0].text(1., .01, r'$R_{outer}=1.1R_v$', fontsize=14)
-ax[1].text(6., .01, r'$R_{inner}=0.9R_v$', fontsize=14)
-ax[2].text(11., .01, r'$R_{outer}=R_{inner}+0.6R_v$', fontsize=14)
+ax[0].text(1., .04, r'$R_{outer}=1.1R_v$', fontsize=14)
+ax[1].text(6., .04, r'$R_{inner}=0.9R_v$', fontsize=14)
+#ax[2].text(11., .04, r'$R_{outer}=R_{inner}+0.2R_v$', fontsize=14)
 
 #plt.text(6, .005, 'Increasing outer radius', fontsize=14)
 #plt.text(10.5, .005, 'Increasing both radii', fontsize=14)
@@ -182,7 +183,7 @@ for i in [0,1,2]:
 ax[0].legend(fontsize=14,ncol=2)
 
 plt.tight_layout()
-plt.savefig('../plots/a2_shl.png')
+plt.savefig('../plots/a2_shl1.png')
 
 
 # %%

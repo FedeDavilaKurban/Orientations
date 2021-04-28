@@ -126,24 +126,12 @@ def cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5):
 
     #global xv,yv,zv,rv,cos
 
-    #sigma5 = []
-    #print('In cosCalc, prior to s5: len(gals_h)=',len(gals_h))
     if s5!=0:
         gals_h = sigma5(gals_h,tree,s5)
 
     cos_list = []
 
     for i in range(len(gals_h)):
-        # if s5!=0:
-        #     #Cuento cantidad de vecinos a un radio de 5Mpc, si es mayor a s5, rompo el loop
-        #     if units=='kpc': rad = 5000.
-        #     if units=='Mpc': rad = 5.
-
-        #     sigma5 = len( tree.query_ball_point([gals_h[i]['x'],gals_h[i]['y'],gals_h[i]['z']],rad))
-        #     #print(sigma5)
-        #     if sigma5>=s5: continue
-        #     #print("sigue")
-
 
         #Calculo el coseno
         u = [gals_h[i]['x']-xv,gals_h[i]['y']-yv,gals_h[i]['z']-zv]
