@@ -1,3 +1,4 @@
+#%%
 """
 Velocities
 """
@@ -38,11 +39,16 @@ def orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     gals = gxs[shell]
     #print('N of galaxies in shell:',len(gals))
 
+    xv_mean = np.mean(gals['xv'])
+    yv_mean = np.mean(gals['yv'])
+    zv_mean = np.mean(gals['zv'])
+    vshell_mean = [xv_mean, yv_mean, zv_mean]
+
     gals = JvsM(sec,gals,gxs,plot=False) #Determine galaxies of interest (involves rmin,rmax,sec)
 
     #cos = cosCalc(gals_h,units,tree,xv,yv,zv,rv,s5) #Calculate the cosines of angle of J and void direction
 
-    return gals 
+    return gals,vshell_mean 
 
 def readTNG_():
     """
@@ -77,7 +83,7 @@ def readTNG_():
 
     gxs = Table(np.column_stack([pos[:,0],pos[:,1],pos[:,2],mass,spin,sp_n,\
         vel[:,0],vel[:,1],vel[:,2]]),\
-        names=['x','y','z','mass','spx','spy','spz','sp_n','sfr','xv','yv','zv']) 
+        names=['x','y','z','mass','spx','spy','spz','sp_n','xv','yv','zv']) 
 
     del mass,pos,spin,sp_n,vel
 
@@ -89,7 +95,7 @@ Define Parameters, Reading Galaxies, Creating Tree
 """
 
 #exp, minradV, maxradV, rmin, rmax, sec, s5, vtype = readExp(sys.argv[1])
-minradV, maxradV, rmin, rmax, sec, s5, vtype = 8., 9., .9, 1.2, 3, 0, 'a'
+minradV, maxradV, rmin, rmax, sec, s5, vtype = 7., 0., .9, 1.2, 3, 0, 'a'
 #print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
 print('maxradVoid = {}Mpc'.format(maxradV))
@@ -113,4 +119,198 @@ if units=='kpc':
 gxs.remove_row(np.where(gxs['y']==lbox)[0][0])
 gxs.remove_row(np.where(gxs['x']<0.)[0][0])
 
+#print('writing')
+#ascii.write(gxs,'gxs.dat')
+
 tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsize=lbox)
+#%%
+print('calculating')
+"""
+Read Galaxy Velocity and Spin Components in the shells of Voids
+"""
+
+#nvs = [0]
+nvs = range(len(voids))
+prll = []
+perp = []
+ratio = []
+
+# xvel_ = []
+# yvel_ = []
+# zvel_ = []
+
+vrad = []
+vtra = []
+mass = []
+
+for nv in nvs:
+    # Ahora que estoy trabajando con velocidades
+    # esta nomenclatura es un poco confusa :P
+    # Cuando la 'v' está primero, significa que es una cantidad del void
+    # Ej.: vx es la posición x del void; gxv es la velocidad en el eje x de la galaxia
+    vx, vy, vz = voids[nv]['x'], voids[nv]['y'], voids[nv]['z']
+
+    # Devuelve 'gals', un subset de 'gxs'. 
+    # Gals son las gxs que estan en la cascara y
+    # de la seccion 'sec' en el espacio Spin-Masa.
+    # Estos parametros estan definidos al principio
+    gals, vshell = orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5) 
+    # vshell son las componentes promedio de la velocidad 
+    # de todas las galaxias del shell (previo a la selección en por Spin-Masa)
+
+    for g in gals:
+
+        gx, gy, gz = g['x'], g['y'], g['z']
+
+        # A la velocidad de la galaxia le resto la "velocidad del shell" 
+        gxv, gyv, gzv = g['xv']-vshell[0], g['yv']-vshell[1], g['zv']-vshell[2]
+        #vel = np.sqrt(gxv**2+gyv**2,gzv**2)
+
+        sx, sy, sz, sn = g['spx'], g['spy'], g['spz'], g['sp_n']
+
+        r = [gx-vx,gy-vy,gz-vz] #galaxy position from void center
+        r_versor = r/np.linalg.norm(r) #radial direction from void center
+        s = [sx,sy,sz] #spin
+        prll.append( abs( np.dot(r_versor,s) ) )
+        perp.append( np.sqrt(sn**2 - prll[-1]**2) )
+
+        vrad.append( np.dot([gxv,gyv,gzv],r_versor) )
+
+        v_norm_squared = gxv**2 + gyv**2 + gzv**2
+        vrad_norm_squared = vrad[-1]**2
+        vtrans_squared = v_norm_squared-vrad_norm_squared
+        #Este error no deberia saltar:
+        if vtrans_squared<0.: 
+            print('Negative Value for V_trans_squared')
+        vtra.append( np.sqrt(vtrans_squared) )
+
+        mass.append( g['mass'] )
+
+perp = np.array(perp)
+prll = np.array(prll)
+
+ratio = perp/prll
+
+vrad = np.array(vrad)
+vtra = np.array(vtra)
+mass = np.array(mass)
+#%%
+
+print('plotting')
+plt.rcParams['figure.figsize'] = (10, 8)
+plt.rcParams['font.size'] = 15
+
+p1, p2 = 10, 90
+pinf = np.percentile(ratio,p1)
+psup = np.percentile(ratio,p2)
+
+#pinf, psup = 1.,1.
+
+fig, axs = plt.subplots(3, 1, constrained_layout=True)
+
+x = np.log10(ratio)
+axs[0].hist(x,bins=30,density=True,alpha=1.)
+axs[0].vlines(np.log10(pinf),0,.9)
+axs[0].vlines(np.log10(psup),0,.9)
+axs[0].set_xlabel(r'$log_{10}(\frac{J_\perp}{J_\parallel})$')
+# axs[0].hist(x[x<=np.log10(pinf)],bins=15,density=False)
+# axs[0].hist(x[x>=np.log10(psup)],bins=15,density=False)
+
+
+axs[0].text(2.,.25,'Min-Max Void R: {}, {}\nMin-Max Shell R: {}, {}\nSpin-Mass Section: {}\ns5: {}\nVoid Type: {}'\
+    .format(minradV, maxradV, rmin, rmax, sec, s5, vtype))
+
+x1 = vrad[ratio>=psup]
+x2 = vrad[ratio<=pinf]
+
+axs[1].hist(x1,label='Perpendicular',bins=25,density=True,alpha=0.7)
+axs[1].hist(x2,label='Parallel',bins=25,density=True,alpha=0.7)
+
+axs[1].legend()
+axs[1].set_xlabel(r'$v_{rad}$')
+
+x1 = vtra[ratio>=psup]
+x2 = vtra[ratio<=pinf]
+
+axs[2].hist(x1,label='Perpendicular',bins=25,density=True,alpha=0.7)
+axs[2].hist(x2,label='Parallel',bins=25,density=True,alpha=0.7)
+
+axs[2].legend()
+axs[2].set_xlabel(r'$v_{tra}$')
+
+plt.savefig('../plots/velocities_{}_{}_{}_{}_{}_{}_{}.jpg'.format(minradV, maxradV, rmin, rmax, sec, s5, vtype))
+# %%
+fig, axs = plt.subplots(3, 1, sharex=True, constrained_layout=True)
+
+a = .4
+
+spin = np.sqrt(perp**2+prll**2) 
+
+x1 = vrad 
+x2 = vtra
+y = np.log10(spin/mass )
+
+axs[0].scatter(x1, y, label='Vrad',alpha=a)
+axs[0].scatter(x2, y, label='Vtra',alpha=a)
+axs[0].legend()
+axs[0].set_ylabel(r'$log_{10}(J/M)$')
+
+y = np.log10(perp/mass)
+
+axs[1].scatter(x1, y, label='Vrad',alpha=a)
+axs[1].scatter(x2, y, label='Vtra',alpha=a)
+axs[1].set_ylabel(r'$log_{10}(J_\perp/M)$')
+
+y = np.log10(prll/mass)
+
+axs[2].scatter(x1, y, label='Vrad',alpha=a)
+axs[2].scatter(x2, y, label='Vtra',alpha=a)
+axs[2].set_xlabel('Velocity')
+axs[2].set_ylabel(r'$log_{10}(J_\parallel/M)$')
+
+plt.savefig('../plots/JvsV.jpg')
+
+# %%
+import matplotlib.colors as colors
+fig, axs = plt.subplots(3, 2, sharex=True, sharey=True, constrained_layout=True)
+
+#spin = np.sqrt(perp**2+prll**2) 
+bins = 80
+
+
+x = vtra
+y = np.log10(spin/mass )
+
+axs[0,1].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+#axs[0,1].set_ylabel(r'$log_{10}(J/M)$')
+
+y = np.log10(perp/mass)
+
+axs[1,1].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+#axs[1,1].set_ylabel(r'$log_{10}(J_\perp/M)$')
+
+y = np.log10(prll/mass)
+
+axs[2,1].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+axs[2,1].set_xlabel(r'$V_{tra}$')
+#axs[2,1].set_ylabel(r'$log_{10}(J_\parallel/M)$')
+
+#----------
+
+x = vrad
+y = np.log10(spin/mass )
+
+axs[0,0].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+axs[0,0].set_ylabel(r'$log_{10}(J/M)$')
+
+y = np.log10(perp/mass)
+
+axs[1,0].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+axs[1,0].set_ylabel(r'$log_{10}(J_\perp/M)$')
+
+y = np.log10(prll/mass)
+
+axs[2,0].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+axs[2,0].set_xlabel(r'$V_{rad}$')
+axs[2,0].set_ylabel(r'$log_{10}(J_\parallel/M)$')
+plt.savefig('../plots/JvsV_hist.jpg')
