@@ -24,17 +24,17 @@ def orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5):
     import numpy as np
     from astropy.table import Table
 
-    global xv,yv,zv,rv,cos
+    global vx,vy,vz,vr,cos
 
-    xv,yv,zv,rv = voids['x','y','z','r'][nv]
+    vx,vy,vz,vr = voids['x','y','z','r'][nv]
     if units=='kpc':
-        xv*=1000.
-        yv*=1000.
-        zv*=1000.
-        rv*=1000.
+        vx*=1000.
+        vy*=1000.
+        vz*=1000.
+        vr*=1000.
 
-    idx1 = tree.query_ball_point([xv,yv,zv],rv*rmax)
-    idx2 = tree.query_ball_point([xv,yv,zv],rv*rmin)
+    idx1 = tree.query_ball_point([vx,vy,vz],vr*rmax)
+    idx2 = tree.query_ball_point([vx,vy,vz],vr*rmin)
     shell = [g for g in idx1 if g not in idx2]
     gals = gxs[shell]
     #print('N of galaxies in shell:',len(gals))
@@ -95,7 +95,7 @@ Define Parameters, Reading Galaxies, Creating Tree
 """
 
 #exp, minradV, maxradV, rmin, rmax, sec, s5, vtype = readExp(sys.argv[1])
-minradV, maxradV, rmin, rmax, sec, s5, vtype = 7., 0., .9, 1.2, 3, 0, 'a'
+minradV, maxradV, rmin, rmax, sec, s5, vtype = 7., 0., .9, float(sys.argv[1]), 3, 0, 'r'
 #print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
 print('maxradVoid = {}Mpc'.format(maxradV))
@@ -168,12 +168,14 @@ for nv in nvs:
 
         sx, sy, sz, sn = g['spx'], g['spy'], g['spz'], g['sp_n']
 
+        # Spin Components
         r = [gx-vx,gy-vy,gz-vz] #galaxy position from void center
         r_versor = r/np.linalg.norm(r) #radial direction from void center
-        s = [sx,sy,sz] #spin
+        s = [sx,sy,sz] #spin vector
         prll.append( abs( np.dot(r_versor,s) ) )
-        perp.append( np.sqrt(sn**2 - prll[-1]**2) )
+        perp.append( np.sqrt(sn**2 - prll[-1]**2) ) # S**2 = S_perp**2 + S_paral**2
 
+        # Velocities
         vrad.append( np.dot([gxv,gyv,gzv],r_versor) )
 
         v_norm_squared = gxv**2 + gyv**2 + gzv**2
@@ -238,43 +240,60 @@ axs[2].hist(x2,label='Parallel',bins=25,density=True,alpha=0.7)
 axs[2].legend()
 axs[2].set_xlabel(r'$v_{tra}$')
 
+axs[0].set_xlim([-2,3])
+axs[0].set_ylim([0,1])
+axs[1].set_xlim([-800,800])
+axs[1].set_ylim([0.,0.006])
+axs[2].set_xlim([0,1400])
+axs[2].set_ylim([0,0.008])
+
 plt.savefig('../plots/velocities_{}_{}_{}_{}_{}_{}_{}.jpg'.format(minradV, maxradV, rmin, rmax, sec, s5, vtype))
 # %%
-fig, axs = plt.subplots(3, 1, sharex=True, constrained_layout=True)
+import statsmodels.api as sm
+x1 = vrad[ratio>=psup]
+x2 = vrad[ratio<=pinf]
+fig, ax = plt.subplots(1, 1, constrained_layout=True)
+color = plt.rcParams['axes.prop_cycle'].by_key()['color']
+sm.qqplot(x1, line =None, ax=ax, color=color[0], label='Perpendicular')
+sm.qqplot(x2, line =None, ax=ax, color=color[1], label='Parallel')
+plt.legend()
+plt.savefig('../plots/qqplot_vrad.jpg')
+#%%
+# fig, axs = plt.subplots(3, 1, sharex=True, constrained_layout=True)
 
-a = .4
+# a = .4
 
-spin = np.sqrt(perp**2+prll**2) 
+# spin = np.sqrt(perp**2+prll**2) 
 
-x1 = vrad 
-x2 = vtra
-y = np.log10(spin/mass )
+# x1 = vrad 
+# x2 = vtra
+# y = np.log10(spin/mass )
 
-axs[0].scatter(x1, y, label='Vrad',alpha=a)
-axs[0].scatter(x2, y, label='Vtra',alpha=a)
-axs[0].legend()
-axs[0].set_ylabel(r'$log_{10}(J/M)$')
+# axs[0].scatter(x1, y, label='Vrad',alpha=a)
+# axs[0].scatter(x2, y, label='Vtra',alpha=a)
+# axs[0].legend()
+# axs[0].set_ylabel(r'$log_{10}(J/M)$')
 
-y = np.log10(perp/mass)
+# y = np.log10(perp/mass)
 
-axs[1].scatter(x1, y, label='Vrad',alpha=a)
-axs[1].scatter(x2, y, label='Vtra',alpha=a)
-axs[1].set_ylabel(r'$log_{10}(J_\perp/M)$')
+# axs[1].scatter(x1, y, label='Vrad',alpha=a)
+# axs[1].scatter(x2, y, label='Vtra',alpha=a)
+# axs[1].set_ylabel(r'$log_{10}(J_\perp/M)$')
 
-y = np.log10(prll/mass)
+# y = np.log10(prll/mass)
 
-axs[2].scatter(x1, y, label='Vrad',alpha=a)
-axs[2].scatter(x2, y, label='Vtra',alpha=a)
-axs[2].set_xlabel('Velocity')
-axs[2].set_ylabel(r'$log_{10}(J_\parallel/M)$')
+# axs[2].scatter(x1, y, label='Vrad',alpha=a)
+# axs[2].scatter(x2, y, label='Vtra',alpha=a)
+# axs[2].set_xlabel('Velocity')
+# axs[2].set_ylabel(r'$log_{10}(J_\parallel/M)$')
 
-plt.savefig('../plots/JvsV.jpg')
+# plt.savefig('../plots/JvsV.jpg')
 
 # %%
 import matplotlib.colors as colors
 fig, axs = plt.subplots(3, 2, sharex=True, sharey=True, constrained_layout=True)
 
-#spin = np.sqrt(perp**2+prll**2) 
+spin = np.sqrt(perp**2+prll**2) 
 bins = 80
 
 
@@ -313,4 +332,5 @@ y = np.log10(prll/mass)
 axs[2,0].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
 axs[2,0].set_xlabel(r'$V_{rad}$')
 axs[2,0].set_ylabel(r'$log_{10}(J_\parallel/M)$')
-plt.savefig('../plots/JvsV_hist.jpg')
+plt.savefig('../plots/JvsV_hist._{}_{}_{}_{}_{}_{}_{}.jpg'.format(minradV, maxradV, rmin, rmax, sec, s5, vtype))
+# %%
