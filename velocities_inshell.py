@@ -212,76 +212,110 @@ rrv = np.array(rrv)
 
 mass = np.array(mass)
 #%%
-"""
-Velocidad vs R
-"""
+
+print('plotting')
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.rcParams['font.size'] = 15
 
-x = np.linspace(rmin,rmax,500)
+p1, p2 = 20, 80
+pinf = np.percentile(ratio,p1)
+psup = np.percentile(ratio,p2)
 
-y = []
-for i in range(len(x)-1):
-    y.append(np.mean(v[np.where(np.logical_and(rrv>x[i],rrv<x[i+1]))]))
+#pinf, psup = 1.,1.
+
+fig, axs = plt.subplots(3, 1, constrained_layout=True)
+
+x = np.log10(ratio)
+axs[0].hist(x,bins=30,density=True,alpha=1.)
+axs[0].vlines(np.log10(pinf),0,.9)
+axs[0].vlines(np.log10(psup),0,.9)
+axs[0].set_xlabel(r'$log_{10}(\frac{J_\perp}{J_\parallel})$')
+# axs[0].hist(x[x<=np.log10(pinf)],bins=15,density=False)
+# axs[0].hist(x[x>=np.log10(psup)],bins=15,density=False)
 
 
-plt.scatter(x[:-1],y)
-plt.ylabel('V (kms/s)')
-plt.xlabel('R/Rv')
+axs[0].text(1.5,.25,'Min-Max Void R: {}, {}\nMin-Max Shell R: {}, {}\nSpin-Mass Section: {}\ns5: {}\nVoid Type: {}'\
+    .format(minradV, maxradV, rmin, rmax, sec, s5, vtype))
 
-rdin = x[np.where(y==np.max(y[15:]))][0]
+x1 = vrad[ratio>=psup]
+x2 = vrad[ratio<=pinf]
+
+axs[1].hist(x1,label='Perpendicular',bins=25,density=True,alpha=0.7)
+axs[1].hist(x2,label='Parallel',bins=25,density=True,alpha=0.7)
+
+axs[1].legend()
+axs[1].set_xlabel(r'$v_{rad}$')
+
+x1 = np.log10(vtra[ratio>=psup])
+x2 = np.log10(vtra[ratio<=pinf])
+
+axs[2].hist(x1,label='Perpendicular',bins=25,density=True,alpha=0.7)
+axs[2].hist(x2,label='Parallel',bins=25,density=True,alpha=0.7)
+
+axs[2].legend()
+axs[2].set_xlabel(r'$v_{tra}$')
+
+axs[0].set_xlim([-2,3])
+axs[0].set_ylim([0,1])
+#axs[1].set_xlim([-800,800])
+#axs[1].set_ylim([0.,0.006])
+#axs[2].set_xlim([0,1400])
+#axs[2].set_ylim([0,0.008])
+
+#plt.savefig('../plots/velocities_{}_{}_{}_{}_{}_{}_{}.jpg'.format(minradV, maxradV, rmin, rmax, sec, s5, vtype))
 # %%
-"""
-Beta vs Velocidad
-"""
-outer_rdin = np.where(rrv>=rdin)[0]
-inner_rdin = np.where(rrv<rdin)[0]
-
-beta_inner = perp[inner_rdin]/prll[inner_rdin]
-beta_outer = perp[outer_rdin]/prll[outer_rdin]
-
-v_inner = v[inner_rdin]
-v_outer = v[outer_rdin]
-
-# Inner
-x1 = np.geomspace(np.min(v_inner),np.max(v_inner),20)
-y1 = []
-y1err = []
-for i in range(len(x1)-1):
-    filter = np.where(np.logical_and(v_inner>x1[i],v_inner<x1[i+1]))
-    n=len(filter[0])
-    print(n)
-    y1.append(np.mean(beta_inner[filter]))
-    y1err.append(np.std(beta_inner[filter])/np.sqrt(n))
-
-plt.scatter(x1[:-1],np.log10(y1),label='Inner')
-plt.errorbar(x1[:-1], np.log10(y1), yerr=np.log10(y1err), fmt="o")
-plt.xscale('log')
-
-# Outer
-x2 = np.geomspace(np.min(v_outer),np.max(v_outer),20)
-y2 = []
-y2err = []
-for i in range(len(x2)-1):
-    filter = np.where(np.logical_and(v_outer>x2[i],v_outer<x2[i+1]))
-    n=len(filter[0])
-    print(n)
-    y2.append(np.mean(beta_outer[filter]))
-    y2err.append(np.std(beta_outer[filter])/np.sqrt(n))
-
-plt.scatter(x2[:-1],np.log10(y2),label='Inner')
-plt.errorbar(x2[:-1], np.log10(y2), yerr=np.log10(y2err), fmt="o")
-plt.xscale('log')
-
-# Outer
-x = np.linspace(np.min(v_outer),np.max(v_outer),50)
-y = []
-for i in range(len(x)-1):
-    y.append(np.mean(beta_outer[np.where(np.logical_and(v_outer>x[i],v_outer<x[i+1]))]))
-plt.scatter((x[:-1]),np.log10(y),label='Outer')
-
-
+import statsmodels.api as sm
+x1 = vrad[ratio>=psup]
+x2 = vrad[ratio<=pinf]
+fig, ax = plt.subplots(1, 1, constrained_layout=True)
+color = plt.rcParams['axes.prop_cycle'].by_key()['color']
+sm.qqplot(x1, line =None, ax=ax, color=color[0], label='Perpendicular')
+sm.qqplot(x2, line =None, ax=ax, color=color[1], label='Parallel')
 plt.legend()
-plt.xlabel('V (kms/s)')
-plt.ylabel(r'$log_{10}(\beta)$')
+plt.savefig('../plots/qqplot_vrad.jpg')
+
+
 # %%
+import matplotlib.colors as colors
+fig, axs = plt.subplots(3, 2, sharex=True, sharey=True, constrained_layout=True)
+
+spin = np.sqrt(perp**2+prll**2) 
+bins = 80
+
+
+x = vtra
+y = np.log10(spin/mass )
+
+axs[0,1].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+#axs[0,1].set_ylabel(r'$log_{10}(J/M)$')
+
+y = np.log10(perp/mass)
+
+axs[1,1].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+#axs[1,1].set_ylabel(r'$log_{10}(J_\perp/M)$')
+
+y = np.log10(prll/mass)
+
+axs[2,1].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+axs[2,1].set_xlabel(r'$V_{tra}$')
+#axs[2,1].set_ylabel(r'$log_{10}(J_\parallel/M)$')
+
+#----------
+
+x = vrad
+y = np.log10(spin/mass )
+
+axs[0,0].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+axs[0,0].set_ylabel(r'$log_{10}(J/M)$')
+
+y = np.log10(perp/mass)
+
+axs[1,0].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+axs[1,0].set_ylabel(r'$log_{10}(J_\perp/M)$')
+
+y = np.log10(prll/mass)
+
+axs[2,0].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
+axs[2,0].set_xlabel(r'$V_{rad}$')
+axs[2,0].set_ylabel(r'$log_{10}(J_\parallel/M)$')
+#plt.savefig('../plots/JvsV_hist._{}_{}_{}_{}_{}_{}_{}.jpg'.format(minradV, maxradV, rmin, rmax, sec, s5, vtype))

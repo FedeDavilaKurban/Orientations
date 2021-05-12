@@ -96,7 +96,7 @@ Define Parameters, Reading Galaxies, Creating Tree
 """
 
 #exp, minradV, maxradV, rmin, rmax, sec, s5, vtype = readExp(sys.argv[1])
-minradV, maxradV, rmin, rmax, sec, s5, vtype = 7., 0., .5, 1.5, 3, 0, 'a'
+minradV, maxradV, rmin, rmax, sec, s5, vtype = 7., 0., .5, 1.5, 3, 0, sys.argv[1]
 #print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
 print('maxradVoid = {}Mpc'.format(maxradV))
@@ -181,7 +181,8 @@ plt.ylabel(r'$\Sigma_5\,(kpc)$')
 #plt.xlim(.5, 1.5)
 
 plt.plot(r,r*m+b)
-
+plt.savefig('../plots/sigma5_vs_r_vtype_{}.jpg'.format(vtype))
+plt.close()
 # %%
 """
 Ahora que tengo la regressión lineal Sig5-R 
@@ -222,17 +223,19 @@ for nv in nvs:
                                 gals['spy'].data,\
                                 gals['spz'].data))
 
-    sig5, inds5 = tree11.query(np.column_stack((gals['x'],gals['y'],gals['z'])), k=[6])  # k1 = identity
+    sig5, inds5 = \
+        tree11.query(np.column_stack((gals['x'],gals['y'],gals['z'])), k=[6])  # k1 = identity
 
     for i in range(len(gals)):
 
         if sig5[i] > m*r_norms[i]/vr+b:
-
+            #plt.scatter(r_norms[i]/vr, sig5[i],c='blue')
             prll_hs5.append(abs( np.dot(r_versors[i],s_vectors[i]))) 
             # S**2 = S_perp**2 + S_paral**2
             perp_hs5.append(np.sqrt(gals['sp_n'][i]**2 - prll_hs5[-1]**2))  
         
         if sig5[i] < m*r_norms[i]/vr+b:
+            #plt.scatter(r_norms[i]/vr, sig5[i],c='orange')
 
             prll_ls5.append(abs( np.dot(r_versors[i],s_vectors[i]))) 
             perp_ls5.append(np.sqrt(gals['sp_n'][i]**2 - prll_ls5[-1]**2))  
@@ -246,18 +249,17 @@ prll_ls5 = np.array(prll_ls5)
 beta_hs5 = perp_hs5/prll_hs5
 beta_ls5 = perp_ls5/prll_ls5
 
-plt.hist(np.log10(beta_hs5),bins=80,density=True)
-plt.hist(np.log10(beta_ls5),bins=80,density=True,alpha=.7)
+plt.hist(np.log10(beta_hs5),bins=100,density=True, label='High S5')
+plt.hist(np.log10(beta_ls5),bins=100,density=True,alpha=.6, label='Low S5')
 
 #plt.hist(np.log10(perp),label='Perpendicular',bins=50,density=True,alpha=.8)
 #plt.hist(np.log10(prll),label='Parallel',bins=50,density=True,alpha=.8)
-#plt.legend()
-plt.show()
+plt.xlabel(r'$\beta$')
+plt.legend()
+plt.savefig('../plots/beta_hs5_and_ls5_vtype_{}.jpg'.format(vtype))
+plt.close()
 
 
-#%%
+# %%
 
-
-vrad = np.array(vrad)
-vtra = np.array(vtra)
-mass = np.array(mass)
+# %%
