@@ -213,7 +213,8 @@ Method 2: Generating Beta directly
 
 
 def get_beta_random2(N):
-    beta = np.tan(np.arccos(np.random.random(N)))
+    #Probar arccos
+    beta = np.tan(np.arcsin(np.random.random(N)))
     return beta
 
 N = 100000
