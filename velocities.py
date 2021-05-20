@@ -95,7 +95,7 @@ Define Parameters, Reading Galaxies, Creating Tree
 """
 
 #exp, minradV, maxradV, rmin, rmax, sec, s5, vtype = readExp(sys.argv[1])
-minradV, maxradV, rmin, rmax, sec, s5, vtype = 7., 0., .5, 7, 3, 0, 's'
+minradV, maxradV, rmin, rmax, sec, s5, vtype = 7., 0., .25, 1.5, 3, 0, 'r'
 #print('Codename of experiment:', exp)
 print('minradVoid = {}Mpc'.format(minradV))
 print('maxradVoid = {}Mpc'.format(maxradV))
@@ -213,23 +213,28 @@ rrv = np.array(rrv)
 mass = np.array(mass)
 #%%
 """
-Velocidad vs R
+Velocidad Radial vs R
 """
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.rcParams['font.size'] = 15
+color = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-x = np.linspace(rmin,rmax,500)
+x = np.linspace(rmin,rmax,20)
 
 y = []
 for i in range(len(x)-1):
-    y.append(np.mean(v[np.where(np.logical_and(rrv>x[i],rrv<x[i+1]))]))
+    y.append(np.mean(vrad[np.where(np.logical_and(rrv>x[i],rrv<x[i+1]))]))
 
-
-plt.scatter(x[:-1],y)
-plt.ylabel('V (kms/s)')
+x_step = (x[0]+x[1])/2
+plt.scatter(x[:-1]+x_step,y)
+plt.ylabel('Vrad (km/s)')
 plt.xlabel('R/Rv')
+plt.savefig('../plots/')
 
-rdin = x[np.where(y==np.max(y[15:]))][0]
+# Radio "dinámico" = Radio correspondiente a Vmax
+rdin = x[np.where(y==np.max(y[15:]))][0]+x_step
+rdin = 1.
+print(rdin)
 # %%
 """
 Beta vs Velocidad
@@ -240,48 +245,49 @@ inner_rdin = np.where(rrv<rdin)[0]
 beta_inner = perp[inner_rdin]/prll[inner_rdin]
 beta_outer = perp[outer_rdin]/prll[outer_rdin]
 
-v_inner = v[inner_rdin]
-v_outer = v[outer_rdin]
+v_inner = vrad[inner_rdin]
+v_outer = vrad[outer_rdin]
 
 # Inner
-x1 = np.geomspace(np.min(v_inner),np.max(v_inner),20)
-y1 = []
-y1err = []
-for i in range(len(x1)-1):
-    filter = np.where(np.logical_and(v_inner>x1[i],v_inner<x1[i+1]))
-    n=len(filter[0])
-    print(n)
-    y1.append(np.mean(beta_inner[filter]))
-    y1err.append(np.std(beta_inner[filter])/np.sqrt(n))
+#x = np.linspace(np.min(v_inner),np.max(v_inner),20)
+x = np.linspace(0,200,10)
 
-plt.scatter(x1[:-1],np.log10(y1),label='Inner')
-plt.errorbar(x1[:-1], np.log10(y1), yerr=np.log10(y1err), fmt="o")
-plt.xscale('log')
-
-# Outer
-x2 = np.geomspace(np.min(v_outer),np.max(v_outer),20)
-y2 = []
-y2err = []
-for i in range(len(x2)-1):
-    filter = np.where(np.logical_and(v_outer>x2[i],v_outer<x2[i+1]))
-    n=len(filter[0])
-    print(n)
-    y2.append(np.mean(beta_outer[filter]))
-    y2err.append(np.std(beta_outer[filter])/np.sqrt(n))
-
-plt.scatter(x2[:-1],np.log10(y2),label='Inner')
-plt.errorbar(x2[:-1], np.log10(y2), yerr=np.log10(y2err), fmt="o")
-plt.xscale('log')
-
-# Outer
-x = np.linspace(np.min(v_outer),np.max(v_outer),50)
 y = []
+yerr = []
 for i in range(len(x)-1):
-    y.append(np.mean(beta_outer[np.where(np.logical_and(v_outer>x[i],v_outer<x[i+1]))]))
-plt.scatter((x[:-1]),np.log10(y),label='Outer')
+    filter = np.where(np.logical_and(v_inner>x[i],v_inner<x[i+1]))[0]
+    n = len(filter)
+    y.append(np.mean(beta_inner[filter]))
+    yerr.append(np.std(beta_inner[filter])/np.sqrt(n))
+#plt.scatter(v_inner,np.log10(beta_inner),s=.01,color='k')
+
+x_step = (x[0]+x[1])/2
+plt.plot((x[:-1])+x_step,np.log10(y),label='Inner')
+plt.errorbar((x[:-1])+x_step,np.log10(y),yerr=np.log10(yerr),color=color[0])
+
+
+# Outer
+#x = np.linspace(np.min(v_outer),np.max(v_outer),20)
+y = []
+yerr = []
+for i in range(len(x)-1):
+    filter = np.where(np.logical_and(v_outer>x[i],v_outer<x[i+1]))[0]
+    n = len(filter)
+    y.append(np.mean(beta_outer[filter]))
+    yerr.append(np.std(beta_outer[filter])/np.sqrt(n))
+x_step = (x[0]+x[1])/2
+plt.plot((x[:-1])+x_step, np.log10(y), label='Outer')
+plt.errorbar((x[:-1])+x_step, np.log10(y), yerr=np.log10(yerr), color=color[1])
 
 
 plt.legend()
 plt.xlabel('V (kms/s)')
 plt.ylabel(r'$log_{10}(\beta)$')
+# %%
+"""
+Hist de Betas
+"""
+
+plt.hist(np.log10(beta_inner),bins=22,density=True)
+plt.hist(np.log10(beta_outer),bins=20,density=True,alpha=.5)
 # %%

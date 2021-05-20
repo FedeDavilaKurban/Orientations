@@ -83,7 +83,7 @@ def readTNG_():
 
 #%%
 """
-Define Parameters, Reading Galaxies, Creating Tree
+Define Parameters 
 """
 
 #exp, minradV, maxradV, rmin, rmax, sec, s5, vtype = readExp(sys.argv[1])
@@ -99,7 +99,10 @@ print('vtype =',vtype)
 
 voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 print('Num of voids:',len(voids))
-
+#%%
+"""
+Reading Galaxies, Creating Tree
+"""
 gxs = readTNG_()
 if units=='Mpc': 
     lbox=205.

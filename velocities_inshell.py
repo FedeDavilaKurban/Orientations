@@ -303,7 +303,7 @@ axs[2,1].set_xlabel(r'$V_{tra}$')
 #----------
 
 x = vrad
-y = np.log10(spin/mass )
+y = np.log10(spin/mass)
 
 axs[0,0].hist2d(x,y,bins=bins,density=True,norm=colors.LogNorm())
 axs[0,0].set_ylabel(r'$log_{10}(J/M)$')
