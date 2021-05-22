@@ -142,7 +142,7 @@ def get_beta_random1():
     for nv in nvs:
 
         vx, vy, vz, vr = voids[nv]['x'], voids[nv]['y'], voids[nv]['z'], voids[nv]['r']
-        gals, vshell = orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5)
+        gals, vshell = orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5,jvsm_b,jvsm_m)
 
         for g in gals:
 
@@ -213,8 +213,8 @@ Method 2: Generating Beta directly
 
 
 def get_beta_random2(N):
-    #Probar arccos
-    beta = np.tan(np.arcsin(np.random.random(N)))
+    #Probar arccos o arcsin
+    beta = np.tan(np.arccos(np.random.random(N)))
     return beta
 
 N = 100000
@@ -270,7 +270,7 @@ def get_beta_random3():
     for nv in nvs:
 
         vx, vy, vz, vr = voids[nv]['x'], voids[nv]['y'], voids[nv]['z'], voids[nv]['r']
-        gals, vshell = orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5)
+        gals, vshell = orientations_(gxs,tree,units,voids,nv,rmin,rmax,sec,s5,jvsm_b,jvsm_m)
 
         for g in gals:
 
@@ -327,5 +327,103 @@ plt.text(3.,.2,r'$n_1/n_2={:.3f}$'.format(b_factor))
 
 plt.xlim([-3.,5.])
 plt.ylim([0.,1.])
+
+# %%
+"""
+Method 4: Calculate ratio of the sections of 
+spheres of "perpendicular" and "parallel" vectors
+"""
+# Volume of sphere of radius 1
+vol_sph = 4*np.pi/3
+
+# Volume of cone within sphere
+# Vertex in center of sphere
+# 45 degree angle
+h = np.sin(np.pi/4)
+vol_cone = np.pi*h**3/3
+
+# Volume of dome
+# e.g. difference between the top portion of sphere 
+# and the base of the cone
+l = 1-h
+vol_dome = np.pi*l*(3*h**2+l**2)/6
+
+# "Parallel" spins will fall within two cones and two domes
+vol_prll = 2*(vol_cone + vol_dome)
+
+# "Perpendicular" spins will fall everywhere else
+vol_perp = vol_sph - vol_prll
+
+# 'n1/n2'
+ratio = vol_perp/vol_prll
+print('n1/n2 =',ratio)
+
+
+# %%
+"""
+Working out method to apply in 'beta_forRbins.py'
+"""
+def get_random_vec(R, N):
+
+    phi = 2*np.pi*np.random.random(N)
+    costheta = 1-2*np.random.random(N)
+    u = np.random.random(N)
+
+    theta = np.arccos( costheta )
+    r = R * np.cbrt( u )
+
+    x = r * np.sin( theta ) * np.cos( phi )
+    y = r * np.sin( theta ) * np.sin( phi )
+    z = r * np.cos( theta )
+    
+    return x,y,z
+
+def get_beta_random(N_beta):
+
+    sx, sy, sz = get_random_vec(1.,N_beta)
+
+    s_randvec = np.column_stack((sx,sy,sz))
+
+    s_norms = np.linalg.norm(s_randvec, axis=1)
+
+    # sx /= s_norms
+    # sy /= s_norms
+    # sz /= s_norms
+
+    sp = np.sqrt(sx**2+sy**2)
+
+    b = sp/np.abs(sz)
+
+    return b
+
+N = 10000
+
+b = get_beta_random(N)
+
+plt.hist(np.log10(b),bins=int(np.sqrt(N)))
+
+
+# %%
+def get_eta_random(N_eta,N_beta):
+    
+    eta_ran = np.zeros(N_eta)
+
+    for i in range(N_eta):
+
+        b = get_beta_random(N_beta)
+        eta_ran [i] = len(b[b>1]) / len(b[b<1])
+
+    return eta_ran
+
+
+N_eta = 500
+N_beta = 10000
+
+eta_ran = get_eta_random(N_eta,N_beta)
+mean = np.mean(eta_ran)
+
+plt.vlines(mean,0,1)
+plt.vlines(1/(np.sqrt(2)-1),0,1,linestyles=':')
+plt.hist(eta_ran,bins=30,density=True)
 
 # %%
