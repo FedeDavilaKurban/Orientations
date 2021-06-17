@@ -1,6 +1,9 @@
 #%%
 """
 Calculate Beta (J_perp/J_prll) for different bins in Radius
+
+Plots:
+-Eta vs R for a, r, and s voids
 """
 import sys
 import numpy as np
@@ -30,30 +33,41 @@ def JvsM_(sec,gals,b,m,plot=True):
     #g_m,g_b,g_rvalue,g_pvalue,g_std=scipy.stats.linregress(np.log10(gxs['mass']),np.log10(gxs['sp_n'])) # Este ajuste es de las galaxias en total (ajuste global "g_...")
     
     # El ajuste tiene que ser con las 'gxs' (no con las 'gals')
-   #  m,b,rvalue,pvalue,std=scipy.stats.linregress(np.log10(gxs['mass']),np.log10(gxs['sp_n'])) 
-    m1 = -1./m
-    b1 = -.7*(m-m1)+b
-    b2 = -.3*(m-m1)+b
+    #  m,b,rvalue,pvalue,std=scipy.stats.linregress(np.log10(gxs['mass']),np.log10(gxs['sp_n'])) 
+    # m1 = -1./m
+    # b1 = -.7*(m-m1)+b
+    # b2 = -.3*(m-m1)+b
+
+    m1 = -.8
+    m2 = -.4
 
     M = np.log10(gals['mass'])
     S = np.log10(gals['sp_n'])
 
     #Alto Spin
-    if sec == 1: gals_h = gals[(M < -.5)&(S > M*m+b)]  
-    if sec == 3: gals_h = gals[(M > -.5)&(S > M*m+b)]  
-    if sec == 13: gals_h = gals[(S > M*m+b)]  
+    if sec == 1: gals_h = gals[(M < m1)&(S > M*m+b)]  
+    if sec == 2: gals_h = gals[(M > m1)&(M < m2)&(S > M*m+b)]  
+    if sec == 3: gals_h = gals[(M > m2)&(S > M*m+b)]  
+    if sec == 12: gals_h = gals[(M < m2)&(S > M*m+b)]  
+    if sec == 23: gals_h = gals[(M > m1)&(S > M*m+b)]  
+    if sec == 123: gals_h = gals[(S > M*m+b)]  
 
     #Bajo Spin
-    if sec == 4: gals_h = gals[(M < -.5)&(S < M*m+b)]  
-    if sec == 6: gals_h = gals[(M > -.5)&(S < M*m+b)]   
-    if sec == 46: gals_h = gals[(S < M*m+b)] 
+    if sec == 4: gals_h = gals[(M < m1)&(S < M*m+b)]  
+    if sec == 5: gals_h = gals[(M > m1)&(M < m2)&(S < M*m+b)]  
+    if sec == 6: gals_h = gals[(M > m2)&(S < M*m+b)]  
+    if sec == 45: gals_h = gals[(M < m2)&(S < M*m+b)]  
+    if sec == 56: gals_h = gals[(M > m1)&(S < M*m+b)]  
+    if sec == 456: gals_h = gals[(S < M*m+b)] 
 
     #Solo Masa
-    if sec == 14: gals_h = gals[(M < -.5)] 
-    if sec == 36: gals_h = gals[(M > -.5)]
+    if sec == 14: gals_h = gals[(M < m1)] 
+    if sec == 25: gals_h = gals[(M > m1)&(M < m2)] 
+    if sec == 36: gals_h = gals[(M > m2)]
 
     #Todas
     if sec == 0: gals_h = gals
+
 
 
     if plot:
@@ -119,7 +133,7 @@ def readTNG_():
     from astropy.table import Table
 
     mass = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloMass'])                                                                                                                      
-    ids = np.where((np.log10(mass)>-1.5)&(np.log10(mass)<3.))
+    ids = np.where((np.log10(mass)>-1)&(np.log10(mass)<3.))
     mass = mass[ids]
 
     pos = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloPos'])[ids]
@@ -157,6 +171,7 @@ if units=='kpc':
 gxs.remove_row(np.where(gxs['y']==lbox)[0][0])
 gxs.remove_row(np.where(gxs['x']<0.)[0][0])
 
+# Linear regression on Spin-Mass
 jvsm_m,jvsm_b,rvalue,pvalue,std = scipy.stats.linregress(np.log10(gxs['mass']),np.log10(gxs['sp_n'])) 
 
 
@@ -226,7 +241,7 @@ def get_eta_random(N_eta,N_beta):
     for i in range(N_eta):
 
         b = get_beta_random(N_beta)
-        eta_ran [i] = len(b[b>1]) / len(b[b<1])
+        eta_ran[i] = len(b[b>1]) / len(b[b<1])
 
     return eta_ran
     
@@ -234,7 +249,7 @@ def get_beta():
     nvs = range(len(voids))
     prll = []
     perp = []
-    ratio = []
+
     r = []
     rrv = []
 
@@ -280,18 +295,25 @@ def get_beta():
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.rcParams['font.size'] = 15
 
-r1 = [0.4,0.5,0.6,0.7,0.8,0.9,1.,1.1,1.2]
-r2 = [0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3]
+rinner_i = np.float64(0.4)
+rinner_f = np.float64(1.2)
+rstep = np.float64(0.2)
+r1 = np.arange(rinner_i,rinner_f,rstep,dtype=np.float64)
+r2 = np.arange(rinner_i+rstep,rinner_f+rstep,rstep,dtype=np.float64)
 
-for sec in [0]:
-
+for sec in [1,2,3,4,5,6,123,456]:
+    print(sec)
     eta = []
+    eta_std = []
+
     eta_random_mean = []
     eta_random_var = []
-
+    eta_random_std = []
+    
+    n_gal = []
     for vtype in ['a','r','s']:
         print(vtype)
-
+        
         for rmin,rmax in zip(r1,r2):
 
             voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
@@ -300,99 +322,153 @@ for sec in [0]:
             beta, perp, prll, r, rrv = get_beta()
 
             x = np.log10(beta)
-            n_perp = len(np.where(x>0.)[0])
-            n_prll = len(np.where(x<0.)[0])
-            eta.append( n_perp / n_prll )
 
+            # Obtain mean and var of eta with Bootstrap
+            bs_eta = []
+            for _ in range(1000):  #so B=1000
+                bs_x = np.random.choice(x, size=len(x))
+            
+                n_perp = len(np.where(bs_x>0.)[0])
+                n_prll = len(np.where(bs_x<0.)[0])
+                bs_eta.append( n_perp / n_prll )
+
+            eta.append( np.mean(bs_eta) )
+            eta_std.append( np.std(bs_eta, ddof=1))#/np.sqrt(len(bs_eta)) )
+
+            # Obtain mean and var of control samples
             N = len(beta)
-            eta_random = get_eta_random(500,N)
+        
+            eta_random = get_eta_random(1000,N) # 1st parameter will be len(eta_random)
             eta_random_mean.append( np.mean(eta_random) )
             eta_random_var.append( np.var(eta_random,ddof=1) )
+            eta_random_std.append( np.std(eta_random,ddof=1))#/np.sqrt(len(eta_random)) )
+
+            # Guardo esto para hacer una pruebita, 
+            # quiero plotear las curvas random individualmente.
+            # Probablemente borre esto despues
+            # n_gal.append(N)
+
+            # plt.hist(x,bins=30,density=True)
+            # plt.vlines(0,0,1.,linestyles=':')
+
+            # plt.xlabel(r'$log_{10}\beta$')
+
+            # plt.text(-2.5,.6,r'$n_2(\beta<1)={}$'.format(n_prll))
+            # plt.text(1.,.6,r'$n_1(\beta>1)={}$'.format(n_perp))
+            # plt.text(3.,.2,r'$n_1/n_2={:.3f}$'.format(eta[-1]))
+
+            # plt.xlim([-3.,5.])
+            # plt.ylim([0.,1.])
+
+            # #plt.show()
+            # #plt.savefig('../plots/beta_forRbins/voids_{}/rmin{}_rmax{}.jpg'.\
+            # #            format(vtype, rmin, rmax))
+            # plt.close()
 
 
-            plt.hist(x,bins=30,density=True)
-            plt.vlines(0,0,1.,linestyles=':')
-
-            plt.xlabel(r'$log_{10}\beta$')
-
-            plt.text(-2.5,.6,r'$n_2(\beta<1)={}$'.format(n_prll))
-            plt.text(1.,.6,r'$n_1(\beta>1)={}$'.format(n_perp))
-            plt.text(3.,.2,r'$n_1/n_2={:.3f}$'.format(eta[-1]))
-
-            plt.xlim([-3.,5.])
-            plt.ylim([0.,1.])
-
-            #plt.show()
-            #plt.savefig('../plots/beta_forRbins/voids_{}/rmin{}_rmax{}.jpg'.\
-            #            format(vtype, rmin, rmax))
-            plt.close()
-
-# %%
-
-nbins = len(r1)
-x = r1
-ya = eta[:nbins]
-yr = eta[nbins:2*nbins]
-ys = eta[-nbins:]
-
-# Theoretical n1/n2 value for random spins
-plt.hlines(1/(np.sqrt(2)-1),x[0],x[-1],linestyles=':')
-y = np.array(eta_random_mean[-nbins:])
-plt.plot(x,y,c='k')
-y1 = y - np.array(eta_random_var[-nbins:])
-y2 = y + np.array(eta_random_var[-nbins:])
-plt.fill_between(x, y1, y2, alpha=.5, color='k')
-
-plt.plot(x,ya,label='All')
-plt.plot(x,yr,label='R')
-plt.plot(x,ys,label='S')
+    nbins = len(r1)
+    x = r1
 
 
-plt.ylabel(r'$n_1/n_2$')
-plt.xlabel('R/Rv')
-plt.legend()
+    ya = eta[:nbins]
+    yr = eta[nbins:2*nbins]
+    ys = eta[-nbins:]
 
-x_ticks_labels = []
-for i in range(nbins):
-    x_ticks_labels.append( '{}-{}'.format(r1[i],r2[i]) )
-plt.xticks(x, x_ticks_labels)
+    ya_err = eta_std[:nbins]
+    yr_err = eta_std[nbins:2*nbins]
+    ys_err = eta_std[-nbins:]
 
-#plt.savefig('../plots/beta_forRbins/factorforallvoids.jpg')
+    ####################
+    eta_random_mean = np.array(eta_random_mean)
+    eta_random_var = np.array(eta_random_var)
+    eta_random_std = np.array(eta_random_std)
+
+    yran_mean_a = eta_random_mean[:nbins]
+    yran_mean_r = eta_random_mean[nbins:2*nbins]
+    yran_mean_s = eta_random_mean[-nbins:]
+
+    yran_var_a = eta_random_var[:nbins]
+    yran_var_r = eta_random_var[nbins:2*nbins]
+    yran_var_s = eta_random_var[-nbins:]
+
+    yran_std_a = eta_random_std[:nbins]
+    yran_std_r = eta_random_std[nbins:2*nbins]
+    yran_std_s = eta_random_std[-nbins:]
+    ####################
+
+    fig, axs = plt.subplots(3, 1, constrained_layout=True, sharex=True, sharey=False)
+
+    axs[0].set_title('section {}'.format(sec))
+
+
+    for ax, y, yerr, yran_mean, yran_err, label, in zip(axs,\
+                                    (ya,yr,ys),\
+                                    (ya_err,yr_err,ys_err),\
+                                    (yran_mean_a,yran_mean_r,yran_mean_s),\
+                                    (yran_std_a,yran_std_r,yran_std_s),('All','Rising','Shell')):
+
+        # Theoretical n1/n2 value for random spins
+        ax.hlines(1/(np.sqrt(2)-1),x[0],x[-1],linestyles=':')
+        ax.plot(x,yran_mean,c='k',alpha=.7)
+
+        ax.fill_between(x, yran_mean-yran_err, yran_mean+yran_err, alpha=.3, color='k')
+        ax.fill_between(x, yran_mean-2*yran_err, yran_mean+2*yran_err, alpha=.3, color='k')
+        ax.fill_between(x, yran_mean-3*yran_err, yran_mean+3*yran_err, alpha=.3, color='k')
+
+        ax.errorbar(x,y,yerr=yerr,label=label)
+
+        ax.legend()
+
+        # plt.ylabel(r'$n_1/n_2$')
+        # plt.xlabel('R/Rv')
+        # plt.legend()
+
+    x_ticks_labels = []
+    for i in range(nbins):
+        x_ticks_labels.append( '{:.1f}-{:.1f}'.format(r1[i],r2[i]) )
+    axs[2].set_xticks(x)
+    axs[2].set_xticklabels(x_ticks_labels)
+
+    plt.savefig('../plots/beta_forRbins/factorforallvoids_err_sec{}_.jpg'.format(sec))
+##########################################################
 #%%
-nbins = len(r1)
-x = r1
 
-ya = eta[:nbins]
-yr = eta[nbins:2*nbins]
-ys = eta[-nbins:]
-
-eta_random_mean = np.array(eta_random_mean)
-eta_random_var = np.array(eta_random_var)
-
-yran_mean_a = eta_random_mean[:nbins]
-yran_mean_r = eta_random_mean[nbins:2*nbins]
-yran_mean_s = eta_random_mean[-nbins:]
-
-yran_var_a = eta_random_var[:nbins]
-yran_var_r = eta_random_var[nbins:2*nbins]
-yran_var_s = eta_random_var[-nbins:]
-
+# Quiero plottear los eta random individualmente
+# Así que tengo que volver a calcularlos
 fig, axs = plt.subplots(3, 1, constrained_layout=True, sharex=True, sharey=False)
+a = 0.2
 
-for ax, y, yran, yvar, label, in zip(axs,\
+eta_random = []
+x_random = []
+for i,N_beta in zip(range(nbins),n_gal[:nbins]):
+    eta_random.append( get_eta_random(100,N_beta) )# 1st parameter will be len(eta_random)
+    x_random.append(x[i])
+axs[0].plot(x_random,eta_random,c='k',alpha=a)
+
+eta_random = []
+x_random = []
+for i,N_beta in zip(range(nbins),n_gal[nbins:2*nbins]):
+    eta_random.append( get_eta_random(100,N_beta) )# 1st parameter will be len(eta_random)
+    x_random.append(x[i])
+axs[1].plot(x_random,eta_random,c='k',alpha=a)
+
+eta_random = []
+x_random = []
+for i,N_beta in zip(range(nbins),n_gal[-nbins:]):
+    eta_random.append( get_eta_random(100,N_beta) )# 1st parameter will be len(eta_random)
+    x_random.append(x[i])
+axs[2].plot(x_random,eta_random,c='k',alpha=a)
+
+
+for ax, y, yerr, label, in zip(axs,\
                                 (ya,yr,ys),\
-                                (yran_mean_a,yran_mean_r,yran_mean_s),\
-                                (yran_var_a,yran_var_r,yran_var_s),('All','Rising','Shell')):
+                                (ya_err,yr_err,ys_err),('All','Rising','Shell')):
 
     # Theoretical n1/n2 value for random spins
     ax.hlines(1/(np.sqrt(2)-1),x[0],x[-1],linestyles=':')
-    ax.plot(x,yran,c='k',alpha=.7)
+    ax.plot(x,yran_mean,c='k',alpha=.7)
 
-    ax.fill_between(x, yran-yvar, yran+yvar, alpha=.3, color='k')
-    ax.fill_between(x, yran-2*yvar, yran+2*yvar, alpha=.3, color='k')
-    ax.fill_between(x, yran-3*yvar, yran+3*yvar, alpha=.3, color='k')
-
-    ax.plot(x,y,label=label)
+    ax.errorbar(x,y,yerr=yerr,label=label,alpha=3)
 
     ax.legend()
 
@@ -402,57 +478,74 @@ for ax, y, yran, yvar, label, in zip(axs,\
 
 x_ticks_labels = []
 for i in range(nbins):
-    x_ticks_labels.append( '{}-{}'.format(r1[i],r2[i]) )
+    x_ticks_labels.append( '{:.1f}-{:.1f}'.format(r1[i],r2[i]) )
 axs[2].set_xticks(x)
 axs[2].set_xticklabels(x_ticks_labels)
+plt.savefig('plotparadiego.png')
 
-plt.savefig('../plots/beta_forRbins/factorforallvoids_err.jpg')
-##########################################################
 # %%
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.rcParams['font.size'] = 15
 
-b = np.logspace(-4,4,100)
+b = np.logspace(-4,4,1000)
 b_dist = np.sin(np.arctan(b))/(1+b**2)
-b_dist2 = np.tan(np.arccos(np.random.random(10000)))
 plt.plot(np.log10(b),b_dist)
+#%%
+b_dist2 = np.tan(np.arccos(np.random.random(1000)))
+plt.hist(np.log10(b_dist2),bins=30)
+
 #plt.hist(np.log10(b_dist2),density=True,bins=100)
 #plt.vlines(np.log10(1/(np.sqrt(2)-1)),0,1,linestyles=':')
+#%%
+def fb(b):
+    return b*pow(1+b**2, -3/2)
+fb=np.vectorize(fb)
+
+
+def Fb(b):
+    return 1-pow(1+b**2, -3/2)
+Fb=np.vectorize(Fb)
+
+b = np.geomspace(0.01,10,100)
+
+# factor de corrección:
+bmin = 0.1
+bmax = 10
+fac = 1 - Fb(0.1) - (1-Fb(10))
+fac = 1/fac
+
+brange_log = np.logspace(0.1, 10, 500)
+fbteo_log = fb(brange_log)
+
+blog = np.logspace(np.log10(bmin), np.log10(bmax), 30)
+
+ax[0,1].hist(b, bins=blin, density=True, color='thistle')
+ax[0,1].plot(brange_log, fbteo_log*fac, color='navy')
+ax[0,1].set_xscale('log')
+ax[0,1].set_xlabel(r'$\beta$', fontsize=14)
+ax[0,1].set_ylabel(r'1/N dN/dlog($\beta$),  f$_B(\beta)$', fontsize=14)
+
+b = np.geomspace(0.01,10,100)
+
+b_dist = b*(1+b**2)**(-3/2)
+plt.plot(np.log10(b),b_dist)
+
+
 # %%
 
 u=np.random.random(10000)
 
+#b_dist = np.tan(np.arccos(u))
 b_dist = np.log10(np.tan(np.arccos(u)))
-
+print('eta =',len(b_dist[b_dist>0.])/len(b_dist[b_dist<0.]))
 plt.hist(b_dist,bins=100,density=True)
-plt.vlines(np.log10(1/(np.sqrt(2)-1)),0,1,linestyles=':')
-# %%
-x = np.random.uniform(-10,10,1000)
-y = np.cos(np.arctan(x))
-plt.scatter(x,y)
 
-x = np.random.uniform(-10,10,1000)
-y = np.sin(np.arctan(x))
-plt.scatter(x,y)
+b_dist = np.sort(b_dist)
+b_dist = 10**b_dist
+plt.plot(np.log10(b_dist),b_dist*pow(1+b_dist**2, -3/2))
+#plt.vlines(np.log10(1/(np.sqrt(2)-1)),0,1,linestyles=':')
+#plt.xscale('log')
 
 # %%
 
-x = np.random.uniform(0,np.pi,1000)
-y = np.abs(np.cos(x))
-plt.scatter(x,y)
-
-y = np.sin(x)
-plt.scatter(x,y)
-#%%
-
-x = np.random.uniform(0,np.pi,1000)
-
-y = np.tan(x)
-plt.scatter(x,y)
-
-y = np.sin(x)/np.abs(np.cos(x))
-plt.scatter(x,y)
-
-y = np.abs(np.tan(x))
-plt.scatter(x,y)
 # %%

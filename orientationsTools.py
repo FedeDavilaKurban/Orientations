@@ -111,6 +111,7 @@ def JvsM(sec,gals,gxs,plot=True):
         plt.legend(loc=4)
         plt.savefig('../plots/JvsM_void{}.png'.format(nv),dpi=300)
 
+    del M, S
     return gals_h
 
 # ----------------------------------------------------------------------------------------------
