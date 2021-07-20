@@ -119,7 +119,7 @@ def readTNG_():
     from astropy.table import Table
 
     mass = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloMass'])                                                                                                                      
-    ids = np.where((np.log10(mass)>-2)&(np.log10(mass)<3.))
+    ids = np.where((np.log10(mass)>-1)&(np.log10(mass)<3.))
     mass = mass[ids]
 
     pos = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloPos'])[ids]
@@ -170,11 +170,14 @@ minradV=7.
 maxradV=0.
 s5=0
 
-rinner_i = np.float64(0.6)
-rinner_f = np.float64(1.5)
-rstep = np.float64(0.1)
-r1 = np.arange(rinner_i,rinner_f,rstep,dtype=np.float64)
-r2 = np.arange(rinner_i+rstep,rinner_f+rstep,rstep,dtype=np.float64)
+# rinner_i = np.float64(0.6)
+# rinner_f = np.float64(1.5)
+# rstep = np.float64(0.1)
+# r1 = np.arange(rinner_i,rinner_f,rstep,dtype=np.float64)
+# r2 = np.arange(rinner_i+rstep,rinner_f+rstep,rstep,dtype=np.float64)
+
+r1 = np.array([0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
+r2 = np.array([0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 
 for sec in [0,1,2,3,4,5,6,123,456]:
     print('sec=',sec)
@@ -228,7 +231,7 @@ for sec in [0,1,2,3,4,5,6,123,456]:
             #print(rrv)
             
             ascii.write(np.column_stack([beta]),\
-                        '../data/beta/-2/beta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
+                        '../data/beta/-1/beta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
                         .format(minradV,maxradV,rmin,rmax,sec,vtype),\
                         names=['beta'],\
                         overwrite=True)

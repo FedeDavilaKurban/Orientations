@@ -1,3 +1,4 @@
+
 #%%
 import sys
 import numpy as np
@@ -49,6 +50,19 @@ def get_gals(gxs,tree,units,voids,nv,rmin,rmax,sec,s5,jvsm_b,jvsm_m,vshell=False
     if vshell:
         return gals,vshell_mean 
     else: return gals
+
+def get_sigma5(gals):
+    """
+
+    """
+    import numpy as np
+
+    data = np.column_stack((gals['x'],gals['y'],gals['z']))
+    nearest_dist, nearest_ind = tree.query(data, k=6)  # k1 = identity
+    dists = nearest_dist[:, 5]                         # choose 5th neighbour
+    #inds = nearest_ind[:, 1]
+    sigma5 = 5./(np.pi*dists**2)
+    return sigma5
 
 def JvsM_(sec,gals,b,m,plot=True):
     """
@@ -127,7 +141,7 @@ def readTNG_():
     spin = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloSpin'])[ids]
     sp_n = np.sum(np.abs(spin)**2,axis=-1)**(1./2)
     
-    vel = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloVel'])[ids]
+    # vel = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloVel'])[ids]
 
     # sfr = il.groupcat.loadSubhalos(basePath,99,fields=['SubhaloSFR'])[ids]
     
@@ -139,12 +153,12 @@ def readTNG_():
     gxs = Table(np.column_stack([pos[:,0],pos[:,1],pos[:,2]\
                                 ,mass\
                                 ,spin,sp_n\
-                                ,vel[:,0],vel[:,1],vel[:,2]\
+                                #,vel[:,0],vel[:,1],vel[:,2]\
                                 #,gasmass,starmass,\
                                 ]),
-                names=['x','y','z','mass','spx','spy','spz','sp_n','xv','yv','zv'])#,'gasmass','starmass']) 
+                names=['x','y','z','mass','spx','spy','spz','sp_n'])#,'xv','yv','zv'])#,'gasmass','starmass']) 
 
-    del mass,pos,spin,sp_n,vel#,masstype,gasmass,starmass
+    del mass,pos,spin,sp_n#,vel#,masstype,gasmass,starmass
 
     return gxs
 
@@ -179,62 +193,31 @@ s5=0
 r1 = np.array([0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
 r2 = np.array([0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 
+
 for sec in [0,1,2,3,4,5,6,123,456]:
     print('sec=',sec)
     for vtype in ['a','r','s']:
         print('vtype=',vtype)
         for rmin,rmax in zip(r1,r2):
             print('rmin, rmax =',rmin,rmax)
+
             voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 
             nvs = range(len(voids))
-            vrad = []
-            vtra = []
 
-            r = []
-            rrv = []
-
+            sigma5 = []
             for nv in nvs:
-                # Posicion y radio del void
-                vx, vy, vz, vr = voids[nv]['x'], voids[nv]['y'], voids[nv]['z'], voids[nv]['r']
 
-                gals, vshell = get_gals(gxs,tree,units,voids,nv,rmin,rmax,sec,s5,jvsm_b,jvsm_m,vshell=True) 
-                # vshell son las componentes promedio de la velocidad 
-                # de todas las galaxias del shell (previo a la selección en por Spin-Masa)
+                #vx, vy, vz, vr = voids[nv]['x'], voids[nv]['y'], voids[nv]['z'], voids[nv]['r']
+                gals = get_gals(gxs,tree,units,voids,nv,rmin,rmax,sec,s5,jvsm_b,jvsm_m,vshell=False)
 
-                for g in gals:
+                sigma5.append( get_sigma5(gals) )
+            
+            sigma5 = np.concatenate(sigma5)
 
-                    gx, gy, gz = g['x'], g['y'], g['z']
-
-                    # A la velocidad de la galaxia le resto la "velocidad del shell" 
-                    gxv, gyv, gzv = g['xv']-vshell[0], g['yv']-vshell[1], g['zv']-vshell[2]
-
-                    gr = [gx-vx,gy-vy,gz-vz] #galaxy position from void center
-                    for axis in range(len(gr)):
-                        if gr[axis]<=-(rmax+.5)*vr: gr[axis]+=lbox
-                        if gr[axis]>= (rmax+.5)*vr: gr[axis]-=lbox
-
-                    r.append( np.linalg.norm(gr) )
-                    rrv.append( r[-1]/vr)
-                    r_versor = gr/r[-1] #radial direction from void center
-
-                    vrad.append( np.dot([gxv,gyv,gzv],r_versor) )
-
-                    v_norm_squared = gxv**2 + gyv**2 + gzv**2
-                    vrad_norm_squared = vrad[-1]**2
-                    vtrans_squared = v_norm_squared-vrad_norm_squared
-
-                    vtra.append( np.sqrt(vtrans_squared) )
-
-            vrad = np.array(vrad)
-            vtra = np.array(vtra)
-            r = np.array(r)
-            rrv = np.array(rrv)
-
-            ascii.write(np.column_stack([vrad,vtra]),\
-                        '../data/vel/-1/vel_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
+            ascii.write(np.column_stack([sigma5]),\
+                        '../data/sigma5/sigma5_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
                         .format(minradV,maxradV,rmin,rmax,sec,vtype),\
-                        names=['vrad','vtra'],\
+                        names=['sigma5'],\
                         overwrite=True)
-
 # %%
