@@ -179,7 +179,7 @@ s5=0
 r1 = np.array([0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
 r2 = np.array([0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 
-for sec in [0,1,2,3,4,5,6,123,456]:
+for sec in [14,36]:
     print('sec=',sec)
     for vtype in ['a','r','s']:
         print('vtype=',vtype)

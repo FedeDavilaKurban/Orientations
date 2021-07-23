@@ -600,7 +600,7 @@ r1 = np.arange(rinner_i,rinner_f,rstep,dtype=np.float64)
 r2 = np.arange(rinner_i+rstep,rinner_f+rstep,rstep,dtype=np.float64)
 
 
-for sec in [3,123]:
+for sec in [3]:
     print(sec)
 
     fig, axs = plt.subplots(2, 1, constrained_layout=True, sharex=True, sharey=True)
@@ -628,6 +628,7 @@ for sec in [3,123]:
                     .format(minradV,maxradV,rmin,rmax,sec,vtype))['vrad'].data
 
                 p50 = np.percentile(vrad,50)
+                print(p50)
                 
                 if vfilter=='hi': beta = beta[vrad>p50]
                 elif vfilter=='lo': beta = beta[vrad<p50]
@@ -671,10 +672,9 @@ for sec in [3,123]:
 
         ####################
 
-        if sec==3: 
-            title = 'H-H Galaxies'
-        elif sec==123: 
-            title = 'High Spin Galaxies'
+        if sec==3: title = 'H-H Galaxies'
+        elif sec==123: title = 'High Spin Galaxies'
+        elif sec==0: title = 'All Galaxies'
 
         for ax, y, yerr, in zip(axs,(yr,ys),(yr_err,ys_err)):
 
@@ -683,7 +683,7 @@ for sec in [3,123]:
 
             ax.hlines(0,x[0],x[-1],linestyles=':')
 
-            if vfilter=='hi': label='High '+r'$V_mathrm{rad}$'
+            if vfilter=='hi': label='High '+r'$V_\mathrm{rad}$'
             if vfilter=='lo': label='Low '+r'$V_\mathrm{rad}$'
             ax.errorbar(x,y,yerr=yerr,capsize=3,fmt='o-',ms=5,label=label)
 
@@ -692,12 +692,14 @@ for sec in [3,123]:
 
         axs[1].set_xlabel('R/Rv')
 
-        if sec==3: ytext=5
-        if sec==123: ytext=5.45
-        axs[0].text(1.25,5,'Rising Voids')
-        axs[1].text(1.25,5,'Shell Voids')
+        if sec==3: ytext=5.45
+        elif sec==123: ytext=5.
+        else: ytext=4.15
 
-        axs[0].legend(loc='upper left')
+        axs[0].text(1.25,ytext,'Rising Voids')
+        axs[1].text(1.25,ytext,'Shell Voids')
+
+        axs[0].legend(loc='upper left',framealpha=.6)
 
         axs[0].set_title(title)
         axs[0].set_xticks([.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
