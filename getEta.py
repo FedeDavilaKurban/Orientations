@@ -97,7 +97,7 @@ maxradV = 0.
 lowMcut = -1
 
 
-for sec in [14,36]:
+for sec in [14,36,123,456,3]:
     print(sec)
 
     
@@ -110,6 +110,8 @@ for sec in [14,36]:
         eta_random_mean = []
         eta_random_var = []
         eta_random_std = []
+        
+        n_gal=[]
 
         for rmin,rmax in zip(r1,r2):
             
@@ -118,7 +120,7 @@ for sec in [14,36]:
 
             N = len(beta)
             #print(N)
-
+            n_gal.append(N)
             x = np.log10(beta.data)
 
             # Obtain mean and var of eta with Bootstrap
@@ -145,9 +147,9 @@ for sec in [14,36]:
             eta_random_var.append( np.var(eta_random,ddof=1) )
             eta_random_std.append( np.std(eta_random,ddof=1))#/np.sqrt(len(eta_random)) )
 
-        ascii.write(np.column_stack([eta,eta_std,eta_random_mean,eta_random_std,r1,r2]),\
+        ascii.write(np.column_stack([eta,eta_std,eta_random_mean,eta_random_std,r1,r2,n_gal]),\
             '../data/eta/eta_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
             .format(minradV,maxradV,sec,vtype),\
-            names=['eta','eta_std','eta_random_mean','eta_random_std','rmin','rmax'],\
+            names=['eta','eta_std','eta_random_mean','eta_random_std','rmin','rmax','N'],\
             overwrite=True)
 # %%

@@ -229,7 +229,7 @@ x_step = (x[0]+x[1])/2
 plt.scatter(x[:-1]+x_step,y)
 plt.ylabel('Vrad (km/s)')
 plt.xlabel('R/Rv')
-plt.savefig('../plots/')
+plt.savefig('../plots/vrad_vs_r.jpg')
 
 # Radio "dinámico" = Radio correspondiente a Vmax
 rdin = x[np.where(y==np.max(y[15:]))][0]+x_step

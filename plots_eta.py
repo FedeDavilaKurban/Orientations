@@ -9,7 +9,6 @@ from orientationsTools import *
 import random
 from config import writePath, units
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import axes3d
 #%%
 
 minradV = 7.
@@ -162,9 +161,8 @@ for sec in [14,36]:
     plt.savefig('../plots/eta_vs_r/Eta_sec{}.jpg'.format(sec))
 # %%
 """
-3rd version -- (eta-eta0)/sigma(eta)
+3rd version -- (eta-eta0)/sigma(eta) vtype r y s
 """
-
 minradV = 7.
 maxradV = 0.
 
@@ -179,7 +177,7 @@ fig, axs = plt.subplots(2, 1, constrained_layout=True, sharex=True, sharey=False
 for sec in [14,36]:
 
     if sec==14: label = "Low Mass"
-    if sec==46: label = "High Mass"
+    if sec==36: label = "High Mass"
 
     if sec==1: title='High Spin - Low Mass Galaxies'
     elif sec==3: title='High Spin - High Mass Galaxies'
@@ -235,6 +233,89 @@ axs[1].text(1.25,axs[0].get_ylim()[1]*.9,'Shell Voids')
 
 axs[0].legend(loc='upper left')
 
-#plt.savefig('../plots/eta_vs_r/Eta_sec{}.jpg'.format(sec))
+plt.savefig('../plots/eta_vs_r/Eta_mass.jpg'.format(sec))
 
 # %%
+"""
+3rd version -- (eta-eta0)/sigma(eta) vtype all
+"""
+import seaborn as sns
+colors = sns.color_palette()
+blue, oran = colors[0], colors[1]
+
+minradV = 7.
+maxradV = 0.
+vtype = 'a'
+
+lowMcut = -1
+
+
+plt.rcParams['figure.figsize'] = (9, 6)
+plt.rcParams['font.size'] = 15
+
+#fig, axs = plt.subplots(2, 1, constrained_layout=True, sharex=True, sharey=False)
+
+plt.fill_between(x, -1, 1, alpha=.025, color='k')
+plt.fill_between(x, -3, 3, alpha=.03, color='k')
+
+plt.text(1.2,4.45,'All Voids')
+
+for sec in [1,2,3,4,5,6]:
+
+    if sec==14: label = "Low Mass"
+    if sec==36: label = "High Mass"
+    if sec==123: label = 'High Spin'
+    if sec==456: label = 'Low Spin'
+
+    if sec==1: 
+        label = 'H-L Gxs'
+        c = blue
+        fmt = 'x:'
+    if sec==2: 
+        label = 'H-I Gxs'
+        c = blue
+        fmt = '^--'
+    if sec==3: 
+        label = 'H-H Gxs'
+        c = blue
+        fmt = 'o-'
+    if sec==4: 
+        label = 'L-L Gxs'
+        c = oran
+        fmt = 'x:'
+    if sec==5: 
+        label = 'L-I Gxs'
+        c = oran
+        fmt = '^--'
+    if sec==6: 
+        label = 'L-H Gxs'
+        c = oran
+        fmt = 'o-'
+
+
+    etaTable = ascii.read('../data/eta/eta_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(minradV,maxradV,sec,vtype),\
+            names=['eta','eta_std','eta_random_mean','eta_random_std','rmin','rmax'])
+            
+    yran_mean = etaTable['eta_random_mean'].data
+    yran_err = etaTable['eta_random_std'].data
+
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+
+    x = (etaTable['rmin'].data+etaTable['rmax'].data)/2
+    
+    plt.hlines(0,x[0],x[-1],linestyles=':')
+
+    plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=5,color=c)
+
+    plt.ylabel(r'$\eta$')
+
+
+plt.xticks(np.array([0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]))
+plt.xlabel('R/Rv')
+
+plt.legend(loc='upper left',ncol=2)
+
+plt.savefig('../plots/eta_vs_r/Eta_allsections_allvoids.jpg'.format(sec))
+#%%

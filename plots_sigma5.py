@@ -583,5 +583,5 @@ for sfilter in ['hi','lo']:
         axs[0].set_xticks([.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
         axs[1].set_xticks([.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
 
-    plt.savefig('../plots/sigma5/Eta_Sigma5_sec{}_v3.jpg'.format(sec))
+    #plt.savefig('../plots/sigma5/Eta_Sigma5_sec{}_v3.jpg'.format(sec))
 # %%
