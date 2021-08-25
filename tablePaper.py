@@ -88,19 +88,4 @@ print(tabulate(info, headers='keys'))
 
 
 
-# for vtype in ['a','r','s']:
-#     for sfilter in ['hi','lo']:
-#         for sec in [0,123,456,14,36,1,3,4,6]:
-
-#             filename = '../data/eta/eta_sfilter{}_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
-#                 .format(sfilter,minradV,maxradV,sec,vtype)
-#             etaTable = ascii.read(filename)
-
-#             eta0 = 1./(np.sqrt(2)-1)
-#             eta_ran_std = np.sqrt(28.1421/etaTable['N'].data)
-
-#             zeta = (etaTable['eta'].data-eta0)/eta_ran_std
-#             zeta_std = etaTable['eta_std'].data/eta_ran_std
-
-
 # %%
