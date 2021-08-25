@@ -147,10 +147,11 @@ for col in ['x','y','z']:
 lbox /= 1000.
 
 tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsize=lbox)
+
 #%%
 import seaborn as sns
 
-plt.rcParams['figure.figsize'] = (8, 8)
+plt.rcParams['figure.figsize'] = (10, 8)
 plt.rcParams['font.size'] = 15
 fig, axs = plt.subplots(3, 1, constrained_layout=True, sharex=True, sharey=True)
 

@@ -178,10 +178,13 @@ s5=0
 
 r1 = np.array([0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
 r2 = np.array([0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5])
+r1 = [.9]
+r2 = [1.4]
 
-for sec in [14,36]:
+
+for sec in [0,123,456]:
     print('sec=',sec)
-    for vtype in ['a','r','s']:
+    for vtype in ['r','s','a']:
         print('vtype=',vtype)
         for rmin,rmax in zip(r1,r2):
             print('rmin, rmax =',rmin,rmax)

@@ -97,7 +97,7 @@ maxradV = 0.
 lowMcut = -1
 
 
-for sec in [14,36,123,456,3]:
+for sec in [0,123,456,14,36,1,3,4,6]:
     print(sec)
 
     

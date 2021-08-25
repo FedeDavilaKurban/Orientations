@@ -77,13 +77,20 @@ maxradV = 0.
 
 lowMcut = -1
 
-
-plt.rcParams['figure.figsize'] = (15, 13)
+colors = sns.color_palette()
+plt.rcParams['figure.figsize'] = (17, 13)
 plt.rcParams['font.size'] = 15
 
 fig, axs = plt.subplots(4, 3, constrained_layout=True, sharex=True, sharey=True)
+axs[0,0].set_ylim([-3,7])
 
-for ax_,secs in zip(axs[:2],([36,14],[123,456])):
+for ax_ in axs:
+    for ax in ax_:
+            ax.hlines(0,x[0],x[-1],linestyles=':')
+            ax.fill_between(x, -1, 1, alpha=.035, color='k')
+            ax.fill_between(x, -3, 3, alpha=.035, color='k')
+
+for ax_,secs in zip(axs[:2],([25,36,14],[123,456])):
 
     for ax, vtype in zip(ax_,['a','r','s']):
 
@@ -91,6 +98,7 @@ for ax_,secs in zip(axs[:2],([36,14],[123,456])):
 
             if sec==14: label = "Low Mass"
             if sec==36: label = "High Mass"
+            if sec==25: label = "Intermediate Mass"
             if sec==456: label = "Low Spin"
             if sec==123: label = "High Spin"
 
@@ -106,112 +114,43 @@ for ax_,secs in zip(axs[:2],([36,14],[123,456])):
             yerr = etaTable['eta_std'].data/yran_err
 
             x = (etaTable['rmin'].data+etaTable['rmax'].data)/2
-            
-            ax.hlines(0,x[0],x[-1],linestyles=':')
-            ax.fill_between(x, -1, 1, alpha=.035, color='k')
-            ax.fill_between(x, -3, 3, alpha=.035, color='k')
 
-            ax.errorbar(x,y,yerr=yerr,label=label,fmt='o-',capsize=3,ms=5)
+            if sec==25:
+                ax.errorbar(x,y,yerr=yerr,label=label,fmt='--',capsize=3,ms=5,\
+                    color='k')
+            else: ax.errorbar(x,y,yerr=yerr,label=label,fmt='o-',capsize=3,ms=5)
 
             ax.set_xticks(np.array([0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]))
 
-    ax_[0].legend(loc='upper left')
+    ax_[0].legend(loc='upper left',framealpha=.4)
     ax_[0].set_ylabel(r'$\zeta$')
 
 ###########################################################
 r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
 r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
+x = (r1+r2)/2
 
 ax_ = axs[2]
 print('Sigma5')
 for sfilter in ['hi','lo']:
-    print(sfilter)
 
     for sec in [0]:
-        print(sec)
-        eta = []
-        eta_std = []
 
-        eta_random_mean = []
-        eta_random_std = []
+        for vtype,ax in zip(['a','r','s'],ax_):
+
+            etaT = ascii.read('../data/eta/eta_sfilter{}_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+                                    .format(sfilter,minradV,maxradV,sec,vtype))
         
-        for vtype in ['a','r','s']:
-            print(vtype)
-            
-            n_gal = []
-
-            for rmin,rmax in zip(r1,r2):
-                
-                beta = ascii.read('../data/beta/-1/beta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
-                                    .format(minradV,maxradV,rmin,rmax,sec,vtype))['beta']
-
-                sigma5 = ascii.read('../data/sigma5/sigma5_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
-                    .format(minradV,maxradV,rmin,rmax,sec,vtype),names=['sigma5'])['sigma5'].data
-
-                p50 = np.percentile(sigma5,50)
-                
-                if sfilter=='hi': beta = beta[sigma5>p50]
-                elif sfilter=='lo': beta = beta[sigma5<p50]
-
-                x = np.log10(beta.data)
-
-                eta_, eta_std_ = get_eta_bs(x)
-    
-                eta.append( eta_ )
-                eta_std.append( eta_std_ )#/np.sqrt(len(bs_eta)) )
-
-                # Obtain mean and var of control samples
-                N = len(beta)
-                n_gal.append(N)
-
-                eta_random = get_eta_random(1000,N) # 1st parameter will be len(eta_random)
-                eta_random_mean.append( np.mean(eta_random) )
-                #eta_random_var.append( np.var(eta_random,ddof=1) )
-                eta_random_std.append( np.std(eta_random,ddof=1))#/np.sqrt(len(eta_random)) )
-
-            print('N =',n_gal)
-
-        nbins = len(r1)
-        x = (r1+r2)/2
-
-        ####################
-        eta_random_mean = np.array(eta_random_mean)
-        eta_random_std = np.array(eta_random_std)
-
-        yran_mean_a = eta_random_mean[:nbins]
-        yran_mean_r = eta_random_mean[nbins:2*nbins]
-        yran_mean_s = eta_random_mean[-nbins:]
-
-        yran_std_a = eta_random_std[:nbins]
-        yran_std_r = eta_random_std[nbins:2*nbins]
-        yran_std_s = eta_random_std[-nbins:]
-        ####################
-
-        ya = (eta[:nbins]-yran_mean_a)/yran_std_a
-        yr = (eta[nbins:2*nbins]-yran_mean_r)/yran_std_r
-        ys = (eta[-nbins:]-yran_mean_s)/yran_std_s
-
-        ya_err = eta_std[:nbins]/yran_std_a
-        yr_err = eta_std[nbins:2*nbins]/yran_std_r
-        ys_err = eta_std[-nbins:]/yran_std_s
-
-        ####################
-
-
-        for ax, y, yerr in zip(ax_,(ya,yr,ys),(ya_err,yr_err,ys_err)):
-
-            ax.hlines(0,x[0],x[-1],linestyles=':')
-
-            ax.fill_between(x, -1, 1, alpha=.035, color='k')
-            ax.fill_between(x, -3, 3, alpha=.035, color='k')
-
+            eta0 = 1./(np.sqrt(2)-1)
+            eta_ran_std = np.sqrt(28.1421/etaT['N'].data)
+            y = (etaT['eta']-eta0)/eta_ran_std
 
             if sfilter=='hi': label='High '+r'$\Sigma_5$'
             if sfilter=='lo': label='Low '+r'$\Sigma_5$'
 
             ax.errorbar(x,y,yerr=yerr,capsize=3,fmt='o-',ms=5,label=label)
 
-ax_[0].legend(loc='upper left')
+ax_[0].legend(loc='upper left',framealpha=.4)
 ax_[0].set_ylabel(r'$\zeta$')
 ###########################################################
 
@@ -220,102 +159,124 @@ ax_[0].set_ylabel(r'$\zeta$')
 ax_ = axs[3]
 print('Vrad')
 for vfilter in ['hi','lo']:
-    print(vfilter)
 
     for sec in [0]:
-        print(sec)
-        eta = []
-        eta_std = []
 
-        eta_random_mean = []
-        eta_random_std = []
-        
-        for vtype in ['a','r','s']:
-            print(vtype)
+        for vtype,ax in zip(['a','r','s'],ax_):
             
-            n_gal = []
+            etaT = ascii.read('../data/eta/eta_vfilter{}_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+                                    .format(vfilter,minradV,maxradV,sec,vtype))
+        
+            eta0 = 1./(np.sqrt(2)-1)
+            eta_ran_std = np.sqrt(28.1421/etaT['N'].data)
+            y = (etaT['eta']-eta0)/eta_ran_std
 
-            for rmin,rmax in zip(r1,r2):
-                
-                beta = ascii.read('../data/beta/-1/beta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
-                                    .format(minradV,maxradV,rmin,rmax,sec,vtype))['beta']
-
-                vrad = ascii.read('../data/vel/-1/vel_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
-                    .format(minradV,maxradV,rmin,rmax,sec,vtype))['vrad'].data
-
-                p50 = np.percentile(vrad,50)
-                
-                if vfilter=='hi': beta = beta[vrad>p50]
-                elif vfilter=='lo': beta = beta[vrad<p50]
-
-                x = np.log10(beta.data)
-
-                eta_, eta_std_ = get_eta_bs(x)
-    
-                eta.append( eta_ )
-                eta_std.append( eta_std_ )#/np.sqrt(len(bs_eta)) )
-
-                # Obtain mean and var of control samples
-                N = len(beta)
-                n_gal.append(N)
-
-                eta_random = get_eta_random(1000,N) # 1st parameter will be len(eta_random)
-                eta_random_mean.append( np.mean(eta_random) )
-                #eta_random_var.append( np.var(eta_random,ddof=1) )
-                eta_random_std.append( np.std(eta_random,ddof=1))#/np.sqrt(len(eta_random)) )
-
-            print('N =',n_gal)
-
-        nbins = len(r1)
-        x = (r1+r2)/2
-
-        ####################
-        eta_random_mean = np.array(eta_random_mean)
-        eta_random_std = np.array(eta_random_std)
-
-        yran_mean_a = eta_random_mean[:nbins]
-        yran_mean_r = eta_random_mean[nbins:2*nbins]
-        yran_mean_s = eta_random_mean[-nbins:]
-
-        yran_std_a = eta_random_std[:nbins]
-        yran_std_r = eta_random_std[nbins:2*nbins]
-        yran_std_s = eta_random_std[-nbins:]
-        ####################
-
-        ya = (eta[:nbins]-yran_mean_a)/yran_std_a
-        yr = (eta[nbins:2*nbins]-yran_mean_r)/yran_std_r
-        ys = (eta[-nbins:]-yran_mean_s)/yran_std_s
-
-        ya_err = eta_std[:nbins]/yran_std_a
-        yr_err = eta_std[nbins:2*nbins]/yran_std_r
-        ys_err = eta_std[-nbins:]/yran_std_s
-
-        ####################
-
-
-        for ax, y, yerr in zip(ax_,(ya,yr,ys),(ya_err,yr_err,ys_err)):
-
-            ax.hlines(0,x[0],x[-1],linestyles=':')
-
-            ax.fill_between(x, -1, 1, alpha=.035, color='k')
-            ax.fill_between(x, -3, 3, alpha=.035, color='k')
-
+            
             if vfilter=='hi': label='High '+r'$\mathrm{V_{rad}}$'
             if vfilter=='lo': label='Low '+r'$\mathrm{V_{rad}}$'
 
             ax.errorbar(x,y,yerr=yerr,capsize=3,fmt='o-',ms=5,label=label)
 
-ax_[0].legend(loc='upper left')
+ax_[0].legend(loc='upper left',framealpha=.4)
 ax_[0].set_ylabel(r'$\zeta$')
 
 ###########################################################
 for ax in axs[3]:
     ax.set_xlabel('R/Rv')
 
+#axs[0,0].set_ylim([-3,6])
 axs[0,0].set_title('All Voids')
 axs[0,1].set_title('R-Voids')
 axs[0,2].set_title('S-Voids')
-plt.tight_layout()
+#plt.tight_layout()
 plt.savefig('../plots/allvoidsallgalaxies_results.jpg')
-#%%
 
+#%%
+plt.rcParams['figure.figsize'] = (8, 12)
+plt.rcParams['font.size'] = 15
+
+minradV, maxradV = 7.0, 0.0
+vtype = 'a'
+r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
+r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
+x = (r1+r2)/2
+
+fig, axs = plt.subplots(3, 1, constrained_layout=True, sharex=True, sharey=True)
+
+for vtype,ax in zip(['a','r','s'],axs):
+
+    ax.fill_between(x, -1, 1, alpha=.05, color='k')
+    ax.fill_between(x, -3, 3, alpha=.05, color='k')
+
+
+    for sec in [3,1]:
+
+        eta=[]
+        eta_std=[]
+        eta_random_mean=[]
+        eta_random_std=[]
+        n_gal=[]
+
+        for rmin,rmax in zip(r1,r2):
+
+            beta = ascii.read('../data/beta/-1/beta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
+                                .format(minradV,maxradV,rmin,rmax,sec,vtype))['beta']
+
+            vrad = ascii.read('../data/vel/-1/vel_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
+                .format(minradV,maxradV,rmin,rmax,sec,vtype))['vrad'].data
+
+            sigma5 = ascii.read('../data/sigma5/sigma5_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
+                            .format(minradV,maxradV,rmin,rmax,sec,vtype),names=['sigma5'])['sigma5'].data
+
+            vp50 = np.percentile(vrad,50)
+            sp50 = np.percentile(sigma5,50)
+
+            if sec==3:
+                beta = beta[vrad<vp50]
+                #sigma5 = sigma5[vrad<vp50]
+
+                #beta = beta[sigma5<sp50]
+                label = 'Low {}, H-H Galaxies'.format(r'$\mathrm{V_{rad}}$')
+
+            if sec==1:
+                beta = beta[vrad>vp50]
+                #sigma5 = sigma5[vrad>vp50]
+
+                #beta = beta[sigma5>sp50]
+                label = 'High {}, L-L Galaxies'.format(r'$\mathrm{V_{rad}}$')
+
+            logb = np.log10(beta.data)
+
+            eta_, eta_std_ = get_eta_bs(logb)
+
+            eta.append( eta_ )
+            eta_std.append( eta_std_ )
+
+            N = len(beta)
+            n_gal.append(N)
+
+            eta_random_mean.append( 1./(np.sqrt(2)-1) )
+            eta_random_std.append( np.sqrt(28.1421/N) )
+
+        eta=np.array(eta)
+        eta_std=np.array(eta_std)
+        eta_random_mean=np.array(eta_random_mean)
+        eta_random_std=np.array(eta_random_std)
+
+        y = (eta-eta_random_mean)/eta_random_std
+        yerr = eta_std/eta_random_std
+
+        ax.errorbar(x,y,yerr=yerr,capsize=3,fmt='o-',ms=5,label=label)
+
+    ax.set_xlabel('R/Rv')
+    ax.legend(loc='upper left',framealpha=.4)
+    ax.set_ylabel(r'$\zeta$')
+
+
+axs[0].set_title('All Voids')
+axs[1].set_title('R Voids')
+axs[2].set_title('S Voids')
+
+plt.savefig('../bestsignal.png')
+
+# %%
