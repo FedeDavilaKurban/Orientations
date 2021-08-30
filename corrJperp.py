@@ -161,10 +161,20 @@ tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsiz
 minradV=7.
 maxradV=0.
 s5=0
-sec = 3
+sec = 0
 
 r1 = [.9]
 r2 = [1.4]
+
+prll = []
+perp = []
+
+r = []
+rrv = []
+
+r_versor = []
+phi = []
+tita = []
 
 
 for vtype in ['r']:
@@ -175,56 +185,75 @@ for vtype in ['r']:
         voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 
         nvs = range(len(voids))
-        nvs=[0]
-        prll = []
-        perp = []
-
-        r = []
-        rrv = []
-
-        r_versor = []
-        phi = []
-        tita = []
+        #nvs=[0]
 
         for nv in nvs:
 
             vx, vy, vz, vr = voids[nv]['x'], voids[nv]['y'], voids[nv]['z'], voids[nv]['r']
             gals = get_gals(gxs,tree,units,voids,nv,rmin,rmax,sec,s5,jvsm_b,jvsm_m,vshell=False)
 
-            for g in gals:
+            # for g in gals:
 
-                gx, gy, gz = g['x'], g['y'], g['z']
+            #     gx, gy, gz = g['x'], g['y'], g['z']
 
-                sx, sy, sz, sn = g['spx'], g['spy'], g['spz'], g['sp_n']
+            #     sx, sy, sz, sn = g['spx'], g['spy'], g['spz'], g['sp_n']
 
-                s = [sx,sy,sz] #spin vector
+            #     s = [sx,sy,sz] #spin vector
 
-                gr = [gx-vx,gy-vy,gz-vz] #galaxy position from void center
-                for axis in range(len(gr)):
-                    if gr[axis]<=-(rmax+.5)*vr: gr[axis]+=lbox
-                    if gr[axis]>= (rmax+.5)*vr: gr[axis]-=lbox
+            #     gr = [gx-vx,gy-vy,gz-vz] #galaxy position from void center
+            #     for axis in range(len(gr)):
+            #         if gr[axis]<=-(rmax+.5)*vr: gr[axis]+=lbox
+            #         if gr[axis]>= (rmax+.5)*vr: gr[axis]-=lbox
 
-                r.append( np.linalg.norm(gr) )
-                rrv.append(r[-1]/vr)
-                r_versor.append( gr/r[-1] ) #radial direction from void center
+            #     r.append( np.linalg.norm(gr) )
+            #     rrv.append(r[-1]/vr)
+            #     r_versor.append( gr/r[-1] ) #radial direction from void center
 
-                prll.append( np.dot(r_versor[-1],s)*r_versor[-1]  )
-                perp.append( s - prll[-1] ) 
+            #     prll.append( np.dot(r_versor[-1],s)*r_versor[-1]  )
+            #     perp.append( s - prll[-1] ) 
 
-                tita.append( np.pi/2-np.arccos(gz/np.sqrt(gx**2+gy**2+gz**2)) )
-                phi.append( np.arctan2(gy, gx) )
+            #     tita.append( np.pi/2-np.arccos(gr[2]/np.sqrt(gr[0]**2+gr[1]**2+gr[2]**2)) )
+            #     phi.append( np.arctan2(gr[1], gr[0]) )
+
+            gx, gy, gz = gals['x'], gals['y'], gals['z']
+
+            sx, sy, sz, sn = gals['spx'], gals['spy'], gals['spz'], gals['sp_n']
+
+            s = [sx.data,sy.data,sz.data] #spin vector
+
+            gr = [gx.data-vx.data,gy.data-vy.data,gz.data-vz.data] #galaxy position from void center
+            for i in range(len(gr)):
+                for j in range(len(gr[i])):
+                    if gr[i][j]<=-(rmax+.5)*vr: gr[i][j]+=lbox
+                    if gr[i][j]>= (rmax+.5)*vr: gr[i][j]-=lbox
+
+            r.append( np.linalg.norm(gr,axis=0) )
+            rrv.append(r[-1]/vr)
+            r_versor.append( gr/r[-1] ) #radial direction from void center
+
+            prll.append( np.multiply(r_versor[-1], s).sum(0)*r_versor[-1]  )
+            perp.append( s - prll[-1] ) 
+
+            tita.append( np.pi/2-np.arccos(gr[2]/np.sqrt(gr[0]**2+gr[1]**2+gr[2]**2)) )
+            phi.append( np.arctan2(gr[1], gr[0]) )
 
 
-        r = np.array(r)
-        rrv = np.array(rrv)
-        r_versor = np.array(r_versor)
+        # r = np.array(r)
+        # rrv = np.array(rrv)
+        # r_versor = np.array(r_versor)
 
-        perp =  np.array(perp)
-        prll = np.array(prll)
+        # perp =  np.array(perp)
+        # prll = np.array(prll)
 
-        tita = np.array(tita)
-        phi = np.array(phi)
+        # tita = np.array(tita)
+        # phi = np.array(phi)
 
+#%%
+#Para ver cuantas gxs hay en c/void
+#s=0
+for p in phi:
+    s=len(p)
+    print(s)
 
 #%%
 # # Build new basis
@@ -247,11 +276,41 @@ for vtype in ['r']:
 # print(vec_new) #Estoy buscando que la tercera componente me de 0
 
 #%%
+nv=46
+print(len(phi[nv]))
+
 fig = plt.figure(figsize=(10,10))
 ax = fig.add_subplot(111, projection='mollweide')
-ax.scatter(phi,tita,s=1)
+ax.grid(True)
+ax.scatter(phi[nv],tita[nv],s=4)
 #ax.quiver(phi,tita,perp[0][0],perp[0][1],color='k',width=.005)
 
+plt.show()
+# %%
+
+vrad = ascii.read('../data/vel/-1/vel_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
+    .format(minradV,maxradV,rmin,rmax,sec,vtype))['vrad'].data
+vrad = vrad[len(phi[nv-1]):len(phi[nv-1])+len(phi[nv])]
+vmed = np.median(vrad)
+print(vmed)
+#%%
+
+fig = plt.figure(figsize=(10,6))
+ax = fig.add_subplot(111, projection='mollweide')
+ax.grid(True)
+sc=ax.scatter(phi[nv],tita[nv],s=2,c=vrad,cmap='plasma_r')
+plt.colorbar(sc)
+plt.show()
+
+#%%
+phi_v = phi[nv][vrad<vmed]
+tita_v = tita[nv][vrad<vmed]
+
+fig = plt.figure(figsize=(10,6))
+ax = fig.add_subplot(111, projection='mollweide')
+ax.grid(True)
+sc=ax.scatter(phi_v,tita_v,s=2,c=vrad[vrad<vmed],cmap='plasma_r')
+plt.colorbar(sc)
 plt.show()
 
 # %%
