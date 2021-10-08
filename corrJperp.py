@@ -276,7 +276,7 @@ for p in phi:
 # print(vec_new) #Estoy buscando que la tercera componente me de 0
 
 #%%
-nv=46
+nv=27
 print(len(phi[nv]))
 
 fig = plt.figure(figsize=(10,10))
@@ -309,8 +309,22 @@ tita_v = tita[nv][vrad<vmed]
 fig = plt.figure(figsize=(10,6))
 ax = fig.add_subplot(111, projection='mollweide')
 ax.grid(True)
-sc=ax.scatter(phi_v,tita_v,s=2,c=vrad[vrad<vmed],cmap='plasma_r')
+sc=ax.scatter(phi_v,tita_v,s=5,c=vrad[vrad<vmed],cmap='plasma_r',alpha=.6)
 plt.colorbar(sc)
+plt.show()
+
+    # %%
+phi_1 = phi[nv][vrad<vmed]
+tita_1 = tita[nv][vrad<vmed]
+
+phi_2 = phi[nv][vrad>vmed]
+tita_2 = tita[nv][vrad>vmed]
+
+fig = plt.figure(figsize=(10,6))
+ax = fig.add_subplot(111, projection='mollweide')
+ax.grid(True)
+ax.scatter(phi_1,tita_1,s=8,color='r',alpha=.7)
+ax.scatter(phi_2,tita_2,s=8,color='b',alpha=.7)
 plt.show()
 
 # %%

@@ -72,15 +72,15 @@ def get_eta_bs(x,Nbs=1000):
 #%%
 
 minradV, maxradV = 7.0, 0.0
-r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
-r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
+# r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
+# r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 r1 = [.9]
 r2 = [1.4]
 
 for sfilter in ['hi','lo']:
     print(sfilter)
 
-    for sec in [0,123,456,1,3,4,6,14,36]:
+    for sec in [0,123,456,14,36,4,6,1,3]:
         print(sec)
         
         for vtype in ['a','r','s']:
@@ -99,7 +99,7 @@ for sfilter in ['hi','lo']:
                     .format(minradV,maxradV,rmin,rmax,sec,vtype),names=['sigma5'])['sigma5'].data
 
                 p50 = np.percentile(sigma5,50)
-                
+                print('p50 = ',p50)
                 if sfilter=='hi': 
                     #p67 = np.percentile(sigma5,67)
                     beta = beta[sigma5>p50]
@@ -116,8 +116,13 @@ for sfilter in ['hi','lo']:
                 eta.append( eta_ )
                 eta_std.append( eta_std_ )#/np.sqrt(len(bs_eta)) )
 
+            if r1==[.9]: 
+                filename = '../data/eta/eta_sfilter{}_minradV{}_maxradV{}_sec{}_vtype{}_forTable.txt'
+            else: 
+                filename = '../data/eta/eta_sfilter{}_minradV{}_maxradV{}_sec{}_vtype{}.txt'
+
             ascii.write(np.column_stack([eta,eta_std,r1,r2,n_gal]),\
-            '../data/eta/eta_sfilter{}_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            filename\
             .format(sfilter,minradV,maxradV,sec,vtype),\
             names=['eta','eta_std','rmin','rmax','N'],\
             overwrite=True)

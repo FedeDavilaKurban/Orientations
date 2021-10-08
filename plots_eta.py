@@ -253,10 +253,10 @@ lowMcut = -1
 plt.rcParams['figure.figsize'] = (9, 6)
 plt.rcParams['font.size'] = 15
 
-#fig, axs = plt.subplots(2, 1, constrained_layout=True, sharex=True, sharey=False)
+fig, axs = plt.subplots(2, 1, constrained_layout=True, sharex=True, sharey=False)
 
-plt.fill_between(x, -1, 1, alpha=.025, color='k')
-plt.fill_between(x, -3, 3, alpha=.03, color='k')
+#plt.fill_between(x, -1, 1, alpha=.025, color='k')
+#plt.fill_between(x, -3, 3, alpha=.03, color='k')
 
 plt.text(1.2,4.45,'All Voids')
 
@@ -317,5 +317,50 @@ plt.xlabel('R/Rv')
 
 plt.legend(loc='upper left',ncol=2)
 
-plt.savefig('../plots/eta_vs_r/Eta_allsections_allvoids.jpg'.format(sec))
+#plt.savefig('../plots/eta_vs_r/Eta_allsections_allvoids.jpg'.format(sec))
 #%%
+
+import seaborn as sns
+#colors = sns.color_palette()
+#blue, oran = colors[0], colors[1]
+
+minradV = 7.
+maxradV = 0.
+sec=0
+
+plt.rcParams['figure.figsize'] = (9, 6)
+plt.rcParams['font.size'] = 15
+
+r1=[.8,.9,1.,1.1,1.2,1.3,1.4]
+r2=[.9,1.,1.1,1.2,1.3,1.4,1.5]
+x = (np.array(r1)+np.array(r2))/2
+
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.025, color='k')
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.03, color='k')
+plt.hlines(0,.8,1.5,linestyles=':')
+
+for vtype, label, fmt in zip(['a','r','s'],\
+                            ['All Voids', 'R-Voids', 'S-Voids'],\
+                            ['o-','x--','^:']):
+
+    etaTable = ascii.read('../data/eta/eta_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(minradV,maxradV,sec,vtype),\
+            names=['eta','eta_std','eta_random_mean','eta_random_std','rmin','rmax','N'])
+
+    yran_mean = etaTable['eta_random_mean'].data
+    yran_err = etaTable['eta_random_std'].data
+
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+
+    
+
+    plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='k')
+
+plt.ylabel(r'$\zeta$')
+plt.xlabel(r'$\mathrm{r/R_v}$')
+plt.xlim([.8,1.5])
+plt.legend()
+
+plt.savefig('../plots/eta_nosubsample.pdf')
+# %%

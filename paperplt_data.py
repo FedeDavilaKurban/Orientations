@@ -29,18 +29,18 @@ for i in range(len(voids)):
 	N.append(len(tree.query_ball_point([x,y,z],r)))
 
 #%%
-fig , ax = plt.subplots(nrows = 2, ncols = 2, sharex=False, sharey=False, figsize=(10,8))
+fig , ax = plt.subplots(nrows = 2, ncols = 1, sharex=False, sharey=False, figsize=(10,8))
 
-#Ngal vs R
-ax[0][0].scatter(voids['r'],np.log10(N))
-ax[0][0].set_xlabel('Void Radius')
-ax[0][0].set_ylabel(r'$\mathrm{log}_{10}N_{gal}$')
-ax[0][0].set_xscale('log')
+# #Ngal vs R
+# ax[0][0].scatter(voids['r'],np.log10(N))
+# ax[0][0].set_xlabel('Void Radius')
+# ax[0][0].set_ylabel(r'$\mathrm{log}_{10}N_{gal}$')
+# ax[0][0].set_xscale('log')
 
-#Histogram Void Radius
-ax[0][1].hist(voids['r'],bins=30,cumulative=-1)
-ax[0][1].set_xlabel('Void Radius (Mpc)')
-ax[0][1].set_yscale('log')
+# #Histogram Void Radius
+# ax[0][1].hist(voids['r'],bins=30,cumulative=-1)
+# ax[0][1].set_xlabel('Void Radius (Mpc)')
+# ax[0][1].set_yscale('log')
 
 
 minradV = 7.
@@ -51,8 +51,8 @@ for nv in range(len(voids[voids['r']>=minradV])):
     ax[1][0].plot(profile['r'],profile['rho'],c='C0',alpha=0.2)
 
 
-ax[1][0].set_ylabel(r'$\rho/\bar{\rho}-1$')
-ax[1][0].set_xlabel('r (Mpc)')
+ax[0][0].set_ylabel(r'$\rho/\bar{\rho}-1$')
+ax[0][0].set_xlabel('r (Mpc)')
 
 xv,yv,zv,rv = voids[voids['r']>=8.]['x','y','z','r'][0]
 
@@ -73,9 +73,9 @@ filter = np.where(np.log10(gals['mass'])<=2)
 x = np.log10(gals['mass'])
 y = np.log10(gals['sp_n'])
 
-ax[1][1].scatter(x[filter],y[filter],s=5)
-h = ax[1][1].hist2d(x[filter], y[filter], bins=50, norm=LogNorm(), cmap=plt.cm.Blues, cmin=3)
-fig.colorbar(h[3], ax=ax[1][1], orientation='horizontal')
+ax[0][1].scatter(x[filter],y[filter],s=5)
+h = ax[0][1].hist2d(x[filter], y[filter], bins=50, norm=LogNorm(), cmap=plt.cm.Blues, cmin=3)
+fig.colorbar(h[3], ax=ax[0][1], orientation='horizontal')
 
 #ax[1][1].scatter(np.log10(gals['mass']),np.log10(gals['sp_n']),edgecolor='blue',facecolor='none')
 
@@ -84,24 +84,24 @@ fig.colorbar(h[3], ax=ax[1][1], orientation='horizontal')
 #     bins=100,norm=LogNorm(),mincnt=2,cmap=plt.cm.Blues)
 # fig.colorbar(h, ax=ax[1][1], orientation='horizontal')
 
-ax[1][1].set_xlabel(r'$\mathrm{log_{10}}M/M_{\odot}$')
-ax[1][1].set_ylabel(r'$\mathrm{log_{10}}|\vec{J}|$')
-ax[1][1].plot(x, x*m+b,ls='-',color=color,label='Linear regression')
-ax[1][1].vlines(-.7, np.min(np.log10(gals['sp_n'])), \
+ax[0][1].set_xlabel(r'$\mathrm{log_{10}}M/M_{\odot}$')
+ax[0][1].set_ylabel(r'$\mathrm{log_{10}}|\vec{J}|$')
+ax[0][1].plot(x, x*m+b,ls='-',color=color,label='Linear regression')
+ax[0][1].vlines(-.7, np.min(np.log10(gals['sp_n'])), \
     np.max(y),colors=color,linestyles=':')
-ax[1][1].vlines(-.3, np.min(np.log10(gals['sp_n'])), \
+ax[0][1].vlines(-.3, np.min(np.log10(gals['sp_n'])), \
     np.max(y),colors=color,linestyles=':')
 
-ax[1][1].text(-0.95, 2.25, 'H-L', fontsize=15, color=color)
-ax[1][1].text(-0.64, 2.4, 'H-I', fontsize=15, color=color)
-ax[1][1].text(-0.25, 2.5, 'H-H', fontsize=15, color=color)
-ax[1][1].text(-0.95, 0.5, 'L-L', fontsize=15, color=color)
-ax[1][1].text(-0.64, 0.65, 'L-I', fontsize=15, color=color)
-ax[1][1].text(-0.25, 0.8, 'L-H', fontsize=15, color=color)
-ax[1][1].legend(loc ='lower right')
+# ax[1][1].text(-0.95, 2.25, 'H-L', fontsize=15, color=color)
+# ax[1][1].text(-0.64, 2.4, 'H-I', fontsize=15, color=color)
+# ax[1][1].text(-0.25, 2.5, 'H-H', fontsize=15, color=color)
+# ax[1][1].text(-0.95, 0.5, 'L-L', fontsize=15, color=color)
+# ax[1][1].text(-0.64, 0.65, 'L-I', fontsize=15, color=color)
+# ax[1][1].text(-0.25, 0.8, 'L-H', fontsize=15, color=color)
+ax[0][1].legend(loc ='lower right')
 
 plt.tight_layout()
-plt.savefig('../plots/data.png')
+#plt.savefig('../plots/data.png')
 # %%
 
 import matplotlib.pyplot as plt

@@ -84,11 +84,15 @@ plt.rcParams['font.size'] = 15
 fig, axs = plt.subplots(4, 3, constrained_layout=True, sharex=True, sharey=True)
 axs[0,0].set_ylim([-3,7])
 
+r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
+r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
+x = (r1+r2)/2
+
 for ax_ in axs:
     for ax in ax_:
-            ax.hlines(0,x[0],x[-1],linestyles=':')
-            ax.fill_between(x, -1, 1, alpha=.035, color='k')
-            ax.fill_between(x, -3, 3, alpha=.035, color='k')
+            ax.hlines(0,r1[0],r2[-1],linestyles=':')
+            ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.035, color='k')
+            ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.035, color='k')
 
 for ax_,secs in zip(axs[:2],([25,36,14],[123,456])):
 
@@ -122,13 +126,10 @@ for ax_,secs in zip(axs[:2],([25,36,14],[123,456])):
 
             ax.set_xticks(np.array([0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]))
 
-    ax_[0].legend(loc='upper left',framealpha=.4)
+    ax_[0].legend(loc='upper left',ncol=2,framealpha=.4)
     ax_[0].set_ylabel(r'$\zeta$')
 
 ###########################################################
-r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
-r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
-x = (r1+r2)/2
 
 ax_ = axs[2]
 print('Sigma5')
@@ -143,14 +144,17 @@ for sfilter in ['hi','lo']:
         
             eta0 = 1./(np.sqrt(2)-1)
             eta_ran_std = np.sqrt(28.1421/etaT['N'].data)
-            y = (etaT['eta']-eta0)/eta_ran_std
+            y = (etaT['eta'].data-eta0)/eta_ran_std
+            yerr = etaT['eta_std'].data/eta_ran_std
 
             if sfilter=='hi': label='High '+r'$\Sigma_5$'
             if sfilter=='lo': label='Low '+r'$\Sigma_5$'
 
+            x = (etaTable['rmin'].data+etaTable['rmax'].data)/2
+            print(x)
             ax.errorbar(x,y,yerr=yerr,capsize=3,fmt='o-',ms=5,label=label)
 
-ax_[0].legend(loc='upper left',framealpha=.4)
+ax_[0].legend(loc='upper left',ncol=2,framealpha=.4)
 ax_[0].set_ylabel(r'$\zeta$')
 ###########################################################
 
@@ -169,22 +173,25 @@ for vfilter in ['hi','lo']:
         
             eta0 = 1./(np.sqrt(2)-1)
             eta_ran_std = np.sqrt(28.1421/etaT['N'].data)
-            y = (etaT['eta']-eta0)/eta_ran_std
+            y = (etaT['eta'].data-eta0)/eta_ran_std
+            yerr = etaT['eta_std'].data/eta_ran_std
 
+            x = (etaTable['rmin'].data+etaTable['rmax'].data)/2
             
             if vfilter=='hi': label='High '+r'$\mathrm{V_{rad}}$'
             if vfilter=='lo': label='Low '+r'$\mathrm{V_{rad}}$'
 
             ax.errorbar(x,y,yerr=yerr,capsize=3,fmt='o-',ms=5,label=label)
 
-ax_[0].legend(loc='upper left',framealpha=.4)
+ax_[0].legend(loc='upper left',ncol=2,framealpha=.4)
 ax_[0].set_ylabel(r'$\zeta$')
 
 ###########################################################
 for ax in axs[3]:
-    ax.set_xlabel('R/Rv')
+    ax.set_xlabel(r'$\mathrm{r/R_v}$')
 
-#axs[0,0].set_ylim([-3,6])
+axs[0,0].set_ylim([-4,7])
+axs[0,0].set_xlim([.8,1.5])
 axs[0,0].set_title('All Voids')
 axs[0,1].set_title('R-Voids')
 axs[0,2].set_title('S-Voids')
@@ -204,9 +211,10 @@ x = (r1+r2)/2
 fig, axs = plt.subplots(3, 1, constrained_layout=True, sharex=True, sharey=True)
 
 for vtype,ax in zip(['a','r','s'],axs):
-
-    ax.fill_between(x, -1, 1, alpha=.05, color='k')
-    ax.fill_between(x, -3, 3, alpha=.05, color='k')
+    
+    ax.hlines(0,r1[0],r2[-1],linestyles=':')
+    ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.05, color='k')
+    ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.05, color='k')
 
 
     for sec in [3,1]:
@@ -268,15 +276,16 @@ for vtype,ax in zip(['a','r','s'],axs):
 
         ax.errorbar(x,y,yerr=yerr,capsize=3,fmt='o-',ms=5,label=label)
 
-    ax.set_xlabel('R/Rv')
-    ax.legend(loc='upper left',framealpha=.4)
+    ax.set_xlabel(r'$\mathrm{r/R_v}$')
+    ax.legend(loc='upper left',framealpha=.4,ncol=1)
     ax.set_ylabel(r'$\zeta$')
 
-
+axs[0].set_ylim([-4,8])
+axs[0].set_xlim([.8,1.5])
 axs[0].set_title('All Voids')
 axs[1].set_title('R Voids')
 axs[2].set_title('S Voids')
 
-plt.savefig('../bestsignal.png')
+plt.savefig('../plots/bestsignal.png')
 
 # %%
