@@ -329,14 +329,14 @@ maxradV = 0.
 sec=0
 
 plt.rcParams['figure.figsize'] = (9, 6)
-plt.rcParams['font.size'] = 15
+plt.rcParams['font.size'] = 18
 
 r1=[.8,.9,1.,1.1,1.2,1.3,1.4]
 r2=[.9,1.,1.1,1.2,1.3,1.4,1.5]
 x = (np.array(r1)+np.array(r2))/2
 
-plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.025, color='k')
-plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.03, color='k')
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.1, color='k')
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.1, color='k')
 plt.hlines(0,.8,1.5,linestyles=':')
 
 for vtype, label, fmt in zip(['a','r','s'],\

@@ -78,8 +78,8 @@ maxradV = 0.
 lowMcut = -1
 
 colors = sns.color_palette()
-plt.rcParams['figure.figsize'] = (17, 13)
-plt.rcParams['font.size'] = 15
+plt.rcParams['figure.figsize'] = (20, 15)
+plt.rcParams['font.size'] = 18
 
 fig, axs = plt.subplots(4, 3, constrained_layout=True, sharex=True, sharey=True)
 axs[0,0].set_ylim([-3,7])
@@ -91,8 +91,8 @@ x = (r1+r2)/2
 for ax_ in axs:
     for ax in ax_:
             ax.hlines(0,r1[0],r2[-1],linestyles=':')
-            ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.035, color='k')
-            ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.035, color='k')
+            ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.1, color='k')
+            ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.1, color='k')
 
 for ax_,secs in zip(axs[:2],([25,36,14],[123,456])):
 
@@ -196,11 +196,13 @@ axs[0,0].set_title('All Voids')
 axs[0,1].set_title('R-Voids')
 axs[0,2].set_title('S-Voids')
 #plt.tight_layout()
-plt.savefig('../plots/allvoidsallgalaxies_results.jpg')
+#plt.savefig('../plots/allvoidsallgalaxies_results.jpg')
+plt.savefig('../plots/allvoidsallgalaxies_results.pdf')
+
 
 #%%
 plt.rcParams['figure.figsize'] = (8, 12)
-plt.rcParams['font.size'] = 15
+plt.rcParams['font.size'] = 18
 
 minradV, maxradV = 7.0, 0.0
 vtype = 'a'

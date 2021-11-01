@@ -716,8 +716,8 @@ for sec in [3]:
 """
 Vrad vs R
 """
-plt.rcParams['figure.figsize'] = (10, 8)
-plt.rcParams['font.size'] = 15
+plt.rcParams['figure.figsize'] = (12, 8)
+plt.rcParams['font.size'] = 18
 import seaborn as sns
 
 vtype = 's'
@@ -736,13 +736,17 @@ for vtype, c in zip(['a','r','s'],colors[:3]):
         vtra_mean.append(np.mean(vel['vtra'].data))
         r_mean.append( (rmin+rmax)/2)
 
-    plt.plot(r_mean,vrad_mean,marker='o',color=c,label=r'$V_\mathrm{rad}$'+', {} voids'.format(vtype))
-    plt.plot(r_mean,vtra_mean,ls='--',marker='x',color=c,label=r'$V_\mathrm{tra}$'+', {} voids'.format(vtype))
+    if vtype=='a': label= r'$\mathrm{V_{rad}}$'+', All voids'
+    if vtype=='r': label= r'$\mathrm{V_{rad}}$'+', R-voids'
+    if vtype=='s': label= r'$\mathrm{V_{rad}}$'+', S-voids'
+
+    plt.plot(r_mean,vrad_mean,marker='o',color=c,label=label)
+    plt.plot(r_mean,vtra_mean,ls='--',marker='x',color=c,label=label)
 
 
 plt.xticks([0.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
 plt.legend(ncol=3)
-plt.xlabel('R/Rv')
-plt.ylabel('Vrad, Vtra')
-plt.savefig('../plots/vel/VradVtra_vs_R_allvtypes.jpg')
+plt.xlabel('r/Rv')
+plt.ylabel(r'$\mathrm{V_{rad}, V_{tra}}$ (km/s)')
+plt.savefig('../plots/vel/VradVtra_vs_R_allvtypes.pdf')
 # %%

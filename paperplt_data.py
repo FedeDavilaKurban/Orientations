@@ -29,6 +29,10 @@ for i in range(len(voids)):
 	N.append(len(tree.query_ball_point([x,y,z],r)))
 
 #%%
+
+plt.rcParams['figure.figsize'] = (8, 12)
+plt.rcParams['font.size'] = 18
+
 fig , ax = plt.subplots(nrows = 2, ncols = 1, sharex=False, sharey=False, figsize=(10,8))
 
 # #Ngal vs R
@@ -44,38 +48,50 @@ fig , ax = plt.subplots(nrows = 2, ncols = 1, sharex=False, sharey=False, figsiz
 
 
 minradV = 7.
+filename = writePath+'Proyectos/Orientations/data/vtype/minradV{}_vtype.dat'.format(float(minradV))
+vtypes = ascii.read(filename)
 for nv in range(len(voids[voids['r']>=minradV])):
     filename = writePath+'Proyectos/Orientations/data/profiles/minradV{}_void{}.dat'.format(minradV,nv)
     profile = ascii.read(filename,names=['r','rho'])
     if nv==38: profile = profile[1:]
-    ax[1][0].plot(profile['r'],profile['rho'],c='C0',alpha=0.2)
 
+    if vtypes[nv]['type']=='r': c, ls, a, label = 'C0', '--', 0.4, 'R-voids'
+    if vtypes[nv]['type']=='s': c, ls, a, label = 'C1', '-', 0.5, 'S-voids'
 
-ax[0][0].set_ylabel(r'$\rho/\bar{\rho}-1$')
-ax[0][0].set_xlabel('r (Mpc)')
+    if nv==1:
+        ax[0].plot(profile['r'],profile['rho'],c=c,ls=ls,alpha=a,label=label)
+    elif nv==2:
+        ax[0].plot(profile['r'],profile['rho'],c=c,ls=ls,alpha=a,label=label)
+    else:
+        ax[0].plot(profile['r'],profile['rho'],c=c,ls=ls,alpha=a)
+
+ax[0].legend(loc = 'lower right')
+
+ax[0].set_ylabel(r'$\Delta(r)$')
+ax[0].set_xlabel('r (Mpc/h)')
 
 xv,yv,zv,rv = voids[voids['r']>=8.]['x','y','z','r'][0]
 
-idx1 = tree.query_ball_point([xv,yv,zv],rv*1.4)
+idx1 = tree.query_ball_point([xv,yv,zv],rv*1.5)
 idx2 = tree.query_ball_point([xv,yv,zv],rv*0.8)
 shell = [g for g in idx1 if g not in idx2]
 gals = gxs[shell]
 
 m,b,rvalue,pvalue,std=scipy.stats.linregress(np.log10(gals['mass']),np.log10(gals['sp_n'])) # El ajuste tiene que ser con las 'gxs' (no con las 'gals')
 m1 = -1./m
-b1 = -.7*(m-m1)+b
-b2 = -.3*(m-m1)+b
+b1 = -.8*(m-m1)+b
+b2 = -.4*(m-m1)+b
 
 from matplotlib.colors import LogNorm
 color='k'
 
-filter = np.where(np.log10(gals['mass'])<=2)
+#filter = np.where(np.log10(gals['mass'])<=2)
 x = np.log10(gals['mass'])
 y = np.log10(gals['sp_n'])
 
-ax[0][1].scatter(x[filter],y[filter],s=5)
-h = ax[0][1].hist2d(x[filter], y[filter], bins=50, norm=LogNorm(), cmap=plt.cm.Blues, cmin=3)
-fig.colorbar(h[3], ax=ax[0][1], orientation='horizontal')
+#ax[1].scatter(x[filter],y[filter],s=5)
+h = ax[1].hist2d(x, y, bins=25, norm=LogNorm(), cmap=plt.cm.Blues, cmin=0)
+fig.colorbar(h[3], ax=ax[1], orientation='vertical')
 
 #ax[1][1].scatter(np.log10(gals['mass']),np.log10(gals['sp_n']),edgecolor='blue',facecolor='none')
 
@@ -84,13 +100,14 @@ fig.colorbar(h[3], ax=ax[0][1], orientation='horizontal')
 #     bins=100,norm=LogNorm(),mincnt=2,cmap=plt.cm.Blues)
 # fig.colorbar(h, ax=ax[1][1], orientation='horizontal')
 
-ax[0][1].set_xlabel(r'$\mathrm{log_{10}}M/M_{\odot}$')
-ax[0][1].set_ylabel(r'$\mathrm{log_{10}}|\vec{J}|$')
-ax[0][1].plot(x, x*m+b,ls='-',color=color,label='Linear regression')
-ax[0][1].vlines(-.7, np.min(np.log10(gals['sp_n'])), \
+ax[1].set_xlabel(r'$\mathrm{log_{10}}(M/M_{\odot})$')
+ax[1].set_ylabel(r'$\mathrm{log_{10}}|\vec{S}|$')
+ax[1].plot(x, x*m+b,ls='-',color=color,label='Linear regression')
+ax[1].vlines(-.8, np.min(np.log10(gals['sp_n'])), \
     np.max(y),colors=color,linestyles=':')
-ax[0][1].vlines(-.3, np.min(np.log10(gals['sp_n'])), \
+ax[1].vlines(-.4, np.min(np.log10(gals['sp_n'])), \
     np.max(y),colors=color,linestyles=':')
+ax[1].set_xlim([-1.,2.5])
 
 # ax[1][1].text(-0.95, 2.25, 'H-L', fontsize=15, color=color)
 # ax[1][1].text(-0.64, 2.4, 'H-I', fontsize=15, color=color)
@@ -98,10 +115,11 @@ ax[0][1].vlines(-.3, np.min(np.log10(gals['sp_n'])), \
 # ax[1][1].text(-0.95, 0.5, 'L-L', fontsize=15, color=color)
 # ax[1][1].text(-0.64, 0.65, 'L-I', fontsize=15, color=color)
 # ax[1][1].text(-0.25, 0.8, 'L-H', fontsize=15, color=color)
-ax[0][1].legend(loc ='lower right')
+# ax[1].legend(loc ='lower right')
 
 plt.tight_layout()
-#plt.savefig('../plots/data.png')
+#plt.savefig('../plots/data2.png')
+plt.savefig('../plots/data.pdf')
 # %%
 
 import matplotlib.pyplot as plt

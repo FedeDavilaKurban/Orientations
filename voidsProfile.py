@@ -152,7 +152,7 @@ tree = spatial.cKDTree(data=np.column_stack((gxs['x'],gxs['y'],gxs['z'])),boxsiz
 import seaborn as sns
 
 plt.rcParams['figure.figsize'] = (10, 8)
-plt.rcParams['font.size'] = 15
+plt.rcParams['font.size'] = 18
 fig, axs = plt.subplots(3, 1, constrained_layout=True, sharex=True, sharey=True)
 
 color = sns.color_palette()
@@ -190,18 +190,19 @@ for vtype, c, ax in zip(['a','r','s'],color[:3],axs):
             rho_array.append( len(tree.query_ball_point([x,y,z],r))/vol)
 
         ax.plot(r_array/radius,np.array(rho_array)/rhototal-1,marker='o',ms=1,lw=.5,color=c)
-        ax.set_ylabel(r'$\rho(r)/\bar{\rho}-1$')
+        ax.set_ylabel(r'$\Delta(r/Rv)$')
+
+for i in range(len(axs)):
+    axs[i].set_yticks([-1.,-.75,-.5,-.25,0.])
+    axs[i].set_xticks([0.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
 
 axs[2].set_xlim([.8,1.5])
-axs[0].set_xticks([0.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
-axs[1].set_xticks([0.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
-axs[2].set_xticks([0.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
 
 axs[0].text(0.825,-0.1,'All Voids')
 axs[1].text(0.825,-0.1,'Rising Voids')
 axs[2].text(0.825,-0.1,'Shell Voids')
 
-axs[2].set_xlabel('R/Rv')
+axs[2].set_xlabel('r/Rv')
 
-plt.savefig('../plots/vel/voidsprofiles.jpg')
+plt.savefig('../plots/vel/voidsprofiles.pdf')
 # %%
