@@ -205,7 +205,7 @@ plt.rcParams['figure.figsize'] = (8, 12)
 plt.rcParams['font.size'] = 18
 
 minradV, maxradV = 7.0, 0.0
-vtype = 'a'
+#vtype = 'a'
 r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
 r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 x = (r1+r2)/2
@@ -215,8 +215,8 @@ fig, axs = plt.subplots(3, 1, constrained_layout=True, sharex=True, sharey=True)
 for vtype,ax in zip(['a','r','s'],axs):
     
     ax.hlines(0,r1[0],r2[-1],linestyles=':')
-    ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.05, color='k')
-    ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.05, color='k')
+    ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.1, color='k')
+    ax.fill_between([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.1, color='k')
 
 
     for sec in [3,1]:
@@ -288,6 +288,6 @@ axs[0].set_title('All Voids')
 axs[1].set_title('R Voids')
 axs[2].set_title('S Voids')
 
-plt.savefig('../plots/bestsignal.png')
+#plt.savefig('../plots/bestsignal.png')
 
 # %%

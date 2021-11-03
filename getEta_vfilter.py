@@ -72,15 +72,20 @@ def get_eta_bs(x,Nbs=1000):
 #%%
 
 minradV, maxradV = 7.0, 0.0
-# r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
-# r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
-r1 = [.9]
-r2 = [1.4]
+
+forTable=False
+
+if forTable==True:
+    r1 = [.9]
+    r2 = [1.4]
+else:
+    r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
+    r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 
 for vfilter in ['hi','lo']:
     print(vfilter)
 
-    for sec in [0,123,456,14,36,4,6,1,3]:
+    for sec in [1]:
         print(sec)
         
         for vtype in ['a','r','s']:
@@ -116,7 +121,7 @@ for vfilter in ['hi','lo']:
                 eta.append( eta_ )
                 eta_std.append( eta_std_ )#/np.sqrt(len(bs_eta)) )
 
-            if r1==[.9]: 
+            if forTable==True: 
                 filename = '../data/eta/eta_vfilter{}_minradV{}_maxradV{}_sec{}_vtype{}_forTable.txt'
             else: 
                 filename = '../data/eta/eta_vfilter{}_minradV{}_maxradV{}_sec{}_vtype{}.txt'

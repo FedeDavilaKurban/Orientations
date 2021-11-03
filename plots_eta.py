@@ -319,7 +319,9 @@ plt.legend(loc='upper left',ncol=2)
 
 #plt.savefig('../plots/eta_vs_r/Eta_allsections_allvoids.jpg'.format(sec))
 #%%
-
+"""
+Plot No Subsamples
+"""
 import seaborn as sns
 #colors = sns.color_palette()
 #blue, oran = colors[0], colors[1]
@@ -363,4 +365,304 @@ plt.xlim([.8,1.5])
 plt.legend()
 
 plt.savefig('../plots/eta_nosubsample.pdf')
+# %%
+"""
+Plot High Spin, High Mass, High/Low Velocity
+"""
+import seaborn as sns
+#colors = sns.color_palette()
+#blue, oran = colors[0], colors[1]
+
+minradV = 7.
+maxradV = 0.
+sec=3
+
+plt.rcParams['figure.figsize'] = (9, 6)
+plt.rcParams['font.size'] = 18
+
+r1=[.8,.9,1.,1.1,1.2,1.3,1.4]
+r2=[.9,1.,1.1,1.2,1.3,1.4,1.5]
+x = (np.array(r1)+np.array(r2))/2
+
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.1, color='k')
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.1, color='k')
+plt.hlines(0,.8,1.5,linewidth=.6,color='k',alpha=.7)
+
+for vtype, label, fmt in zip(['a','r','s'],\
+                            ['All Voids', 'R-Type', 'S-Type'],\
+                            ['o-','x--','^:']):
+
+    filename = '../data/eta/eta_vfilterhi_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(minradV,maxradV,sec,vtype)
+    etaTable = ascii.read(filename,\
+            names=['eta','eta_std','rmin','rmax','N'])
+
+    yran_mean = 1./(np.sqrt(2)-1)
+    yran_err = np.sqrt(28.1421/etaTable['N'])
+
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+
+    
+
+    plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='k')
+
+plt.ylabel(r'$\zeta$')
+plt.xlabel(r'$\mathrm{r/R_v}$')
+plt.xlim([.8,1.5])
+plt.ylim([-4,8])
+
+plt.legend(loc='upper left')
+# %%
+"""
+Plot High Spin, High Mass, High/Low Velocity
+"""
+import seaborn as sns
+#colors = sns.color_palette()
+#blue, oran = colors[0], colors[1]
+
+minradV = 7.
+maxradV = 0.
+sec=3
+
+plt.rcParams['figure.figsize'] = (9, 6)
+plt.rcParams['font.size'] = 18
+
+r1=[.8,.9,1.,1.1,1.2,1.3,1.4]
+r2=[.9,1.,1.1,1.2,1.3,1.4,1.5]
+x = (np.array(r1)+np.array(r2))/2
+
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.1, color='k')
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.1, color='k')
+plt.hlines(0,.8,1.5,linewidth=.6,color='k',alpha=.7)
+
+for vtype, label, fmt in zip(['a','r','s'],\
+                            ['All Voids', 'R-Type', 'S-Type'],\
+                            ['o-','x--','^:']):
+
+    filename = '../data/eta/eta_vfilterhi_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(minradV,maxradV,sec,vtype)
+    etaTable = ascii.read(filename,\
+            names=['eta','eta_std','rmin','rmax','N'])
+
+    yran_mean = 1./(np.sqrt(2)-1)
+    yran_err = np.sqrt(28.1421/etaTable['N'])
+
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+
+    
+
+    plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='k')
+
+plt.legend(loc='upper left')
+
+for vtype, label, fmt in zip(['a','r','s'],\
+                            ['All Voids', 'R-Type', 'S-Type'],\
+                            ['o-','x--','^:']):
+
+    filename = '../data/eta/eta_vfilterlo_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(minradV,maxradV,sec,vtype)
+    etaTable = ascii.read(filename,\
+            names=['eta','eta_std','rmin','rmax','N'])
+
+    yran_mean = 1./(np.sqrt(2)-1)
+    yran_err = np.sqrt(28.1421/etaTable['N'])
+
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+
+    
+
+    plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='C00')
+
+
+plt.ylabel(r'$\zeta$')
+plt.xlabel(r'$\mathrm{r/R_v}$')
+plt.xlim([.8,1.5])
+plt.ylim([-4,8])
+
+#plt.legend(loc='upper left')
+plt.savefig('../plots/hSpin-hMass-hlVel.jpg')
+
+ # %%
+"""
+Plot High Spin, Low Velocity, High/Low Mass
+"""
+import seaborn as sns
+#colors = sns.color_palette()
+#blue, oran = colors[0], colors[1]
+
+minradV = 7.
+maxradV = 0.
+plt.xscale
+plt.rcParams['figure.figsize'] = (9, 6)
+plt.rcParams['font.size'] = 18
+
+r1=[.8,.9,1.,1.1,1.2,1.3,1.4]
+r2=[.9,1.,1.1,1.2,1.3,1.4,1.5]
+x = (np.array(r1)+np.array(r2))/2
+
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.1, color='k')
+plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.1, color='k')
+plt.hlines(0,.8,1.5,linewidth=.6,color='k',alpha=.7)
+
+sec=1
+for vtype, label, fmt in zip(['a','r','s'],\
+                            ['All Voids', 'R-Type', 'S-Type'],\
+                            ['o-','x--','^:']):
+
+    filename = '../data/eta/eta_vfilterlo_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(minradV,maxradV,sec,vtype)
+    etaTable = ascii.read(filename,\
+            names=['eta','eta_std','rmin','rmax','N'])
+
+    yran_mean = 1./(np.sqrt(2)-1)
+    yran_err = np.sqrt(28.1421/etaTable['N'])
+
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+
+    
+
+    plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='k')
+
+plt.legend(loc='upper left')
+
+sec=3
+for vtype, label, fmt in zip(['a','r','s'],\
+                            ['All Voids', 'R-Type', 'S-Type'],\
+                            ['o-','x--','^:']):
+
+    filename = '../data/eta/eta_vfilterlo_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(minradV,maxradV,sec,vtype)
+    etaTable = ascii.read(filename,\
+            names=['eta','eta_std','rmin','rmax','N'])
+
+    yran_mean = 1./(np.sqrt(2)-1)
+    yran_err = np.sqrt(28.1421/etaTable['N'])
+
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+
+    
+
+    plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='C00')
+
+
+plt.ylabel(r'$\zeta$')
+plt.xlabel(r'$\mathrm{r/R_v}$')
+plt.xlim([.8,1.5])
+plt.ylim([-4,8])
+
+plt.savefig('../plots/hSpin-lVel-hlMass.jpg')
+
+# %%
+"""
+Trying Something
+"""
+import seaborn as sns
+#colors = sns.color_palette()
+#blue, oran = colors[0], colors[1]
+
+
+colors = sns.color_palette()
+plt.rcParams['figure.figsize'] = (15, 10)
+plt.rcParams['font.size'] = 18
+
+fig, axs = plt.subplots(2, 2, constrained_layout=True, sharex=True, sharey=True)
+
+minradV = 7.
+maxradV = 0.
+plt.xscale
+plt.rcParams['figure.figsize'] = (9, 6)
+plt.rcParams['font.size'] = 18
+
+r1=[.8,.9,1.,1.1,1.2,1.3,1.4]
+r2=[.9,1.,1.1,1.2,1.3,1.4,1.5]
+x = (np.array(r1)+np.array(r2))/2
+
+for ax in axs:
+    for ax_ in ax:
+        ax_.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.1, color='k')
+        ax_.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.1, color='k')
+        ax_.hlines(0,.8,1.5,linewidth=.6,color='k',alpha=.7)
+        ax_.set_ylim([-4,8])
+
+sec=1
+# for vtype, label, fmt in zip(['a','r','s'],\
+#                             ['All Voids', 'R-Type', 'S-Type'],\
+#                             ['o-','x--','^:']):
+
+#     filename = '../data/eta/eta_vfilterlo_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+#             .format(minradV,maxradV,sec,vtype)
+#     etaTable = ascii.read(filename,\
+#             names=['eta','eta_std','rmin','rmax','N'])
+
+#     yran_mean = 1./(np.sqrt(2)-1)
+#     yran_err = np.sqrt(28.1421/etaTable['N'])
+
+#     y = (etaTable['eta'].data-yran_mean)/yran_err
+#     yerr = etaTable['eta_std'].data/yran_err
+
+    
+
+#     axs[0,0].errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='k')
+
+for sec, c, label in zip([1,3],['C00','C03'],['Low Mass', 'High Mass']):
+    vtype='a'
+    filename = '../data/eta/eta_vfilterlo_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(minradV,maxradV,sec,vtype)
+    etaTable = ascii.read(filename,\
+            names=['eta','eta_std','rmin','rmax','N'])
+    yran_mean = 1./(np.sqrt(2)-1)
+    yran_err = np.sqrt(28.1421/etaTable['N'])
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+    axs[0,0].errorbar(x,y,yerr=yerr,label=label,fmt='o-',capsize=3,ms=7,color=c)
+    axs[0,0].legend(framealpha=.6)
+
+for sec, c in zip([1,3],['C00','C03']):
+    for vtype, label, fmt in zip(['r','s'], ['R-type', 'S-type'], ['x--','^:']):
+        filename = '../data/eta/eta_vfilterlo_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+                .format(minradV,maxradV,sec,vtype)
+        etaTable = ascii.read(filename,\
+                names=['eta','eta_std','rmin','rmax','N'])
+        yran_mean = 1./(np.sqrt(2)-1)
+        yran_err = np.sqrt(28.1421/etaTable['N'])
+        y = (etaTable['eta'].data-yran_mean)/yran_err
+        yerr = etaTable['eta_std'].data/yran_err
+        axs[0,1].errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color=c)
+        #axs[0,1].legend(framealpha=.6)
+
+sec=3
+for vfilter, c, label in zip(['hi','lo'],['C00','C03'],['Hi V', 'Low V']):
+    vtype='a'
+    filename = '../data/eta/eta_vfilter{}_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+            .format(vfilter,minradV,maxradV,sec,vtype)
+    etaTable = ascii.read(filename,\
+            names=['eta','eta_std','rmin','rmax','N'])
+    yran_mean = 1./(np.sqrt(2)-1)
+    yran_err = np.sqrt(28.1421/etaTable['N'])
+    y = (etaTable['eta'].data-yran_mean)/yran_err
+    yerr = etaTable['eta_std'].data/yran_err
+    axs[1,0].errorbar(x,y,yerr=yerr,label=label,fmt='o-',capsize=3,ms=7,color=c)
+    axs[1,0].legend(framealpha=.6)
+
+for vfilter, c in zip(['hi','lo'],['C00','C03']):
+    for vtype, label, fmt in zip(['r','s'], ['R-type', 'S-type'], ['x--','^:']):
+        filename = '../data/eta/eta_vfilter{}_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+                .format(vfilter,minradV,maxradV,sec,vtype)
+        etaTable = ascii.read(filename,\
+                names=['eta','eta_std','rmin','rmax','N'])
+        yran_mean = 1./(np.sqrt(2)-1)
+        yran_err = np.sqrt(28.1421/etaTable['N'])
+        y = (etaTable['eta'].data-yran_mean)/yran_err
+        yerr = etaTable['eta_std'].data/yran_err
+        axs[1,1].errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color=c)
+        #axs[1,1].legend(framealpha=.6)
+
+
+#plt.legend(loc='upper left')
+
 # %%
