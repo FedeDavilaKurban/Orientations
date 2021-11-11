@@ -12,7 +12,8 @@
 
 #%%
 import sys
-sys.path.append('/home/fede/')
+from config import illustrisPath
+sys.path.append(illustrisPath)
 import illustris_python as il
 import numpy as np
 import matplotlib.pyplot as plt
@@ -142,30 +143,40 @@ Ntotal = len(gxs)
 rhototal = len(gxs)/(lbox**3)
 
 r_array = np.linspace(6,10.6,30) #Rv
+r_array = np.linspace(.8,1.5,30) #Rv
 
-for vtype, ls, c in zip(['s','r'],['-','--'],['C00','C03']):
+for vtype, c in zip(['s','r'],['C00','C03']):
     print('vtype=',vtype)
 
     voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 
+    rho_arrays= []
 
     for nv in range(len(voids)):
         #print(nv)
         x,y,z,radius = voids['x','y','z','r'][nv].as_void()
         
         rho_array = []
-        for r in r_array:
+        for r in r_array*radius:
             vol = 4.*np.pi*(r)**3./3
             rho_array.append( len(tree.query_ball_point([x,y,z],r))/vol)
 
-        if nv==0:
-            if vtype=='r': label='R-type'
-            if vtype=='s': label='S-type'
-        else: label=None
+        rho_arrays.append(rho_array)
 
-        axs[1].plot(r_array/radius,np.array(rho_array)/rhototal-1,\
-            marker='o',ms=2,lw=.5,ls=ls, color=c,label=label)
-        axs[1].set_ylabel(r'$\Delta(r/Rv)$')
+    rho_mean = np.mean(rho_arrays,axis=0)
+    rho_meanerr = np.std(rho_arrays,axis=0)/np.sqrt(len(voids))
+    rho_std = np.std(rho_arrays,axis=0)
+
+    if vtype=='r': label='R-type'
+    elif vtype=='s': label='S-type'
+
+    y = rho_mean/rhototal-1
+
+    axs[1].fill_between(r_array,y-rho_std/rhototal,y+rho_std/rhototal,\
+        color=c,alpha=.5)
+    axs[1].errorbar(r_array,rho_mean/rhototal-1,yerr=rho_meanerr/rhototal,\
+        marker='o',ms=5,lw=1, color=c,label=label)
+    axs[1].set_ylabel(r'$\Delta(r/Rv)$')
 
 axs[1].legend()
 axs[1].set_yticks([-1.,-.75,-.5,-.25,0.])
@@ -181,8 +192,9 @@ axs[1].set_ylim([-1.,0])
 
 axs[1].set_xlabel(r'$\mathrm{r/R_v}$')
 
-axs[0].text(0.825,-3.75,'High Mass, High Spin, Low {}'.format(r'$\mathrm{v_{rad}}$'))
+axs[0].text(0.825,-3.75,'High Mass, High Spin, Low {} galaxies'.format(r'$\mathrm{v_{rad}}$'))
 
-plt.tight_layout()
+#plt.tight_layout()
+#plt.show()
 plt.savefig('../plots/bestSignalwithProfiles.pdf')
 # %%
