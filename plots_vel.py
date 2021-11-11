@@ -716,37 +716,54 @@ for sec in [3]:
 """
 Vrad vs R
 """
-plt.rcParams['figure.figsize'] = (12, 8)
+plt.rcParams['figure.figsize'] = (9, 5)
 plt.rcParams['font.size'] = 18
 import seaborn as sns
 
-vtype = 's'
-sec = 3
+#vtype = 's'
+sec = 0
 colors = sns.color_palette()
+
+minradV=7.
+maxradV=0.
+rinner_i = np.float64(0.8)
+rinner_f = np.float64(1.5)
+rstep = np.float64(0.1)
+r1 = np.arange(rinner_i,rinner_f,rstep,dtype=np.float64)
+r2 = np.arange(rinner_i+rstep,rinner_f+rstep,rstep,dtype=np.float64)
 
 for vtype, c in zip(['a','r','s'],colors[:3]):
     vrad_mean=[]
     vtra_mean=[]
+    vrad_err=[]
+    vtra_err=[]
     r_mean=[]
 
     for rmin,rmax in zip(r1,r2):
         vel = ascii.read('../data/vel/-1/vel_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
                         .format(minradV,maxradV,rmin,rmax,sec,vtype))
-        vrad_mean.append( np.mean(vel['vrad'].data))
+        vrad_mean.append(np.mean(vel['vrad'].data))
         vtra_mean.append(np.mean(vel['vtra'].data))
+        vrad_err.append(np.std(vel['vrad'].data)/(np.sqrt(len(vel['vrad']))))
+        vtra_err.append(np.std(vel['vtra'].data)/(np.sqrt(len(vel['vtra']))))
         r_mean.append( (rmin+rmax)/2)
 
     if vtype=='a': label= r'$\mathrm{V_{rad}}$'+', All voids'
-    if vtype=='r': label= r'$\mathrm{V_{rad}}$'+', R-voids'
-    if vtype=='s': label= r'$\mathrm{V_{rad}}$'+', S-voids'
+    if vtype=='r': label= r'$\mathrm{V_{rad}}$'+', R-type'
+    if vtype=='s': label= r'$\mathrm{V_{rad}}$'+', S-type'
 
-    plt.plot(r_mean,vrad_mean,marker='o',color=c,label=label)
-    plt.plot(r_mean,vtra_mean,ls='--',marker='x',color=c,label=label)
+    #plt.plot(r_mean,vrad_mean,marker='o',color=c,label=label)
+    #plt.plot(r_mean,vtra_mean,ls='--',marker='x',color=c,label=label)
+    plt.errorbar(r_mean,vrad_mean,yerr=vrad_err,marker='o',color=c,label=label)
+    plt.errorbar(r_mean,vtra_mean,yerr=vtra_err,ls='--',marker='x',markersize=10,color=c,label=label)
 
+#plt.hlines(115,.8,1.5,linestyles=':',color='k')
 
 plt.xticks([0.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
-plt.legend(ncol=3)
+plt.xlim([.8,1.5])
+plt.legend(ncol=2)
 plt.xlabel('r/Rv')
 plt.ylabel(r'$\mathrm{V_{rad}, V_{tra}}$ (km/s)')
+plt.tight_layout()
 plt.savefig('../plots/vel/VradVtra_vs_R_allvtypes.pdf')
-# %%
+    # %%

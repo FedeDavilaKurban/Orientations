@@ -507,27 +507,27 @@ plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -1, 1, alpha=.1, color='k')
 plt.fill_between([.8,.9,1.,1.1,1.2,1.3,1.4,1.5], -3, 3, alpha=.1, color='k')
 plt.hlines(0,.8,1.5,linewidth=.6,color='k',alpha=.7)
 
-sec=1
-for vtype, label, fmt in zip(['a','r','s'],\
-                            ['All Voids', 'R-Type', 'S-Type'],\
-                            ['o-','x--','^:']):
+# sec=1
+# for vtype, label, fmt in zip(['a','r','s'],\
+#                             ['All Voids', 'R-Type', 'S-Type'],\
+#                             ['o-','x--','^:']):
 
-    filename = '../data/eta/eta_vfilterlo_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
-            .format(minradV,maxradV,sec,vtype)
-    etaTable = ascii.read(filename,\
-            names=['eta','eta_std','rmin','rmax','N'])
+#     filename = '../data/eta/eta_vfilterlo_minradV{}_maxradV{}_sec{}_vtype{}.txt'\
+#             .format(minradV,maxradV,sec,vtype)
+#     etaTable = ascii.read(filename,\
+#             names=['eta','eta_std','rmin','rmax','N'])
 
-    yran_mean = 1./(np.sqrt(2)-1)
-    yran_err = np.sqrt(28.1421/etaTable['N'])
+#     yran_mean = 1./(np.sqrt(2)-1)
+#     yran_err = np.sqrt(28.1421/etaTable['N'])
 
-    y = (etaTable['eta'].data-yran_mean)/yran_err
-    yerr = etaTable['eta_std'].data/yran_err
+#     y = (etaTable['eta'].data-yran_mean)/yran_err
+#     yerr = etaTable['eta_std'].data/yran_err
 
     
 
-    plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='k')
+#     plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='k')
 
-plt.legend(loc='upper left')
+# plt.legend(loc='upper left')
 
 sec=3
 for vtype, label, fmt in zip(['a','r','s'],\
@@ -549,6 +549,7 @@ for vtype, label, fmt in zip(['a','r','s'],\
 
     plt.errorbar(x,y,yerr=yerr,label=label,fmt=fmt,capsize=3,ms=7,color='C00')
 
+plt.legend(loc='upper left')
 
 plt.ylabel(r'$\zeta$')
 plt.xlabel(r'$\mathrm{r/R_v}$')
