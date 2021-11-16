@@ -191,7 +191,7 @@ axs[0].text(0.825,-3.75,'High Mass, High Spin, Low {} galaxies'.format(r'$\mathr
 
 #plt.tight_layout()
 #plt.show()
-plt.savefig('../plots/bestSignalwithProfiles.pdf')
+plt.savefig('../plots/bestSignalwithProfiles.png')
 # %%
 """
 With Vrad
@@ -317,7 +317,7 @@ rstep = np.float64(0.1)
 r1 = np.arange(rinner_i,rinner_f,rstep,dtype=np.float64)
 r2 = np.arange(rinner_i+rstep,rinner_f+rstep,rstep,dtype=np.float64)
 
-for vtype, c in zip(['r','s'],['C00','C03']):
+for vtype, c in zip(['s','r'],['C00','C03']):
     vrad_mean=[]
     vtra_mean=[]
     vrad_err=[]
@@ -356,5 +356,5 @@ axs[2].set_xlim([.8,1.5])
 axs[2].set_xlabel(r'$\mathrm{r/R_v}$')
 axs[2].set_ylabel(r'$\mathrm{V_{rad}}$ (km/s)')
 #plt.show()
-plt.savefig('../plots/bestSignalwithProfilesVel.pdf')
+plt.savefig('../plots/bestSignalwithProfilesVel.png')
 # %%
