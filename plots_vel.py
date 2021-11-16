@@ -757,7 +757,8 @@ for vtype, c in zip(['a','r','s'],colors[:3]):
     plt.errorbar(r_mean,vrad_mean,yerr=vrad_err,marker='o',color=c,label=label)
     plt.errorbar(r_mean,vtra_mean,yerr=vtra_err,ls='--',marker='x',markersize=10,color=c,label=label)
 
-#plt.hlines(115,.8,1.5,linestyles=':',color='k')
+plt.hlines(120,.8,1.5,linestyles=':',color='k')
+plt.hlines(15,.8,1.5,linestyles=':',color='k')
 
 plt.xticks([0.8,.9,1.,1.1,1.2,1.3,1.4,1.5])
 plt.xlim([.8,1.5])
@@ -765,5 +766,5 @@ plt.legend(ncol=2)
 plt.xlabel('r/Rv')
 plt.ylabel(r'$\mathrm{V_{rad}, V_{tra}}$ (km/s)')
 plt.tight_layout()
-plt.savefig('../plots/vel/VradVtra_vs_R_allvtypes.pdf')
-    # %%
+#plt.savefig('../plots/vel/VradVtra_vs_R_allvtypes.pdf')
+# %%
