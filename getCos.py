@@ -170,11 +170,6 @@ minradV=7.
 maxradV=0.
 s5=0
 
-# rinner_i = np.float64(0.6)
-# rinner_f = np.float64(1.5)
-# rstep = np.float64(0.1)
-# r1 = np.arange(rinner_i,rinner_f,rstep,dtype=np.float64)
-# r2 = np.arange(rinner_i+rstep,rinner_f+rstep,rstep,dtype=np.float64)
 
 r1 = np.array([0.8,0.9,1.0,1.1,1.2,1.3,1.4])
 r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
@@ -192,11 +187,11 @@ for sec in [0]:
             voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 
             nvs = range(len(voids))
-            prll = []
-            perp = []
 
             r = []
             rrv = []
+
+            cos_list = []
 
             for nv in nvs:
 
@@ -216,26 +211,19 @@ for sec in [0]:
                         if gr[axis]<=-(rmax+.5)*vr: gr[axis]+=lbox
                         if gr[axis]>= (rmax+.5)*vr: gr[axis]-=lbox
 
-                    r.append( np.linalg.norm(gr) )
-                    rrv.append(r[-1]/vr)
-                    r_versor = gr/r[-1] #radial direction from void center
+                    # r.append( np.linalg.norm(gr) )
+                    # rrv.append(r[-1]/vr)
+                    # r_versor = gr/r[-1] #radial direction from void center
 
-                    prll.append( abs( np.dot(r_versor,s) ) )
-                    perp.append( np.sqrt(sn**2 - prll[-1]**2) ) # S**2 = S_perp**2 + S_paral**2
+                    cos = abs( np.dot(gr,s)/(np.linalg.norm(gr)*np.linalg.norm(s)) )
+                    cos_list.append(cos)
 
+            # r = np.array(r)
+            # rrv = np.array(rrv)
 
-            r = np.array(r)
-            rrv = np.array(rrv)
-
-            perp =  np.array(perp)
-            prll = np.array(prll)
-            beta = perp/prll
-
-            #print(rrv)
-            
-            ascii.write(np.column_stack([beta]),\
-                        '../data/beta/-1/beta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
+            ascii.write(np.column_stack([cos_list]),\
+                        '../data/cos/cos_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}.txt'\
                         .format(minradV,maxradV,rmin,rmax,sec,vtype),\
-                        names=['beta'],\
+                        names=['cos'],\
                         overwrite=True)
 # %%
