@@ -177,9 +177,9 @@ r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 #r2 = [1.4]
 
 
-for sec in [0]:
+for sec in [3]:
     print('sec=',sec)
-    for vtype in ['r','s','a']:
+    for vtype in ['r']:
         print('vtype=',vtype)
         for rmin,rmax in zip(r1,r2):
             print('rmin, rmax =',rmin,rmax)
