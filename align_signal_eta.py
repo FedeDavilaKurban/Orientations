@@ -70,7 +70,7 @@ fig = plt.figure(figsize=(10,10))
 fig.subplots_adjust(hspace=0, wspace=0.1, bottom=.2)
 ax = fig.add_subplot(111)
 ax.set_xlim(-1.3, 1.3)
-ax.set_ylim(-1.3, 1.3)
+#ax.set_ylim(-1.3, 1.3)
 
 ax.hist(np.log10(beta))
 plt.show()
@@ -86,8 +86,8 @@ bins = np.linspace(1.9, 4.8, 50)
 
 clrs = ['#402218', '#865439', '#C68B59', '#D7B19D']
 
-Nran = 200*5
-Netas = 300*5
+Nran = 200
+Netas = 300
 
 for k, c in enumerate(np.arange(0.7, 1, 0.1)):
     print(c)
@@ -181,6 +181,7 @@ for k, c in enumerate([0.7, 0.8, 0.9, 1.]):
     r = ellipsp(t, 1, c)
     ax.plot(t, r, clrs[k])
 
+ax.set_theta_zero_location("N")
 ax.grid(True)
 #fig.savefig('ellipses.pdf')           
 plt.show()
