@@ -124,8 +124,8 @@ for k, c in enumerate(cs):
 ax3.set_theta_zero_location("N")
 ax3.grid(True)
 
-#plt.show()
-plt.savefig('../plots/zetaCos_v_zetaEta_ECDF.jpg')
-# %%
+plt.show()
+#plt.savefig('../plots/zetaCos_v_zetaEta_ECDF.jpg')
+ # %%
 
 
