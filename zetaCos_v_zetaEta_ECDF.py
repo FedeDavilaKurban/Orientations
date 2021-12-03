@@ -164,21 +164,26 @@ def get_eta_bs(x,Nbs=1000):
     eta = np.mean(bs_eta) 
     eta_std = np.std(bs_eta, ddof=1)
 
-    return eta, eta_std
+    return eta, eta_std, bs_eta
 #%%    
-#from mpl_toolkits.mplot3d import Axes3D
 
-fig = plt.figure(figsize=(6,10))
-fig.subplots_adjust(hspace=0.3, wspace=0.1, bottom=.2)
-ax1 = fig.add_subplot(2,1,2) 
-ax2 = fig.add_subplot(2,1,1,projection='polar')
+fig = plt.figure(figsize=(10,10))
+fig.subplots_adjust(hspace=0.3, wspace=0.15, bottom=.2)
+ax3 = fig.add_subplot(3,2,1) #cos
+ax2 = fig.add_subplot(3,2,2,projection='polar')
+ax4 = fig.add_subplot(3,2,3) #etas 
+ax1 = fig.add_subplot(3,2,4) 
 
-bins = np.linspace(1.9, 4.8, 20)
+ax5 = fig.add_subplot(3,2,(5,6)) #zetas
 
-clrs = ['#361e15','#402218', '#865439', '#C68B59', '#D7B19D']
+clrs = ['#361e15',\
+        #'#402218', \
+        '#865439', \
+        '#C68B59']#, \
+        #'#D7B19D']
 
-cc = np.array([.5,.8,1,1,1])**1
-aa = np.array([1,1,1,.8,.4])**1
+cc = np.array([.6,.8,1])
+aa = np.array([1,1,1])
 bb = aa
 
 #from pylab import *
@@ -190,24 +195,20 @@ Nran = 500
 zeta_eta = []
 zeta_cos = []
 
-nseed = 30
+all_etas = []
+all_cos_m = []
+diff_etas=[]
 
-for rseed in np.arange(0,nseed):
+nseed = 50
+rseeds = np.arange(0,0+nseed)
+for rseed in rseeds:
 
-    np.random.seed(rseed)
     for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
-        #print(b,c)
+        #print(k,a,b,c)
 
-        # if c>0.:
-        #     f = partial(ellipsoid, c=c)
-        # else:
-        #     b=-c
-        #     c=1
-        #     f = partial(ellipsoid, b=b)
         f = partial(ellipsoid, a=a, b=b, c=c)
 
-        # eta = np.zeros(Netas)
-        # for i in range(Netas):
+        np.random.seed(rseed)
         x, t, u, St, Su = r_surface(Nran, f, *domain_t, *domain_u, 20, 20)
         xs = x[0,:]
         ys = x[1,:]
@@ -220,104 +221,139 @@ for rseed in np.arange(0,nseed):
             para = zs[j]
             perp = np.sqrt(xs[j]**2+ys[j]**2)
             beta[j] = perp / abs(para)
+    
+            #beta[j] = abs(para)/perp
 
             norm = np.sqrt(xs[j]**2 + ys[j]**2 + zs[j]**2)
             cos[j] = abs(para) / norm
         
-        eta_m, eta_std = get_eta_bs(np.log10(beta),Nbs=10)
+        eta_bs, eta_std, eta_array = \
+            get_eta_bs(np.log10(beta),Nbs=1000)
 
+        #Esto lo hice porque queria ver un
+        #histograma de la diferencia entre estas dos etas
+        #a.k.a.: diff_etas
+        eta = sum(beta>1)/sum(beta<1)
+        diff_etas.append(eta-eta_bs)
+
+        all_etas.append(eta_bs)
+        all_cos_m.append(cos.mean())
         #################
-        zeta_eta.append( (eta_m-(1./(np.sqrt(2)-1)))/eta_std )
-        zeta_cos.append( (cos.mean()-.5)/cos.std() )
-        ax1.scatter(zeta_cos[-1],zeta_eta[-1],\
-                alpha=.6,color=clrs[k],label=f'c/a={c/a:.1f}')
+        ze = (eta_bs-(1./(np.sqrt(2)-1)))/eta_std
+        zc = (cos.mean()-.5)/cos.std()
+
+        zeta_eta.append( ze )
+        zeta_cos.append( zc )
+        # ax1.scatter(zc,ze,\
+        #         alpha=.6,color=clrs[k],label=f'c/a={c/a:.1f}')
+        # QUIERO PROBAR PLOTTEAR SOLO ETA VS COS
+        ax1.axvline(0.5,ls='--',lw=1,color='slategrey')
+        ax1.axhline(1/(np.sqrt(2)-1),ls='--',lw=1,\
+            color='slategrey')
+        ax1.scatter(cos.mean(),eta_bs,\
+                alpha=.5,color=clrs[k],label=f'c/a={c/a:.1f}')
 
 #################################################################
-        # if rseed==0:
-        #     ax2.scatter(ys,zs,color=clrs[k])
-
         def ellipsp(t, a, c):
             e2 = 1 - (c/a)**2
             r = np.sqrt(c**2 / (1-e2*np.cos(t)**2))
             return r
         t_ = np.linspace(0, 2*np.pi, 100)
-        r_ = ellipsp(t_, a, c)
-        ax2.plot(t_, r_, clrs[k])
+        r_ = ellipsp(t_, c, a)
+        ax2.plot(t_, r_, clrs[k],label=f'c/a={c/a:.1f}')
+#################################################################
 
-        # # Set of all spherical angles:
-        # u = np.linspace(0, 2 * np.pi, 100)
-        # v = np.linspace(0, np.pi, 100)
+        if rseed==rseeds[0]:
+            bins = 6
+            ax3.hist(cos,bins=bins, histtype='step',\
+                 color=clrs[k], density=True, lw=2)
+            ax4.hist(eta_array, bins=bins, histtype='step',\
+                 color=clrs[k], density=True, lw=2)
+            ax4.axvline(1/(np.sqrt(2)-1),color='slategrey',ls='--')
+            ax4.axvline(eta,color=clrs[k],ls=':')
 
-        # # Cartesian coordinates that correspond to the spherical angles:
-        # # (this is the equation of an ellipsoid):
-        # ex = a * np.outer(np.cos(u), np.sin(v))
-        # ey = b * np.outer(np.sin(u), np.sin(v))
-        # ez = c * np.outer(np.ones_like(u), np.cos(v))
+            ytext=[.1,.2,.3]
+            s = r'$\langle cos(\lambda)\rangle=$'+f'{cos.mean():.1f}'+\
+                r'$\pm$'+f'{cos.std():.1f}'
+            ax3.text(.1,ytext[k],s,\
+                color=clrs[k],transform = ax3.transAxes)
 
-        # # Plot:
-        # ax2.plot_surface(ex, ey, ez,  rstride=10, cstride=4,\
-        #      color=clrs[k],alpha=.4)
+            ytext=[.7,.8,.9]
+            s = r'$\langle \eta\rangle=$'+f'{np.mean(eta_array):.1f}'+\
+                r'$\pm$'+f'{np.std(eta_array,ddof=1):.1f}'
+            ax4.text(.7,ytext[k],s,\
+                color=clrs[k],transform = ax4.transAxes)
+            ax4.text(.7,.6,r'$\eta_{ran}\simeq$'+'2.41',\
+                color='slategrey',transform = ax4.transAxes)
 
-        # # Adjustment of the axes, so that they all have the same span:
-        # max_radius = max(1/np.sqrt((a,b,c)))
-        # for axis in 'xyz':
-        #     getattr(ax2, 'set_{}lim'.format(axis))((-max_radius, max_radius))
+
+        ax3.text(.75,.9,'Nran={}'.format(Nran),\
+            fontsize=10,alpha=.7,transform = ax3.transAxes)
+
+        ax1.text(.3,.9,'{} random samples for each c/a'.format(nseed),\
+            fontsize=10,alpha=.7,transform = ax1.transAxes)
+
+##############################################################
 
     ax2.set_theta_zero_location("N")
     #ax2.grid(True)
-
-    #ax1.axvline(2.41, color='slategrey', linestyle='--',label='Random')
  
-    if rseed==0: ax1.legend()
+    if rseed==rseeds[0]: ax2.legend(bbox_to_anchor=(-.1, 1.05))
 
-    ax1.set_xlabel(r'$\zeta_{cos}$')
-    ax1.set_ylabel(r'$\zeta_{\eta}$')
+
+    ax1.set_xlabel(r'$\langle cos(\lambda)\rangle$')
+    ax1.set_ylabel(r'$\eta$')
 
     #ax1.set_xlim([-.4,.3])
 
-    #ax4.set_xlabel(r'$log_{10}(\beta)$')
+    ax3.set_xlabel(r'$\cos(\lambda)$')
+    ax4.set_xlabel(r'$\eta$')
     ################
 
 
 
+# for i in range(len(aa)):
+#     zc_m = np.mean(zeta_cos[i::len(aa)])
+#     zc_std = np.std(zeta_cos[i::len(aa)],ddof=1)
+#     ze_m = np.mean(zeta_eta[i::len(aa)])
+#     ze_std = np.std(zeta_eta[i::len(aa)],ddof=1)
+
+#     ax1.errorbar(zc_m,ze_m,xerr=zc_std,yerr=ze_std,color='k',capsize=3)
+
+# QUIERO PROBAR PLOTTEAR SOLO ETA VS COS
 for i in range(len(aa)):
+    cos_m = np.mean(all_cos_m[i::len(aa)])
+    cos_m_std = np.std(all_cos_m[i::len(aa)],ddof=1)
+    eta_m = np.mean(all_etas[i::len(aa)])
+    eta_m_std = np.std(all_etas[i::len(aa)],ddof=1)
+
+    ax1.errorbar(cos_m,eta_m,xerr=cos_m_std,yerr=eta_m_std,\
+        color='k',capsize=3)
+
+#plt.show()
+
+###################################
+
+for i in range(len(aa)):
+    ax5.scatter(zeta_cos[i::len(aa)],zeta_eta[i::len(aa)],\
+        color=clrs[i],alpha=.5)
+
+
     zc_m = np.mean(zeta_cos[i::len(aa)])
     zc_std = np.std(zeta_cos[i::len(aa)],ddof=1)
     ze_m = np.mean(zeta_eta[i::len(aa)])
     ze_std = np.std(zeta_eta[i::len(aa)],ddof=1)
 
-    ax1.errorbar(zc_m,ze_m,xerr=zc_std,yerr=ze_std,color='k',capsize=3)
+    ax5.errorbar(zc_m,ze_m,xerr=zc_std,yerr=ze_std,alpha=2,lw=3,\
+        color=clrs[i],capsize=5,label=f'c/a={cc[i]/aa[i]:.1f}')
 
-plt.show()
-# %%
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-import numpy as np
+ax5.axvline(0,ls=':',color='slategrey')
+ax5.axhline(0,ls=':',color='slategrey')
+ax5.legend()
+ax5.set_xlabel(r'$\zeta_{cos}=\frac{\langle cos\rangle -cos_{ran}}{\sigma_{cos}}$')
+ax5.set_ylabel(r'$\zeta_{\eta}=\frac{\eta-\eta_{ran}}{\sigma_{\eta}}$')
+#plt.show()
 
-fig = plt.figure(figsize=plt.figaspect(1))  # Square figure
-ax = fig.add_subplot(111, projection='3d')
-
-
-a, b, c = (1,1,1.2)
-
-# Set of all spherical angles:
-u = np.linspace(0, 2 * np.pi, 100)
-v = np.linspace(0, np.pi, 100)
-
-# Cartesian coordinates that correspond to the spherical angles:
-# (this is the equation of an ellipsoid):
-x = a * np.outer(np.cos(u), np.sin(v))
-y = b * np.outer(np.sin(u), np.sin(v))
-z = c * np.outer(np.ones_like(u), np.cos(v))
-
-# Plot:
-ax.plot_surface(x, y, z,  rstride=10, cstride=4, color='b',alpha=.4)
-
-# Adjustment of the axes, so that they all have the same span:
-max_radius = max(1/np.sqrt((a,b,c)))
-for axis in 'xyz':
-    getattr(ax, 'set_{}lim'.format(axis))((-max_radius, max_radius))
-
-plt.show()
+plt.savefig('../plots/zetaCos_v_zetaEta_ECDF/zetaCos_v_zetaEta_ECDF_v2.jpg'.format(rseed))
 
 # %%

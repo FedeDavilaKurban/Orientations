@@ -61,6 +61,7 @@ def get_eta_random(N_eta,N_beta):
     return eta_ran
     
 def get_eta_bs(x,Nbs=1000):
+    #x should be log10(beta)
     bs_eta = []
     for _ in range(Nbs):  
         bs_x = np.random.choice(x, size=len(x))
