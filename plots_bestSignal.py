@@ -190,8 +190,8 @@ axs[1].set_xlabel(r'$\mathrm{r/R_v}$')
 axs[0].text(0.825,-3.75,'High Mass, High Spin, Low {} galaxies'.format(r'$\mathrm{v_{rad}}$'))
 
 #plt.tight_layout()
-#plt.show()
-plt.savefig('../plots/bestSignalwithProfiles.png')
+plt.show()
+#plt.savefig('../plots/bestSignalwithProfiles.png')
 # %%
 """
 With Vrad
@@ -355,6 +355,6 @@ axs[2].set_xlim([.8,1.5])
 #axs[2].legend(ncol=1)
 axs[2].set_xlabel(r'$\mathrm{r/R_v}$')
 axs[2].set_ylabel(r'$\mathrm{V_{rad}}$ (km/s)')
-#plt.show()
-plt.savefig('../plots/bestSignalwithProfilesVel.png')
+plt.show()
+#plt.savefig('../plots/bestSignalwithProfilesVel.png')
 # %%
