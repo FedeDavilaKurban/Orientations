@@ -154,17 +154,17 @@ Quiero hacer el plot zeta vs zeta con varios random seed
 #%%
 def get_eta_bs(x,Nbs=1000):
     bs_eta = []
-    #bs_cos_mean = []
     for _ in range(Nbs):  
         bs_x = np.random.choice(x, size=len(x))
-        #bs_cos = np.random.choice(cos, size=len(cos))
 
         n_perp = np.sum(bs_x>0.)
-        n_prll = np.sum(bs_x<0)
+        n_prll = np.sum(bs_x<0.)
         bs_eta.append( n_perp / n_prll )
+        
+        # n_perp = np.sum(bs_x<0.)
+        # n_prll = np.sum(bs_x>0.)
+        # bs_eta.append( n_prll / n_perp )
     
-        #bs_cos_mean.append( np.mean(bs_cos) )
-
     eta = np.mean(bs_eta) 
     eta_std = np.std(bs_eta, ddof=1)
     
@@ -185,14 +185,14 @@ clrs = ['#361e15',\
         #'#C68B59',\
         '#D7B19D']
 
-cc = np.array([.6,1,1])
-aa = np.array([1,1,.6])
+cc = np.array([.6,.8,1])
+aa = np.array([1,1,1])
 bb = aa
 
 #from pylab import *
 #clrs = cm.get_cmap('seismic', len(cc))  # matplotlib color palette name, n colors
 
-Nran = 500
+Nran = 1000
 Nbs = 1000
 #Netas = 300*2
 
@@ -203,7 +203,7 @@ all_etas = []
 all_cos_m = []
 diff_etas=[]
 
-nseed = 50
+nseed = 10
 rseeds = np.arange(0,0+nseed)
 for rseed in rseeds:
 
@@ -225,7 +225,6 @@ for rseed in rseeds:
             para = zs[j]
             perp = np.sqrt(xs[j]**2+ys[j]**2)
             beta[j] = perp / abs(para)
-    
             #beta[j] = abs(para)/perp
 
             norm = np.sqrt(xs[j]**2 + ys[j]**2 + zs[j]**2)
@@ -237,11 +236,14 @@ for rseed in rseeds:
         #Esto lo hice porque queria ver un
         #histograma de la diferencia entre estas dos etas
         #a.k.a.: diff_etas
-        #eta = sum(beta>1)/sum(beta<1)
+        eta_data = sum(beta>1)/sum(beta<1)
         #diff_etas.append(eta-eta_bs)
 
         eta_ran = 1/(np.sqrt(2)-1)
-        eta_ran_std = 28.1421/Nran
+        #eta_ran = eta_ran**(-1)
+        eta_ran_std = np.sqrt(28.1421/Nran) #beta = perp/prll
+        #eta_ran_std = np.sqrt(.8284/Nran) #beta = prll/perp
+        
 
         all_etas.append(eta_bs)
         all_cos_m.append(cos.mean())
@@ -267,7 +269,10 @@ for rseed in rseeds:
             return r
         t_ = np.linspace(0, 2*np.pi, 100)
         r_ = ellipsp(t_, c, a)
-        ax2.plot(t_, r_, clrs[k],label=f'c/a={c/a:.1f}')
+
+        if c<=a: e2=1-(c/a)**2
+        if c>a: e2=1-(a/c)**2 
+        ax2.plot(t_, r_, clrs[k],label=r'$e^2=$'+f'{e2:.1f}')
 #################################################################
 
         if rseed==rseeds[0]:
@@ -278,6 +283,7 @@ for rseed in rseeds:
                  color=clrs[k], density=True, lw=2)
             ax4.axvline(eta_ran,color='slategrey',ls='--')
             ax4.axvline(eta_bs,color=clrs[k],ls=':')
+            #ax4.axvline(eta_data,color='k',ls=':')
 
             ytext=np.arange(len(cc))/10+.1
             s = r'$\langle cos(\lambda)\rangle=$'+f'{cos.mean():.2f}'+\
@@ -293,7 +299,7 @@ for rseed in rseeds:
             ax4.text(.65,np.min(ytext)-.1,r'$\eta_{ran}\simeq$'\
                 +f'{eta_ran:.2f}'+r'$\pm$'+f'{eta_ran_std:.2f}',\
                 color='slategrey',transform = ax4.transAxes)
-            ax4.text(.67,.1,f'{Nbs} bootstrap \n resamplings',\
+            ax4.text(.67,np.min(ytext)-.35,f'{Nbs} bootstrap \n resamplings',\
                 color='k',transform = ax4.transAxes)
 
         ax3.text(.75,.9,'Nran={}'.format(Nran),\
@@ -343,6 +349,8 @@ for i in range(len(aa)):
 
 ###################################
 
+xp = []
+yp = []
 for i in range(len(aa)):
     ax5.scatter(zeta_cos[i::len(aa)],zeta_eta[i::len(aa)],\
         color=clrs[i],alpha=.5)
@@ -353,6 +361,9 @@ for i in range(len(aa)):
     ze_m = np.mean(zeta_eta[i::len(aa)])
     ze_std = np.std(zeta_eta[i::len(aa)],ddof=1)
 
+    xp.append(zc_m)
+    yp.append(ze_m)
+
     ax5.errorbar(zc_m,ze_m,xerr=zc_std,yerr=ze_std,alpha=2,lw=3,\
         color=clrs[i],capsize=5,label=f'c/a={cc[i]/aa[i]:.1f}')
 
@@ -360,6 +371,17 @@ for i in range(len(aa)):
 #ax5.set_xscale('log')
 ax5.axvline(0,ls=':',color='slategrey')
 ax5.axhline(0,ls=':',color='slategrey')
+
+z = np.polyfit(xp,yp,2) 
+p = np.poly1d(z)
+xfit = np.linspace(np.min(xp),np.max(xp),100)
+yfit = p(xfit)
+ax5.plot(np.linspace(np.min(xp),np.max(xp),100),yfit)
+ax5.axvline(-.2,ls=':')
+ax5.axhline(p(-.2),ls=':')
+ax5.scatter(-0.2,p(-0.2))
+ax5.text(-.41,p(-0.2)+.2,f'zeta={p(-.2):.1f}',c='C00')
+
 ax5.legend()
 ax5.set_xlabel(r'$\zeta_{cos}=(\langle cos\rangle -cos_{ran})/\sigma_{cos}}$')
 ax5.set_ylabel(r'$\zeta_{\eta}=(\eta-\eta_{ran})/\sigma_{\eta}}$')
