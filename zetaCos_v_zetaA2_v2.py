@@ -1,5 +1,8 @@
 """
 Quiero hacer un plot zeta_a2 vs zeta_cos
+
+v2: Quiero hacer bootstrap con los cosenos para calcular un a2 medio 
+y su desviación estándar
 """
 #%%
 import numpy as np
@@ -102,14 +105,23 @@ for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
         zs = x[2,:]
 
         cos.append( get_cos(xs,ys,zs) )
-        newcos_, ecdf_, y_ = ecdf_residues(cos[-1])
-        newcos.append(newcos_)
-        ecdf.append(ecdf_)
-        residues.append(y_)
-        
-        yfit_, d_yfit, a2_ = fits(newcos_,y_)
-        residues_fit.append(yfit_)
-        a2.append(a2_)
+
+        newcos_bs = []
+        ecdf_bs = []
+        residues_bs = []
+        residues_fit_bs = []
+        a2_bs = []
+        for i in range(Nbs):
+            cos_bs = np.random.choice(cos[-1],size=len(cos[-1]))        
+            newcos_bs, ecdf_bs, y_bs = ecdf_residues(cos_bs)
+            newcos.append(newcos_bs)
+            ecdf.append(ecdf_bs)
+            residues.append(y_bs)
+            
+            yfit_bs, d_yfit, a2_bs_ = fits(newcos_bs,y_bs)
+            residues_fit_bs.append(yfit_bs)
+            a2_bs.append(a2_bs_)
+        a2.append(np.mean(a2_bs))
 
 #%%
 k=0
