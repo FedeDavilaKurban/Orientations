@@ -64,7 +64,7 @@ Code parameters
 """
 Nran = 1000
 Nbs = 100
-nseed = 100
+nseed = 50
 
 eta_ran = 1/(np.sqrt(2)-1)
 #eta_ran = eta_ran**(-1)
@@ -117,7 +117,7 @@ plt.rcParams['font.size'] = 16
 fs = 18
 
 ncol = 2
-nrow = 4
+nrow = 3
 
 ax0 = fig.add_subplot(nrow,ncol,2,projection='polar')
 ax1 = fig.add_subplot(nrow,ncol,1) #cos
@@ -239,5 +239,5 @@ ax5.set_xlabel(r'$\zeta_{cos}=(\langle cos\rangle -cos_{ran})/\sigma_{cos}}$')
 ax5.set_ylabel(r'$\zeta_{\eta}=(\eta-\eta_{ran})/\sigma_{\eta}}$')
 #ax5.set_xlim([-.35,.14])
 plt.tight_layout()
-plt.savefig(f'../plots/zetaCos_v_zetaEta_v3/Nran{Nran}_Nbs{Nbs}_nseed{nseed}.jpg')
+plt.savefig(f'../plots/zetaCos_v_zetaEta_v3/eta_Nran{Nran}_Nbs{Nbs}_nseed{nseed}.pdf')
 # %%
