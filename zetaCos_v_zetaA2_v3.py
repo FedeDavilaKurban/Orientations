@@ -278,7 +278,7 @@ plt.show()
 # %%
 
 #Testeando la formula analitica de a1
-for k in range(10):
+for k in np.random.choice(range(nseed),size=5):
     x = newcos[k]
     a1_empirico = a2[k]
     n = x.size
@@ -287,6 +287,11 @@ for k in range(10):
     for i in range(n):
         den += (i+1-n*x[i])*np.sin(np.pi*x[i])
     a1_analitico = den/num
-    print(a1_empirico - a1_analitico)
+
+    print(a1_empirico,a1_analitico)
+    f_emp=a1_empirico*np.sin(np.pi*newcos[0])
+    f_an=a1_analitico*np.sin(np.pi*newcos[0])
+    plt.plot(newcos[0],f_emp,color='C00')
+    plt.plot(newcos[0],f_an,ls='--',color='C00')
 
 # %%
