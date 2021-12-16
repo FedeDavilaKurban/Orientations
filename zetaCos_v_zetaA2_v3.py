@@ -19,15 +19,15 @@ def fits(cos1,y,verbose=False):
 
     def func(x,a,b,c,d,e):
         return a \
-            + b*np.sin( np.pi*(x+1.)/2. ) \
-            + c*np.sin( 2.*np.pi*(x+1.)/2. ) \
-            + d*np.sin( 3.*np.pi*(x+1.)/2. ) \
-            + e*np.sin( 4.*np.pi*(x+1.)/2. )
+            + b*np.sin( np.pi*x ) \
+            + c*np.sin( 2.*np.pi*x ) \
+            + d*np.sin( 3.*np.pi*x ) \
+            + e*np.sin( 4.*np.pi*x )
     def dfunc(x,b,c,d,e):
-        return np.pi/2.*b*np.cos( np.pi*(x+1.)/2. ) \
-            + np.pi*c*np.cos( 2.*np.pi*(x+1.)/2. ) \
-            + np.pi*3./2.*d*np.cos( 3.*np.pi*(x+1.)/2. ) \
-            + np.pi*2.*e*np.cos( 4.*np.pi*(x+1.)/2. )
+        return np.pi*b*np.cos( np.pi*x ) \
+            + 2*np.pi*c*np.cos( 2.*np.pi*x ) \
+            + 3*np.pi*d*np.cos( 3.*np.pi*x ) \
+            + 4*np.pi*e*np.cos( 4.*np.pi*x )
 
     x = np.array(cos1)
 
@@ -42,7 +42,7 @@ def fits(cos1,y,verbose=False):
     if verbose==True: print('a1=',a1,'; a2=',a2,'; a3=',a3,'; a4=',a4)
 
     del x, cov
-    return yfit,d_yfit,a2
+    return yfit,d_yfit,a1
 
 def ecdf_residues(cos_list,verbose=False):
     """
@@ -52,10 +52,11 @@ def ecdf_residues(cos_list,verbose=False):
     #import numpy as np
     from statsmodels.distributions.empirical_distribution import ECDF
 
-    cos_neg=-1*np.array(cos_list)
-    cos1 = np.sort(np.concatenate([cos_list,cos_neg]))
+    #cos_neg=-1*np.array(cos_list)
+    #cos1 = np.sort(np.concatenate([cos_list,cos_neg]))
+    cos1 = np.sort(cos_list)
     ecdf = ECDF(cos1) # Empirical cumulated distribution function
-    y = ecdf(cos1)-(cos1+1.)/2. # Para cuando tomamos el valor verdadero de cos (no el absoluto) 
+    y = ecdf(cos1)-(cos1)#+1.)/2. # Para cuando tomamos el valor verdadero de cos (no el absoluto) 
 
     return cos1,ecdf,y
 
@@ -75,19 +76,14 @@ def get_cos(xs,ys,zs):
 """
 Code parameters
 """
-Nran = 500
+Nran = 1000
 Nbs = 100
-nseed = 30
+nseed = 10
 
 cc = np.array([.6,.8,1])
 aa = np.array([1,1,1])
 bb = aa
 #%%
-clrs = ['#361e15',\
-        #'#402218', \
-        '#865439', \
-        #'#C68B59',\
-        '#D7B19D']
 
 cos = []
 newcos = []
@@ -98,10 +94,14 @@ a2 = []
 a2_std = []
 a2_bs=[]
 
-for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
-    f = partial(ellipsoid, a=a, b=b, c=c)
-    print(k)
-    for rseed in range(nseed):
+rseeds = np.arange(4,4+nseed)
+for rseed in rseeds:
+
+    for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
+        #print(k,a,b,c)
+
+        f = partial(ellipsoid, a=a, b=b, c=c)
+
         np.random.seed(rseed)
         x, t, u, St, Su = r_surface(Nran, f, *domain_t, *domain_u, 20, 20)
         xs = x[0,:]
@@ -120,42 +120,31 @@ for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
         for i in range(Nbs):
             c_bs = np.random.choice(cos[-1],size=len(cos[-1]))
             nc_, e_, y_ = ecdf_residues(c_bs)
-            yf_, d_yf, a2_ = fits(newcos_,y_)
+            yf_, d_yf, a2_ = fits(nc_,y_)
             a2_bs.append(a2_)
         
         a2.append(np.mean([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1))
         a2_std.append(np.std([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1,ddof=1))
 
-#%%
-# k=0
-# for i in range(nseed):     
-#     plt.plot(newcos[i],residues[i],color=clrs[k],alpha=.2)
-# k=1
-# for i in range(nseed):
-#     plt.plot(newcos[i+nseed],residues[i+nseed],color=clrs[k],alpha=.2)
-# k=2
-# for i in range(nseed):
-#     plt.plot(newcos[i+nseed*2],residues[i+nseed*2],color=clrs[k],alpha=.2)
-# plt.show()
+
 #%%
 def plot_fitcurves(newcos,residues_fit,ax):
-    xm = np.linspace(-1,1,100)
+    xm = np.linspace(0,1,100)
     for k in range(len(cc)):
         ys = []
         for i in range(nseed):
-            xx = newcos[i+nseed*k].flatten()
-            yy = residues_fit[i+nseed*k].flatten()
+            xx = newcos[k+len(cc)*i].flatten()
+            yy = residues_fit[k+len(cc)*i].flatten()
             ys.append(np.interp(xm,xx,yy))
         ym = np.mean(ys,axis=0)
         y_s1 = np.std(ys,axis=0,ddof=1)
         ax.fill_between(xm,ym-y_s1*3,ym+y_s1*3,color=clrs[k],alpha=.5)
         ax.plot(xm,ym,color=clrs[k],lw=3)
 
-
 def plot_allcurves(newcos,residues,clrs,nseed,ax):
-    for k in range(len(cc)):
-        for i in range(nseed):     
-            ax.plot(newcos[i+nseed*k],residues[i+nseed*k],\
+    for i in range(nseed):
+        for k in range(len(cc)):
+            ax.plot(newcos[k+len(cc)*i],residues[k+len(cc)*i],\
                 color=clrs[k],alpha=.2)
 
 def plot_eye(aa,bb,cc,clrs,ax):
@@ -170,18 +159,18 @@ def plot_eye(aa,bb,cc,clrs,ax):
         if c>a: e2=1-(a/c)**2 
         ax0.plot(t_, r_, clrs[k],label=r'$e^2=$'+f'{e2:.1f}',lw=2)
     ax.set_theta_zero_location("N")
-    ax.legend(bbox_to_anchor=(-.2, 1.))
+    ax.legend(bbox_to_anchor=(-.1, 1.))
 
 def plot_zetas(a2,cos,nseed,cc,clrs,ax):
 
-    def get_a2stdran(a2,nseed):
-        a2_ran=[a2[i:i+nseed] for i in range(0, len(a2), nseed)][-1]
+    def get_a2stdran(a2):
+        a2_ran=a2[::3]
         return np.array(np.std(a2_ran))
 
     for k in range(len(cc)):
 
-        y = np.array([a2[i:i+nseed] for i in range(0, len(a2), nseed)][k])
-        x = np.mean([cos[i:i+nseed] for i in range(0, len(cos), nseed)][k],axis=1)
+        y = np.array(a2[k::3])
+        x = np.mean(cos[k::3],axis=1)
 
         zy = y/get_a2stdran(a2,nseed)
         zx = (x-0.5)/np.sqrt(12)
@@ -191,23 +180,24 @@ def plot_zetas(a2,cos,nseed,cc,clrs,ax):
             yerr=np.std(zy,ddof=1),xerr=np.std(zx,ddof=1),color='k',\
                 capsize=5,lw=2)
 
-
 def plot_a2hist(a2_bs,a2,ax):
+    xtext=np.linspace(0.6,.05,3)
+    ytext=np.linspace(.6,.35,3)
     for i in range(len(cc)):
-        hist = a2_bs[i*Nbs*nseed:i*Nbs*nseed+Nbs]
+        hist = a2_bs[i*Nbs:i*Nbs+Nbs]
         ax.hist(hist,histtype='step',lw=2,color=clrs[i],density=True)
-        ax.axvline(a2[i*nseed],ls=':',color=clrs[i])
+        ax.axvline(a2[i],ls=':',color=clrs[i])
         ax.axvline(0,ls=':',color='slategrey')
 
-        ytext=np.arange(10)[-len(cc):]/10
-        s = r'$\langle a2\rangle=$'+f'{a2[i*nseed][0]:.2f}'+\
-            r'$\pm$'+f'{a2_std[i*nseed][0]:.2f}'
-        ax.text(.5,ytext[i],s,\
+
+        s = r'$\langle a1\rangle=$'+f'{a2[i][0]:.2f}'+\
+            r'$\pm$'+f'{a2_std[i][0]:.2f}'
+        ax.text(.025,ytext[i]+.3,s,\
             color=clrs[i],transform = ax.transAxes)
         # ax3.text(.5,np.min(ytext)-.1,r'$\eta_{ran}\simeq$'\
         #     +f'{eta_ran:.2f}'+r'$\pm$'+f'{eta_ran_std:.2f}',\
         #     color='slategrey',transform = ax3.transAxes)
-        ax.text(.05,.8,f'{Nbs} bootstrap \n resamplings',\
+        ax.text(.68,.82,f'{Nbs} bootstrap \n resamplings',\
             color='k',transform = ax.transAxes)
 
 fig = plt.figure(figsize=(13,17))
@@ -231,12 +221,12 @@ ax6 = fig.add_subplot(nrow,ncol,5) #hist a2
 ax1.set_xlabel(r'$\cos(\lambda)$')
 ax2.set_xlabel(r'$\cos(\lambda)$')
 ax2.set_ylabel('ECDF')
-ax3.set_xlabel(r'$\cos(\lambda)$'+' [mirrored]')
-ax3.set_ylabel('Residues')
-ax4.set_xlabel(r'$\cos(\lambda)$'+' [mirrored]')
+ax3.set_xlabel(r'$\cos(\lambda)$')
+ax3.set_ylabel('Residues = ECDF(cosines) - cosines')
+ax4.set_xlabel(r'$\cos(\lambda)$')
 ax4.set_ylabel('Residues Fits')
 ax5.set_xlabel(r'$\zeta_{cos}=(\langle cos\rangle -cos_{ran})/\sigma_{cos}}$')
-ax5.set_ylabel(r'$\zeta_{a2}=(a2-a2_{ran})/\sigma_{a2,ran}}$')
+ax5.set_ylabel(r'$\zeta_{a1}=(a1-a1_{ran})/\sigma_{a1,ran}}$')
 ax6.set_xlabel('a2 [bootstrap resampling]')
 
 #VERTICAL/HORIZONTAL LINES
@@ -259,27 +249,44 @@ plot_allcurves(newcos,residues,clrs,nseed,ax3)
 plot_fitcurves(newcos,residues_fit,ax4)
 plot_a2hist(a2_bs,a2,ax6)
 for i in range(len(cc)):
-    x = np.sort(cos[i*nseed])
+    x = np.sort(cos[i])
     ax1.hist(x, bins=bins, histtype='step', \
         color=clrs[i], density=True, lw=2)
-    ax2.step(x, ecdf[i*nseed](x), color=clrs[i], lw=2)
+    ax2.step(x, ecdf[i](x), color=clrs[i], lw=2)
     
     ytext=np.arange(len(cc))/10+.1
-    s = r'$\langle cos(\lambda)\rangle=$'+f'{cos[i*nseed].mean():.2f}'+\
-        r'$\pm$'+f'{cos[i*nseed].std():.2f}'
+    s = r'$\langle cos(\lambda)\rangle=$'+f'{cos[i].mean():.2f}'+\
+        r'$\pm$'+f'{cos[i].std():.2f}'
     ax1.text(.1,ytext[i],s,\
         color=clrs[i],transform = ax1.transAxes)
 plot_zetas(a2,cos,nseed,cc,clrs,ax5)
 
 #TEXT
 ax1.text(.6,.9,'Nran={}'.format(Nran),\
-    fontsize=fs, alpha=.7, color='k', transform = ax1.transAxes)
-ax3.text(.1,.7,'{} realizations \n for each {}'.format(nseed,r'$e^2$'),\
-    fontsize=fs,alpha=.7,color='k',transform = ax3.transAxes)
-ax4.text(.4,.1,'a2{}amplitude of the fit'.format(r'$\simeq$'),\
-    fontsize=fs-1,alpha=.7,color='k',transform = ax4.transAxes)
+    fontsize=fs, alpha=1, color='k', transform = ax1.transAxes)
+ax3.text(.05,.8,'{} realizations \n for each {}'.format(nseed,r'$e^2$'),\
+    fontsize=fs,alpha=1,color='k',transform = ax3.transAxes)
+ax4.text(.42,.1,'a1{}amplitude of the curve'.format(r'$\simeq$'),\
+    fontsize=fs-1,alpha=1,color='k',transform = ax4.transAxes)
+ax4.text(.05,.8,'Mean and {} obtained \n from the {} realizations'\
+    .format(r'$\sigma$',nseed),\
+    fontsize=fs-1,alpha=1,color='k',transform = ax4.transAxes)
 
 plt.tight_layout()
-plt.savefig(f'../plots/zetaCos_v_zetaA2/a2_Nran{Nran}_Nbs{Nbs}_nseed{nseed}.pdf')
+plt.savefig(f'../plots/zetaCos_v_zetaA2/a2_Nran{Nran}_Nbs{Nbs}_nseed{nseed}_v3.pdf')
 plt.show()
+# %%
+
+#Testeando la formula analitica de a1
+for k in range(10):
+    x = newcos[k]
+    a1_empirico = a2[k]
+    n = x.size
+    num = np.sum(n*(np.sin(np.pi*x))**2)
+    den = 0
+    for i in range(n):
+        den += (i+1-n*x[i])*np.sin(np.pi*x[i])
+    a1_analitico = den/num
+    print(a1_empirico - a1_analitico)
+
 # %%

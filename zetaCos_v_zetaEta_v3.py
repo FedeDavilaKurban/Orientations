@@ -123,16 +123,16 @@ ax0 = fig.add_subplot(nrow,ncol,2,projection='polar')
 ax1 = fig.add_subplot(nrow,ncol,1) #cos
 ax2 = fig.add_subplot(nrow,ncol,3) #betas
 ax3 = fig.add_subplot(nrow,ncol,4) #etas 
-ax4 = fig.add_subplot(nrow,ncol,5) #eta vs cos
-ax5 = fig.add_subplot(nrow,ncol,6) #zetas
+#ax4 = fig.add_subplot(nrow,ncol,5) #eta vs cos
+ax5 = fig.add_subplot(nrow,ncol,(5,6)) #zetas
 #ax5 = ax4.twinx().twiny()
 
 ax1.axhline(1,ls='--',lw=1,color='slategrey')
 ax2.axvline(0,ls='--',lw=1,color='slategrey')
 ax3.axvline(eta_ran,ls='--',lw=1,color='slategrey')
-ax4.axvline(0.5,ls='--',lw=1,color='slategrey')
-ax4.axhline(eta_ran,ls='--',lw=1,\
-    color='slategrey')
+#ax4.axvline(0.5,ls='--',lw=1,color='slategrey')
+#ax4.axhline(eta_ran,ls='--',lw=1,\
+#    color='slategrey')
 ax5.axvline(0,ls=':',color='slategrey')
 ax5.axhline(0,ls=':',color='slategrey')
 
@@ -194,10 +194,10 @@ for i in range(len(cc)):
     xx = np.mean(cos,axis=1)[i::len(cc)]
     yy = eta[i::len(cc)]
     
-    ax4.scatter(xx, yy, color=clrs[i], alpha=.5)
-    ax4.errorbar(np.mean(xx), np.mean(yy), \
-        xerr=np.std(xx), yerr=np.std(yy), lw=2,\
-        color='k',capsize=5)
+    #ax4.scatter(xx, yy, color=clrs[i], alpha=.5)
+    #ax4.errorbar(np.mean(xx), np.mean(yy), \
+    #    xerr=np.std(xx), yerr=np.std(yy), lw=2,\
+    #    color='k',capsize=5)
     
     zc = (xx-0.5)/np.sqrt(1/12)
     zeta_cos.append(zc)
@@ -227,14 +227,14 @@ ax1.text(.6,.9,'Nran={}'.format(Nran),\
     fontsize=fs, alpha=.7, color='k', transform = ax1.transAxes)
 ax2.text(.65,.9,r'$\beta=S_\perp/S_\parallel$'.format(Nran),\
     fontsize=fs+4, alpha=.7, color='k', transform = ax2.transAxes)
-ax4.text(.45,.8,'{} random samples \n for each {}'.format(nseed,r'$e^2$'),\
-    fontsize=fs,alpha=.7,color='k',transform = ax4.transAxes)
+ax5.text(.75,.8,'{} random samples \n for each {}'.format(nseed,r'$e^2$'),\
+    fontsize=fs,alpha=.7,color='k',transform = ax5.transAxes)
 
 ax1.set_xlabel(r'$\cos(\lambda)$')
 ax2.set_xlabel(r'$log_{10}(\beta)$')
 ax3.set_xlabel(r'$\eta$')
-ax4.set_xlabel(r'$\langle cos(\lambda)\rangle$')
-ax4.set_ylabel(r'$\eta$')
+#ax4.set_xlabel(r'$\langle cos(\lambda)\rangle$')
+#ax4.set_ylabel(r'$\eta$')
 ax5.set_xlabel(r'$\zeta_{cos}=(\langle cos\rangle -cos_{ran})/\sigma_{cos}}$')
 ax5.set_ylabel(r'$\zeta_{\eta}=(\eta-\eta_{ran})/\sigma_{\eta}}$')
 #ax5.set_xlim([-.35,.14])

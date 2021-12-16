@@ -170,15 +170,6 @@ def get_eta_bs(x,Nbs=1000):
     
     return eta, eta_std, bs_eta
 
-fig = plt.figure(figsize=(10,10))
-fig.subplots_adjust(hspace=0.3, wspace=0.2, bottom=.2)
-ax3 = fig.add_subplot(3,2,1) #cos
-ax2 = fig.add_subplot(3,2,2,projection='polar')
-ax4 = fig.add_subplot(3,2,3) #etas 
-ax1 = fig.add_subplot(3,2,4) 
-
-ax5 = fig.add_subplot(3,2,(5,6)) #zetas
-
 clrs = ['#361e15',\
         #'#402218', \
         '#865439', \
@@ -193,8 +184,22 @@ bb = aa
 #clrs = cm.get_cmap('seismic', len(cc))  # matplotlib color palette name, n colors
 
 Nran = 1000
-Nbs = 1000
-#Netas = 300*2
+Nbs = 100
+nseed = 5
+       
+eta_ran = 1/(np.sqrt(2)-1)
+#eta_ran = eta_ran**(-1)
+eta_ran_std = np.sqrt(28.1421/Nran) #beta = perp/prll
+#eta_ran_std = np.sqrt(.8284/Nran) #beta = prll/perp
+            
+fig = plt.figure(figsize=(10,10))
+fig.subplots_adjust(hspace=0.3, wspace=0.2, bottom=.2)
+ax3 = fig.add_subplot(3,2,1) #cos
+ax2 = fig.add_subplot(3,2,2,projection='polar')
+ax4 = fig.add_subplot(3,2,3) #etas 
+ax1 = fig.add_subplot(3,2,4) 
+
+ax5 = fig.add_subplot(3,2,(5,6)) #zetas
 
 zeta_eta = []
 zeta_cos = []
@@ -203,7 +208,6 @@ all_etas = []
 all_cos_m = []
 diff_etas=[]
 
-nseed = 10
 rseeds = np.arange(0,0+nseed)
 for rseed in rseeds:
 
@@ -231,19 +235,7 @@ for rseed in rseeds:
             cos[j] = abs(para) / norm
         
         eta_bs, eta_std, eta_array = \
-            get_eta_bs(np.log10(beta),Nbs=Nbs)
-
-        #Esto lo hice porque queria ver un
-        #histograma de la diferencia entre estas dos etas
-        #a.k.a.: diff_etas
-        eta_data = sum(beta>1)/sum(beta<1)
-        #diff_etas.append(eta-eta_bs)
-
-        eta_ran = 1/(np.sqrt(2)-1)
-        #eta_ran = eta_ran**(-1)
-        eta_ran_std = np.sqrt(28.1421/Nran) #beta = perp/prll
-        #eta_ran_std = np.sqrt(.8284/Nran) #beta = prll/perp
-        
+            get_eta_bs(np.log10(beta),Nbs=Nbs)                    
 
         all_etas.append(eta_bs)
         all_cos_m.append(cos.mean())
@@ -278,9 +270,9 @@ for rseed in rseeds:
         if rseed==rseeds[0]:
             bins = 6
             ax3.hist(cos,bins=bins, histtype='step',\
-                 color=clrs[k], density=True, lw=2)
+                color=clrs[k], density=True, lw=2)
             ax4.hist(eta_array, bins=bins*3, histtype='step',\
-                 color=clrs[k], density=True, lw=2)
+                color=clrs[k], density=True, lw=2)
             ax4.axvline(eta_ran,color='slategrey',ls='--')
             ax4.axvline(eta_bs,color=clrs[k],ls=':')
             #ax4.axvline(eta_data,color='k',ls=':')
@@ -312,7 +304,7 @@ for rseed in rseeds:
 
     ax2.set_theta_zero_location("N")
     #ax2.grid(True)
- 
+
     if rseed==rseeds[0]: ax2.legend(bbox_to_anchor=(-.1, 1.05))
 
 
@@ -326,16 +318,6 @@ for rseed in rseeds:
     ################
 
 
-
-# for i in range(len(aa)):
-#     zc_m = np.mean(zeta_cos[i::len(aa)])
-#     zc_std = np.std(zeta_cos[i::len(aa)],ddof=1)
-#     ze_m = np.mean(zeta_eta[i::len(aa)])
-#     ze_std = np.std(zeta_eta[i::len(aa)],ddof=1)
-
-#     ax1.errorbar(zc_m,ze_m,xerr=zc_std,yerr=ze_std,color='k',capsize=3)
-
-# QUIERO PROBAR PLOTTEAR SOLO ETA VS COS
 for i in range(len(aa)):
     cos_m = np.mean(all_cos_m[i::len(aa)])
     cos_m_std = np.std(all_cos_m[i::len(aa)],ddof=1)
@@ -345,7 +327,6 @@ for i in range(len(aa)):
     ax1.errorbar(cos_m,eta_m,xerr=cos_m_std,yerr=eta_m_std,\
         color='k',capsize=3)
 
-#plt.show()
 
 ###################################
 
@@ -376,17 +357,19 @@ z = np.polyfit(xp,yp,2)
 p = np.poly1d(z)
 xfit = np.linspace(np.min(xp),np.max(xp),100)
 yfit = p(xfit)
-ax5.plot(np.linspace(np.min(xp),np.max(xp),100),yfit)
-ax5.axvline(-.2,ls=':')
-ax5.axhline(p(-.2),ls=':')
-ax5.scatter(-0.2,p(-0.2))
-ax5.text(-.41,p(-0.2)+.2,f'zeta={p(-.2):.1f}',c='C00')
+#ax5.plot(np.linspace(np.min(xp),np.max(xp),100),yfit)
+#ax5.axvline(-.2,ls=':')
+#ax5.axhline(p(-.2),ls=':')
+#ax5.scatter(-0.2,p(-0.2))
+#ax5.text(-.41,p(-0.2)+.2,f'zeta={p(-.2):.1f}',c='C00')
 
 ax5.legend()
 ax5.set_xlabel(r'$\zeta_{cos}=(\langle cos\rangle -cos_{ran})/\sigma_{cos}}$')
 ax5.set_ylabel(r'$\zeta_{\eta}=(\eta-\eta_{ran})/\sigma_{\eta}}$')
-plt.show()
+#plt.show()
 
-#plt.savefig('../plots/zetaCos_v_zetaEta_ECDF/zetaCos_v_zetaEta_ECDF_v2.jpg'.format(rseed))
+plt.savefig(f'../plots/zetaCos_v_zetaEta_ECDF/zetaCos_v_zetaEta_Nran{Nran}_Nbs{Nbs}_nseed{nseed}.jpg'.format(rseed))
 
 # %%
+
+
