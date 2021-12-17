@@ -112,7 +112,7 @@ for rseed in rseeds:
 Plot Parameters
 """   
 fig = plt.figure(figsize=(13,17))
-fig.subplots_adjust(hspace=0.6, wspace=0.4, bottom=.2)
+fig.subplots_adjust(hspace=0.6, wspace=0.5, bottom=.2)
 plt.rcParams['font.size'] = 16
 fs = 18
 
@@ -159,7 +159,7 @@ for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
     if c>a: e2=1-(a/c)**2 
     ax0.plot(t_, r_, clrs[k],label=r'$e^2=$'+f'{e2:.1f}')
 ax0.set_theta_zero_location("N")
-ax0.legend(bbox_to_anchor=(-.1, 1.))
+ax0.legend(bbox_to_anchor=(0.05, 1.))
 #######################################################
 
 for i in range(len(cc)):

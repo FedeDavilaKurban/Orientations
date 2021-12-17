@@ -8,7 +8,7 @@ y su desviación estándar
 import numpy as np
 from functools import partial
 
-from numpy.core.fromnumeric import size
+#from numpy.core.fromnumeric import size
 from param_tools import r_surface, surface_area
 from matplotlib import pyplot as plt
 
@@ -19,15 +19,15 @@ def fits(cos1,y,verbose=False):
 
     def func(x,a,b,c,d,e):
         return a \
-            + b*np.sin( np.pi*(x+1.)/2. ) \
-            + c*np.sin( 2.*np.pi*(x+1.)/2. ) \
-            + d*np.sin( 3.*np.pi*(x+1.)/2. ) \
-            + e*np.sin( 4.*np.pi*(x+1.)/2. )
+            + b*np.sin( np.pi*x ) \
+            + c*np.sin( 2.*np.pi*x ) \
+            + d*np.sin( 3.*np.pi*x ) \
+            + e*np.sin( 4.*np.pi*x )
     def dfunc(x,b,c,d,e):
-        return np.pi/2.*b*np.cos( np.pi*(x+1.)/2. ) \
-            + np.pi*c*np.cos( 2.*np.pi*(x+1.)/2. ) \
-            + np.pi*3./2.*d*np.cos( 3.*np.pi*(x+1.)/2. ) \
-            + np.pi*2.*e*np.cos( 4.*np.pi*(x+1.)/2. )
+        return np.pi*b*np.cos( np.pi*x ) \
+            + np.pi*2*c*np.cos( 2.*np.pi*x ) \
+            + np.pi*3*d*np.cos( 3.*np.pi*x ) \
+            + np.pi*4*e*np.cos( 4.*np.pi*x )
 
     x = np.array(cos1)
 
@@ -42,7 +42,7 @@ def fits(cos1,y,verbose=False):
     if verbose==True: print('a1=',a1,'; a2=',a2,'; a3=',a3,'; a4=',a4)
 
     del x, cov
-    return yfit,d_yfit,a2
+    return yfit,d_yfit,a1
 
 def ecdf_residues(cos_list,verbose=False):
     """
@@ -52,10 +52,11 @@ def ecdf_residues(cos_list,verbose=False):
     #import numpy as np
     from statsmodels.distributions.empirical_distribution import ECDF
 
-    cos_neg=-1*np.array(cos_list)
-    cos1 = np.sort(np.concatenate([cos_list,cos_neg]))
+    #cos_neg=-1*np.array(cos_list)
+    #cos1 = np.sort(np.concatenate([cos_list,cos_neg]))
+    cos1 = np.sort(cos_list)
     ecdf = ECDF(cos1) # Empirical cumulated distribution function
-    y = ecdf(cos1)-(cos1+1.)/2. # Para cuando tomamos el valor verdadero de cos (no el absoluto) 
+    y = ecdf(cos1)-(cos1)#1+1.)/2. # Para cuando tomamos el valor verdadero de cos (no el absoluto) 
 
     return cos1,ecdf,y
 
@@ -75,19 +76,14 @@ def get_cos(xs,ys,zs):
 """
 Code parameters
 """
-Nran = 500
+Nran = 1000
 Nbs = 100
-nseed = 30
+nseed = 50
 
 cc = np.array([.6,.8,1])
 aa = np.array([1,1,1])
 bb = aa
 #%%
-clrs = ['#361e15',\
-        #'#402218', \
-        '#865439', \
-        #'#C68B59',\
-        '#D7B19D']
 
 cos = []
 newcos = []
@@ -126,20 +122,13 @@ for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
         a2.append(np.mean([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1))
         a2_std.append(np.std([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1,ddof=1))
 
-#%%
-# k=0
-# for i in range(nseed):     
-#     plt.plot(newcos[i],residues[i],color=clrs[k],alpha=.2)
-# k=1
-# for i in range(nseed):
-#     plt.plot(newcos[i+nseed],residues[i+nseed],color=clrs[k],alpha=.2)
-# k=2
-# for i in range(nseed):
-#     plt.plot(newcos[i+nseed*2],residues[i+nseed*2],color=clrs[k],alpha=.2)
-# plt.show()
+np.savetxt('../data/zetaCos_v_zetaA2/a1_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),a2)
+np.savetxt('../data/zetaCos_v_zetaA2/a1std_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),a2_std)
+np.savetxt('../data/zetaCos_v_zetaA2/cos_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),newcos)
+
 #%%
 def plot_fitcurves(newcos,residues_fit,ax):
-    xm = np.linspace(-1,1,100)
+    xm = np.linspace(0,1,100)
     for k in range(len(cc)):
         ys = []
         for i in range(nseed):
@@ -191,7 +180,6 @@ def plot_zetas(a2,cos,nseed,cc,clrs,ax):
             yerr=np.std(zy,ddof=1),xerr=np.std(zx,ddof=1),color='k',\
                 capsize=5,lw=2)
 
-
 def plot_a2hist(a2_bs,a2,ax):
     for i in range(len(cc)):
         hist = a2_bs[i*Nbs*nseed:i*Nbs*nseed+Nbs]
@@ -202,7 +190,7 @@ def plot_a2hist(a2_bs,a2,ax):
         ytext=np.arange(10)[-len(cc):]/10
         s = r'$\langle a2\rangle=$'+f'{a2[i*nseed][0]:.2f}'+\
             r'$\pm$'+f'{a2_std[i*nseed][0]:.2f}'
-        ax.text(.5,ytext[i],s,\
+        ax.text(.6,ytext[i],s,\
             color=clrs[i],transform = ax.transAxes)
         # ax3.text(.5,np.min(ytext)-.1,r'$\eta_{ran}\simeq$'\
         #     +f'{eta_ran:.2f}'+r'$\pm$'+f'{eta_ran_std:.2f}',\
@@ -282,4 +270,6 @@ ax4.text(.4,.1,'a2{}amplitude of the fit'.format(r'$\simeq$'),\
 plt.tight_layout()
 plt.savefig(f'../plots/zetaCos_v_zetaA2/a2_Nran{Nran}_Nbs{Nbs}_nseed{nseed}.pdf')
 plt.show()
+# %%
+
 # %%
