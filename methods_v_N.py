@@ -97,18 +97,23 @@ def get_eta_bs(x,Nbs=1000):
 
 def plot_a2N(Nrans,nseed,Nbs,cc,clrs,ax):
 
+    print('A1: Nrans = ',Nrans)
+
     for k in range(len(cc)):
         y=[]
         yerr=[]
         for Nran in Nrans:
 
-            a2 = np.loadtxt(f'../data/zetaCos_v_zetaA2/a1_Nbs{Nbs}_nseed{nseed}_Nran{Nran}.gz')
+            a2 = np.loadtxt(f'../data/methods_v_N/a1_Nbs{Nbs}_nseed{nseed}_Nran{Nran}.gz')
 
             y.append( np.mean([a2[i:i+nseed] for i in range(0, len(a2), nseed)][k]) )
             yerr.append( np.std([a2[i:i+nseed] for i in range(0, len(a2), nseed)][k]) )
         x = Nrans
 
         y=np.array(y)
+        
+        print('Yerr/Y = ',np.array(yerr)/y)
+
         ax.plot(x,y,'o-',ms=4,color=clrs[k],label=r'$e^2=$'+f'{1-cc[k]**2:.1f}')
         ax.fill_between(x,y-yerr,y+yerr,alpha=.3,color=clrs[k])
         ax.set_xscale('log')
@@ -120,7 +125,7 @@ def plot_cosN(Nrans,nseed,Nbs,cc,clrs,ax):
         yerr=[]
         for Nran in Nrans:
 
-            cos = np.loadtxt(f'../data/zetaCos_v_zetaA2/cos_Nbs{Nbs}_nseed{nseed}_Nran{Nran}.gz')
+            cos = np.loadtxt(f'../data/methods_v_N/cos_Nbs{Nbs}_nseed{nseed}_Nran{Nran}.gz')
 
             y.append( np.mean([cos[i:i+nseed] for i in range(0, len(cos), nseed)][k]) )
             yerr.append( np.std([cos[i:i+nseed] for i in range(0, len(cos), nseed)][k]) )
@@ -132,6 +137,8 @@ def plot_cosN(Nrans,nseed,Nbs,cc,clrs,ax):
         ax.set_xscale('log')
 
 def plot_etaN(Nrans,nseed,Nbs,cc,clrs,ax):
+
+    print('ETA: Nrans = ',Nrans)
 
     for k in range(len(cc)):
         y=[]
@@ -145,6 +152,8 @@ def plot_etaN(Nrans,nseed,Nbs,cc,clrs,ax):
         x = Nrans
 
         y=np.array(y)
+        print('Yerr/Y = ',np.array(yerr)/y)
+
         ax.plot(x,y,'o-',ms=4,color=clrs[k],label=r'$e^2=$'+f'{1-cc[k]**2:.1f}')
         ax.fill_between(x,y-yerr,y+yerr,alpha=.3,color=clrs[k])
         ax.set_xscale('log')
@@ -159,8 +168,12 @@ nseed = 50
 cc = np.array([.6,.8,1])
 aa = np.array([1,1,1])
 bb = aa
+
+Nrans = np.geomspace(100,100000,10).astype(np.int64)
+
 #%%
-for Nran in [100,500,1000,5000,10000]:
+
+for Nran in Nrans:
     print(Nran)
     cos = []
     newcos = []
@@ -206,13 +219,13 @@ for Nran in [100,500,1000,5000,10000]:
                 a2_bs.append(a2_)
             
             a2.append(np.mean([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1))
-            a2_std.append(np.std([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1,ddof=1))
+            #a2_std.append(np.std([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1,ddof=1))
 
-    np.savetxt('../data/zetaCos_v_zetaA2/a1_Nbs{}_nseed{}_Nran{}.gz'\
+    np.savetxt('../data/methods_v_N/a1_Nbs{}_nseed{}_Nran{}.gz'\
         .format(Nbs,nseed,Nran),a2)
-    np.savetxt('../data/zetaCos_v_zetaA2/a1std_Nbs{}_nseed{}_Nran{}.gz'\
-        .format(Nbs,nseed,Nran),a2_std)
-    np.savetxt('../data/zetaCos_v_zetaA2/cos_Nbs{}_nseed{}_Nran{}.gz'\
+    #np.savetxt('../data/methods_v_N/a1std_Nbs{}_nseed{}_Nran{}.gz'\
+    #    .format(Nbs,nseed,Nran),a2_std)
+    np.savetxt('../data/methods_v_N/cos_Nbs{}_nseed{}_Nran{}.gz'\
         .format(Nbs,nseed,Nran),newcos)
     np.savetxt('../data/methods_v_N/eta_Nbs{}_nseed{}_Nran{}.gz'\
         .format(Nbs,nseed,Nran),eta)
@@ -220,7 +233,7 @@ for Nran in [100,500,1000,5000,10000]:
 #%%
 from matplotlib.ticker import FormatStrFormatter
 
-fig = plt.figure(figsize=(7,13))
+fig = plt.figure(figsize=(14,5))
 #fig.subplots_adjust(hspace=0.2, wspace=0.4, bottom=.2)
 plt.rcParams['font.size'] = 16
 fs = 16
@@ -229,11 +242,10 @@ clrs = ['#361e15',\
         '#865439', \
         #'#C68B59',\
         '#D7B19D']
-#ax2 = fig.add_subplot(312)
-ax3 = fig.add_subplot(211)
-ax1 = fig.add_subplot(212,sharex=ax3)
+#ax2 = fig.add_subplot(133)
+ax3 = fig.add_subplot(121)
+ax1 = fig.add_subplot(122,sharex=ax3)
 
-Nrans = [300,400,500,1000,3000,4000,5000,10000]
 plot_a2N(Nrans,nseed,Nbs,cc,clrs,ax1)
 ax1.set_ylabel('a1')
 ax1.set_xlabel(r'$\mathrm{N_{ran}}$')
@@ -248,7 +260,7 @@ ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 plot_etaN(Nrans,nseed,Nbs,cc,clrs,ax3)
 ax3.axhline(1/(np.sqrt(2)-1),ls=':',color='slategrey',label='Isotropy')
 ax3.set_ylabel(r'$\eta$')
-#ax3.set_xlabel(r'$\mathrm{N_{ran}}$')
+ax3.set_xlabel(r'$\mathrm{N_{ran}}$')
 
 ax3.legend(loc='upper right',ncol=2,framealpha=.6)
 
