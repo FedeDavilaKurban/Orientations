@@ -95,7 +95,7 @@ def get_eta_bs(x,Nbs=1000):
     
     return eta, eta_std, bs_eta
 
-def plot_a2N(Nrans,nseed,Nbs,cc,clrs,ax):
+def plot_a2N(Nrans,nseed,Nbs,cc,clrs,ax1,ax2):
 
     print('A1: Nrans = ',Nrans)
 
@@ -111,12 +111,17 @@ def plot_a2N(Nrans,nseed,Nbs,cc,clrs,ax):
         x = Nrans
 
         y=np.array(y)
-        
-        print('Yerr/Y = ',np.array(yerr)/y)
+        rel_err = np.array(yerr)/y
+        print('Yerr/Y = ',rel_err)        
 
-        ax.plot(x,y,'o-',ms=4,color=clrs[k],label=r'$e^2=$'+f'{1-cc[k]**2:.1f}')
-        ax.fill_between(x,y-yerr,y+yerr,alpha=.3,color=clrs[k])
-        ax.set_xscale('log')
+        ax1.plot(x,y,'o-',ms=4,color=clrs[k],label=r'$e^2=$'+f'{1-cc[k]**2:.1f}')
+        ax1.fill_between(x,y-yerr,y+yerr,alpha=.3,color=clrs[k])
+        ax1.set_xscale('log')
+        
+        if cc[k]!=1.:
+            ax2.plot(x,rel_err,ls='--',color=clrs[k])
+            ax2.set_xscale('log')
+            ax2.set_yscale('log')
 
 def plot_cosN(Nrans,nseed,Nbs,cc,clrs,ax):
 
@@ -136,7 +141,7 @@ def plot_cosN(Nrans,nseed,Nbs,cc,clrs,ax):
         ax.fill_between(x,y-yerr,y+yerr,alpha=.3,color=clrs[k])
         ax.set_xscale('log')
 
-def plot_etaN(Nrans,nseed,Nbs,cc,clrs,ax):
+def plot_etaN(Nrans,nseed,Nbs,cc,clrs,ax1,ax2):
 
     print('ETA: Nrans = ',Nrans)
 
@@ -152,11 +157,17 @@ def plot_etaN(Nrans,nseed,Nbs,cc,clrs,ax):
         x = Nrans
 
         y=np.array(y)
-        print('Yerr/Y = ',np.array(yerr)/y)
+        rel_err = np.array(yerr)/y
+        print('Yerr/Y = ',rel_err)
 
-        ax.plot(x,y,'o-',ms=4,color=clrs[k],label=r'$e^2=$'+f'{1-cc[k]**2:.1f}')
-        ax.fill_between(x,y-yerr,y+yerr,alpha=.3,color=clrs[k])
-        ax.set_xscale('log')
+        ax1.plot(x,y,'o-',ms=4,color=clrs[k],label=r'$e^2=$'+f'{1-cc[k]**2:.1f}')
+        ax1.fill_between(x,y-yerr,y+yerr,alpha=.3,color=clrs[k])
+        ax1.set_xscale('log')
+        
+        if cc[k]!=1.:
+            ax2.plot(x,rel_err,ls='--',color=clrs[k])
+            ax2.set_xscale('log')
+            ax2.set_yscale('log')
 # %%
 """
 Code parameters
@@ -232,8 +243,10 @@ for Nran in Nrans:
 
 #%%
 from matplotlib.ticker import FormatStrFormatter
+from matplotlib import gridspec
+import matplotlib.ticker as mticker
 
-fig = plt.figure(figsize=(14,5))
+fig = plt.figure(figsize=(15,6))
 #fig.subplots_adjust(hspace=0.2, wspace=0.4, bottom=.2)
 plt.rcParams['font.size'] = 16
 fs = 16
@@ -242,13 +255,20 @@ clrs = ['#361e15',\
         '#865439', \
         #'#C68B59',\
         '#D7B19D']
-#ax2 = fig.add_subplot(133)
-ax3 = fig.add_subplot(121)
-ax1 = fig.add_subplot(122,sharex=ax3)
 
-plot_a2N(Nrans,nseed,Nbs,cc,clrs,ax1)
+spec = gridspec.GridSpec(ncols=2, nrows=2,
+                         width_ratios=[1, 1], wspace=0.2,
+                         hspace=0.1, height_ratios=[4, 1])
+
+#ax2 = fig.add_subplot(133)
+ax3 = fig.add_subplot(spec[0])
+ax1 = fig.add_subplot(spec[1])
+ax2 = fig.add_subplot(spec[2])
+ax4 = fig.add_subplot(spec[3],sharey=ax2)
+
+plot_a2N(Nrans,nseed,Nbs,cc,clrs,ax1,ax4)
 ax1.set_ylabel('a1')
-ax1.set_xlabel(r'$\mathrm{N_{ran}}$')
+ax2.set_xlabel(r'$\mathrm{N_{ran}}$')
 ax1.axhline(0,ls=':',color='slategrey',label='Isotropy')
 ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
@@ -257,15 +277,25 @@ ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 # ax2.set_xlabel(r'$\mathrm{N_{ran}}$')
 # ax2.axhline(.5,ls=':',color='slategrey')
 
-plot_etaN(Nrans,nseed,Nbs,cc,clrs,ax3)
+plot_etaN(Nrans,nseed,Nbs,cc,clrs,ax3,ax2)
 ax3.axhline(1/(np.sqrt(2)-1),ls=':',color='slategrey',label='Isotropy')
 ax3.set_ylabel(r'$\eta$')
-ax3.set_xlabel(r'$\mathrm{N_{ran}}$')
+ax4.set_xlabel(r'$\mathrm{N_{ran}}$')
+ax2.set_ylabel(r'$\sigma_\eta/\eta$')
+ax4.set_ylabel(r'$\sigma_{a1}/a1$')
+
+ax4.yaxis.set_major_formatter(mticker.ScalarFormatter())
+
+for ax in [ax2,ax4]:
+    ax.axhline(10/100,ls=':',color='k')
+
+for ax in [ax1,ax3]:
+    ax.set_xticks([])
 
 ax3.legend(loc='upper right',ncol=2,framealpha=.6)
 
-plt.savefig(f'../plots/methods_v_N/plot_Nbs{Nbs}_nseed{nseed}.png',bbox_inches = 'tight')
-plt.savefig(f'../plots/methods_v_N/plot_Nbs{Nbs}_nseed{nseed}.pdf',bbox_inches = 'tight')
-plt.tight_layout()
+plt.savefig(f'../plots/methods_v_N/plot_Nbs{Nbs}_nseed{nseed}_err.png',bbox_inches = 'tight')
+plt.savefig(f'../plots/methods_v_N/plot_Nbs{Nbs}_nseed{nseed}_err.pdf',bbox_inches = 'tight')
+#plt.tight_layout()
 plt.show()
 # %%
