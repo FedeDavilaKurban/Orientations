@@ -36,15 +36,39 @@ def get_cos(xs,ys,zs):
         
     return cos
         
-# def get_beta(xs,ys,zs):
+def get_beta(xs,ys,zs):
 
-#     beta = np.zeros(len(xs)) 
-#     for j in range(len(xs)):
-#         para = zs[j]
-#         perp = np.sqrt(xs[j]**2+ys[j]**2)
-#         beta[j] = perp / abs(para)
+    beta = np.zeros(len(xs)) 
+    for j in range(len(xs)):
+        para = zs[j]
+        perp = np.sqrt(xs[j]**2+ys[j]**2)
+        beta[j] = perp / abs(para)
 
-#     return beta
+    return beta
+
+def get_beta_wErr(xs,ys,zs,stdErr):
+    """
+    Calculate beta with gaussian errors 
+    in the components "para" and "perp"
+
+    Args:
+        xs (array): x-component of vector
+        ys (array): y-component of vector
+        zs (array): z-component of vector
+        stdErr (scalar): Stand. dev. of gaussian distribution for error
+
+    Returns:
+        beta [array]: perp / abs(para)
+    """
+
+
+    beta = np.zeros(len(xs)) 
+    for j in range(len(xs)):
+        para = zs[j] + np.random.normal(0, stdErr)
+        perp = np.sqrt(xs[j]**2+ys[j]**2) + np.random.normal(0, stdErr)
+        beta[j] = abs(perp) / abs(para)
+
+    return beta
 
 def get_eta_bs(x,Nbs=1000):
     bs_eta = []
@@ -93,14 +117,16 @@ def get_eta_bs(x,Nbs=1000):
 """
 Code parameters
 """
-Nrans = [10000]
+Nrans = [500]
 Nbs = 100
 nseed = 50
-stdErr = 1
+stdErr = .1
 
 cc = np.array([.6,.8,1.])
 aa = np.array([1,1,1])
 bb = aa
+
+eta_ran = 1/(np.sqrt(2)-1)
 
 #print(f'Nran={Nran}, Nbs={Nbs}, nseed={nseed}, cosErr={cosErr}')
 #%%      
@@ -108,18 +134,12 @@ bb = aa
 for Nran in Nrans:
     
     print(f'N={Nran}')
-    
-    eta_ran = 1/(np.sqrt(2)-1)
-    #eta_ran = eta_ran**(-1)
-    eta_ran_std = np.sqrt(28.1421/Nran) #beta = perp/prll
-    #eta_ran_std = np.sqrt(.8284/Nran) #beta = prll/perp
 
     zeta_eta = []
     zeta_cos = []
 
     cos = []
     beta = []
-    #std_beta = []
     eta = []
     eta_arrays = []
     eta_stds = []
@@ -128,7 +148,7 @@ for Nran in Nrans:
     beta_wErr = []
 
     #These arrays are the ones that take into account
-    #the gaussian noise introduced in the cosines
+    #the gaussian noise introduced in the components
     eta_wErr = []
     eta_arrays_wErr = []
     eta_stds_wErr = []
@@ -147,26 +167,19 @@ for Nran in Nrans:
             ys = x[1,:]
             zs = x[2,:]
             
-            cos = get_cos(xs,ys,zs) 
-            #beta.append( get_beta(xs,ys,zs) )
-            beta = np.tan(np.arccos(cos)) 
+            #cos = get_cos(xs,ys,zs) 
+            beta.append( get_beta(xs,ys,zs) )
+            #beta = np.tan(np.arccos(cos)) 
 
-            eta_m, eta_std, eta_array = get_eta_bs(beta,Nbs=Nbs) 
+            eta_m, eta_std, eta_array = get_eta_bs(beta[-1],Nbs=Nbs) 
             eta.append(eta_m)
             #eta_arrays.append(eta_array)
             eta_stds.append(eta_stds)
-            
-            #Vector components with gaussian errors
-            xs = xs + np.random.normal(0,stdErr,len(xs))
-            ys = ys + np.random.normal(0,stdErr,len(ys))
-            zs = zs + np.random.normal(0,stdErr,len(zs))
-            
-            cos_wErr = get_cos(xs,ys,zs) 
-            #beta.append( get_beta(xs,ys,zs) )
-            beta_wErr = np.tan(np.arccos(cos_wErr)) 
 
+            #beta_wErr = np.tan(np.arccos(cos_wErr)) 
+            beta_wErr.append( get_beta_wErr(xs,ys,zs,stdErr) )
 
-            eta_m_wErr, eta_std_wErr, eta_array_wErr = get_eta_bs(beta_wErr,Nbs=Nbs) 
+            eta_m_wErr, eta_std_wErr, eta_array_wErr = get_eta_bs(beta_wErr[-1],Nbs=Nbs) 
             eta_wErr.append(eta_m_wErr)
             #eta_arrays_wErr.append(eta_array_wErr)
             eta_stds_wErr.append(eta_stds_wErr)
@@ -175,6 +188,10 @@ for Nran in Nrans:
         eta)
     np.save(f'../data/zetaCos_v_zetaEta_wErrors_v2/eta_wErr_Nran{Nran}_stdErr{stdErr}',eta_wErr)
 
+    np.save(f'../data/zetaCos_v_zetaEta_wErrors_v2/beta_Nran{Nran}_stdErr{stdErr}',\
+        beta)
+    np.save(f'../data/zetaCos_v_zetaEta_wErrors_v2/beta_wErr_Nran{Nran}_stdErr{stdErr}',beta_wErr)
+
 #%%
 
 fig = plt.figure(figsize=(8,6))
@@ -182,7 +199,9 @@ plt.rcParams['font.size'] = 16
 clrs = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ax = fig.add_subplot(111)
 
-for j, Nran in enumerate([500,1000,5000,10000]):
+Nrans = [500,1000,5000]
+
+for j, Nran in enumerate(Nrans):
     
     eta = np.load(f'../data/zetaCos_v_zetaEta_wErrors_v2/eta_Nran{Nran}_stdErr{stdErr}.npy')
     eta_wErr = np.load(f'../data/zetaCos_v_zetaEta_wErrors_v2/eta_wErr_Nran{Nran}_stdErr{stdErr}.npy')
@@ -191,7 +210,6 @@ for j, Nran in enumerate([500,1000,5000,10000]):
         
         x = np.array(eta[i::len(aa)])
         y = np.array(eta_wErr[i::len(aa)])
-
 
         ratio = y/x
 
@@ -211,7 +229,57 @@ for j, Nran in enumerate([500,1000,5000,10000]):
     
 #ax.text(.025,.95,r'$\langle \eta / \eta_\mathrm{w/error} \rangle =$'+f'{np.mean(ratio):.4f}',\
 #                    transform = ax.transAxes)
-plt.savefig(f'../plots/zetaCos_v_zetaEta_wErrors/ratioVSeta_stdErr{stdErr}.jpg')
+#plt.savefig(f'../plots/zetaCos_v_zetaEta_wErrors/ratioVSeta_stdErr{stdErr}.jpg')
+        
+
+# %%
+fig = plt.figure(figsize=(8,6))
+plt.rcParams['font.size'] = 16
+clrs = plt.rcParams['axes.prop_cycle'].by_key()['color']
+ax = fig.add_subplot(111)
+
+Nrans = [500]
+
+for j, Nran in enumerate(Nrans):
+    
+    beta = np.load(f'../data/zetaCos_v_zetaEta_wErrors_v2/beta_Nran{Nran}_stdErr{stdErr}.npy')
+    beta_wErr = np.load(f'../data/zetaCos_v_zetaEta_wErrors_v2/beta_wErr_Nran{Nran}_stdErr{stdErr}.npy')
+
+    #beta = np.log10(beta)
+    #beta_wErr = np.log10(beta_wErr)
+
+    for i in range(len(aa)):
+        
+        x = np.array(beta[i::len(aa)])
+        y = np.array(beta_wErr[i::len(aa)])
+        ratio = y/x
+        percErr = abs(y-x)
+        
+        #ax.axhline(1,color='k',ls='--')
+        #ax.axvline(eta_ran,color='k',ls='--')
+        
+        
+        if i==0: label=f'N={Nran}'
+        else: label=None
+        
+        #Probando algunas cosas:
+        #ax.hist(np.log10(x))
+        #ax.scatter(x,percErr,color='k')
+        
+        ax.errorbar(x.mean(),percErr.mean(),xerr=x.std(),yerr=percErr.std(),\
+            color=clrs[j],capsize=5,label=label)
+      
+    #ax.set_xscale('log')  
+    #ax.set_yscale('log')  
+
+    ax.legend()
+    ax.set_xlabel(r'$log_{10}(\beta)$')
+    #ax.set_ylabel(r'$log_{10}(\beta_\mathrm{with\,errors}) / log_{10}(\beta)$')
+    
+    
+#ax.text(.025,.95,r'$\langle \eta / \eta_\mathrm{w/error} \rangle =$'+f'{np.mean(ratio):.4f}',\
+#                    transform = ax.transAxes)
+#plt.savefig(f'../plots/zetaCos_v_zetaEta_wErrors/ratioVSbeta_stdErr{stdErr}.jpg')
         
 
 # %%
