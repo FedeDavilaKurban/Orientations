@@ -1,38 +1,9 @@
-"""
-Quiero ver el bias entre los betas normales y los betas
-calculados metiendo ruido gaussiano en las componentes de los vectores
-generados aleatoriamente.
-Esto lo hago para simular posibles errores observacionales.
-
-"""
 #%%
-import sys
-from config import illustrisPath
-sys.path.append(illustrisPath+'param_tools')
-# use param_tools: https://github.com/maxkapur/param_tools
-from param_tools import r_surface, surface_area
-
 import numpy as np
-from matplotlib import pyplot as plt
 from functools import partial
-#%%
-"""
-Definitions
-"""
-def ellipsoid(t, u, a=1, b=1, c=1):
-    return np.array([a*np.sin(u)*np.cos(t), b*np.sin(u)*np.sin(t), c*np.cos(u)])
-domain_t = [0, 2*np.pi]
-domain_u = [0, np.pi]
+from param_tools import r_surface, surface_area
+from matplotlib import pyplot as plt
 
-def get_cos(xs,ys,zs):
-
-    cos = np.zeros(len(xs))
-    for j in range(len(xs)):
-        norm = np.sqrt(xs[j]**2 + ys[j]**2 + zs[j]**2)
-        cos[j] = abs(zs[j]) / norm
-        
-    return cos
-        
 def get_beta(xs,ys,zs):
 
     beta = np.zeros(len(xs)) 
@@ -60,95 +31,111 @@ def get_beta_wErr(xs,ys,zs,stdErr):
 
 
     beta = np.zeros(len(xs)) 
-    err = np.random.normal(0, stdErr)
     for j in range(len(xs)):
-        para = zs[j] + err
-        perp = np.sqrt(xs[j]**2+ys[j]**2) + err
+        para = zs[j] + np.random.normal(0, stdErr)
+        perp = np.sqrt(xs[j]**2+ys[j]**2) + np.random.normal(0, stdErr)
         beta[j] = abs(perp) / abs(para)
 
     return beta
 
-def get_eta_bs(x,Nbs=1000):
-    bs_eta = []
-    for _ in range(Nbs):  
-        bs_x = np.random.choice(x, size=len(x))
-
-        n_perp = np.sum(bs_x>1.)
-        n_prll = np.sum(bs_x<1.)
-        bs_eta.append( n_perp / n_prll )
-        
-        # n_perp = np.sum(bs_x<0.)
-        # n_prll = np.sum(bs_x>0.)
-        # bs_eta.append( n_prll / n_perp )
-    
-    eta = np.mean(bs_eta) 
-    eta_std = np.std(bs_eta, ddof=1)
-    
-    return eta, eta_std, bs_eta
+def ellipsoid(t, u, a=1, b=1, c=1):
+    return np.array([a*np.sin(u)*np.cos(t), b*np.sin(u)*np.sin(t), c*np.cos(u)])
+domain_t = [0, 2*np.pi]
+domain_u = [0, np.pi]
 
 
 #%%
-"""
-Code parameters
-"""
-Nrans = [1000]
-Nbs = 100
-nseed = 50
-stdErr = .01
+Nran = 1000
+stdErr = .1
+nseed = 10
 
 cc = np.array([.6,.8,1.])
 aa = np.array([1,1,1])
 bb = aa
 
-eta_ran = 1/(np.sqrt(2)-1)
+#%%
 
-#print(f'Nran={Nran}, Nbs={Nbs}, nseed={nseed}, cosErr={cosErr}')
-#%%      
+
+
+rseeds = np.arange(4,4+nseed)
+for rseed in range(nseed):
+    
+    beta = []
+    beta_wErr = []
+    
+    for k, c in enumerate(cc):
+
+        f = partial(ellipsoid, c=c)
+
+        np.random.seed(rseed)
+        x, t, u, St, Su = r_surface(Nran, f, *domain_t, *domain_u, 20, 20)
+        xs = x[0,:]
+        ys = x[1,:]
+        zs = x[2,:]
+
+        beta.append( get_beta(xs,ys,zs) )
+        beta_wErr.append( get_beta_wErr(xs,ys,zs,stdErr) )
+        # plt.hist(np.log10(beta[-1]),histtype='step')
+        # plt.hist(np.log10(beta_wErr[-1]),histtype='step')
+        # plt.title(f'c={c}')
+        # plt.show()
+        
+        np.save(f'../data/beta_vs_betaWerrors/beta_Nran{Nran}_stdErr{stdErr}_rseed{rseed}',\
+            beta)
+        np.save(f'../data/beta_vs_betaWerrors/beta_wErr_Nran{Nran}_stdErr{stdErr}_rseed{rseed}',\
+            beta_wErr)
+
+
+# %%
 fig = plt.figure(figsize=(8,6))
 plt.rcParams['font.size'] = 16
 clrs = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ax = fig.add_subplot(111)
 
-for Nran in Nrans:
+rseeds = np.arange(4,4+nseed)
+for rseed in range(nseed)[:1]:
     
-    print(f'N={Nran}')
+    beta = np.load(f'../data/beta_vs_betaWerrors/beta_Nran{Nran}_stdErr{stdErr}_rseed{rseed}.npy')
+    beta_wErr = np.load(f'../data/beta_vs_betaWerrors/beta_wErr_Nran{Nran}_stdErr{stdErr}_rseed{rseed}.npy')
 
-    beta = []
-    beta_wErr = []
+    for i in range(len(cc)):
+        if rseed==0: label=f'c={cc[i]}'
+        else: label=None
+        
+        ax.hist(np.log10(beta[i]),histtype='step',label=label,color=clrs[i])
+        ax.hist(np.log10(beta_wErr[i]),histtype='step',label=label,color=clrs[i],lw=2)
 
-    rseeds = np.arange(4,4+nseed)
-    for rseed in rseeds:
-
-        for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
-            #print(k,a,b,c)
-
-            f = partial(ellipsoid, a=a, b=b, c=c)
-
-            np.random.seed(rseed)
-            x, t, u, St, Su = r_surface(Nran, f, *domain_t, *domain_u, 20, 20)
-            xs = x[0,:]
-            ys = x[1,:]
-            zs = x[2,:]
-    
-            beta.append( get_beta(xs,ys,zs) )
-            beta_wErr.append( get_beta_wErr(xs,ys,zs,stdErr) )
-
-            x = np.log10(beta[-1])
-            y = np.log10(beta_wErr[-1])
-            ratio = np.array(y/x)
-            
-            ax.hist(np.log10(np.array(beta)))
-            #ax.scatter(x,ratio)
-            #ax.errorbar(x.mean(),ratio.mean(),xerr=x.std(),yerr=ratio.std(),\
-            #    color=clrs[k],capsize=5)#,label=label)
-            
-            
-    
-
-
-
+ax.legend()
+plt.show()
 # %%
 
-plt.hist(np.log10(beta))
+fig = plt.figure(figsize=(8,6))
+plt.rcParams['font.size'] = 16
+clrs = plt.rcParams['axes.prop_cycle'].by_key()['color']
+ax = fig.add_subplot(111)
 
+rseeds = np.arange(4,4+nseed)
+for rseed in range(nseed):
+    
+    beta = np.load(f'../data/beta_vs_betaWerrors/beta_Nran{Nran}_stdErr{stdErr}_rseed{rseed}.npy')
+    beta_wErr = np.load(f'../data/beta_vs_betaWerrors/beta_wErr_Nran{Nran}_stdErr{stdErr}_rseed{rseed}.npy')
+
+    for i in range(len(cc)):
+        if rseed==0: label=f'c={cc[i]}'
+        else: label=None
+        
+        x = beta[i]
+        y = beta_wErr[i]
+        percErr = abs(y-x)/x
+      
+        logx = np.log10(beta[i])
+        logy = np.log10(beta_wErr[i])
+        
+        ax.scatter(logx,percErr,color=clrs[i],label=label)
+        #ax.errorbar(logx.mean(),percErr.mean(),xerr=logx.std(),yerr=percErr.std(),\
+        #    label=label,color=clrs[i])
+
+ax.legend()
+plt.show()
 # %%
+    
