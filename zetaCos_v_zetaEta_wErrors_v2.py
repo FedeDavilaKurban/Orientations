@@ -71,6 +71,20 @@ def get_beta_wErr(xs,ys,zs,stdErr):
     return beta
 
 def get_eta_bs(x,Nbs=1000):
+    """
+    Calculate eta from beta
+
+    Args:
+        x (array): log10(beta)
+        Nbs (int, optional): Number of bootstrap resamplings. 
+                                            Defaults to 1000.
+
+    Returns:
+       eta (float): mean of boostrap etas
+       eta_std (float): std of boostrap etas
+       bs_eta (array): all boostrap etas
+
+    """
     bs_eta = []
     for _ in range(Nbs):  
         bs_x = np.random.choice(x, size=len(x))
@@ -199,6 +213,7 @@ plt.rcParams['font.size'] = 16
 clrs = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ax = fig.add_subplot(111)
 
+#stdErr = 1.
 Nrans = [500,1000,5000]
 
 for j, Nran in enumerate(Nrans):

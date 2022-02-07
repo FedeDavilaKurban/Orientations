@@ -57,7 +57,7 @@ bb = aa
 
 
 
-rseeds = np.arange(4,4+nseed)
+#rseeds = np.arange(4,4+nseed)
 for rseed in range(nseed):
     
     beta = []
@@ -75,10 +75,6 @@ for rseed in range(nseed):
 
         beta.append( get_beta(xs,ys,zs) )
         beta_wErr.append( get_beta_wErr(xs,ys,zs,stdErr) )
-        # plt.hist(np.log10(beta[-1]),histtype='step')
-        # plt.hist(np.log10(beta_wErr[-1]),histtype='step')
-        # plt.title(f'c={c}')
-        # plt.show()
         
         np.save(f'../data/beta_vs_betaWerrors/beta_Nran{Nran}_stdErr{stdErr}_rseed{rseed}',\
             beta)
@@ -86,27 +82,7 @@ for rseed in range(nseed):
             beta_wErr)
 
 
-# %%
-fig = plt.figure(figsize=(8,6))
-plt.rcParams['font.size'] = 16
-clrs = plt.rcParams['axes.prop_cycle'].by_key()['color']
-ax = fig.add_subplot(111)
 
-rseeds = np.arange(4,4+nseed)
-for rseed in range(nseed)[:1]:
-    
-    beta = np.load(f'../data/beta_vs_betaWerrors/beta_Nran{Nran}_stdErr{stdErr}_rseed{rseed}.npy')
-    beta_wErr = np.load(f'../data/beta_vs_betaWerrors/beta_wErr_Nran{Nran}_stdErr{stdErr}_rseed{rseed}.npy')
-
-    for i in range(len(cc)):
-        if rseed==0: label=f'c={cc[i]}'
-        else: label=None
-        
-        ax.hist(np.log10(beta[i]),histtype='step',label=label,color=clrs[i])
-        ax.hist(np.log10(beta_wErr[i]),histtype='step',label=label,color=clrs[i],lw=2)
-
-ax.legend()
-plt.show()
 # %%
 
 fig = plt.figure(figsize=(8,6))
@@ -114,7 +90,7 @@ plt.rcParams['font.size'] = 16
 clrs = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ax = fig.add_subplot(111)
 
-rseeds = np.arange(4,4+nseed)
+#rseeds = np.arange(4,4+nseed)
 for rseed in range(nseed):
     
     beta = np.load(f'../data/beta_vs_betaWerrors/beta_Nran{Nran}_stdErr{stdErr}_rseed{rseed}.npy')
@@ -135,6 +111,10 @@ for rseed in range(nseed):
         #ax.errorbar(logx.mean(),percErr.mean(),xerr=logx.std(),yerr=percErr.std(),\
         #    label=label,color=clrs[i])
 
+#ax.set_xlim([0,2])
+#ax.set_ylim([0,5])
+#ax.plot(logx,logx,color='k')
+#ax.set_yscale('log')
 ax.legend()
 plt.show()
 # %%
