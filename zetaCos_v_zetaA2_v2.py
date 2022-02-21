@@ -94,10 +94,11 @@ a2 = []
 a2_std = []
 a2_bs=[]
 
+rseeds = np.arange(4,4+nseed)
 for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
     f = partial(ellipsoid, a=a, b=b, c=c)
     print(k)
-    for rseed in range(nseed):
+    for rseed in rseeds:
         np.random.seed(rseed)
         x, t, u, St, Su = r_surface(Nran, f, *domain_t, *domain_u, 20, 20)
         xs = x[0,:]
@@ -122,11 +123,15 @@ for k, (a, b, c) in enumerate(zip(aa,bb,cc)):
         a2.append(np.mean([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1))
         a2_std.append(np.std([a2_bs[-Nbs:][i:i+Nbs] for i in range(0, len(a2_bs[-Nbs:]), Nbs)],axis=1,ddof=1))
 
-np.savetxt('../data/zetaCos_v_zetaA2/a1_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),a2)
-np.savetxt('../data/zetaCos_v_zetaA2/a1std_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),a2_std)
-np.savetxt('../data/zetaCos_v_zetaA2/cos_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),newcos)
+np.savetxt('../data/zetaCos_v_zetaA2_v2/a1_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),a2)
+np.savetxt('../data/zetaCos_v_zetaA2_v2/a1std_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),a2_std)
+np.savetxt('../data/zetaCos_v_zetaA2_v2/cos_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran),newcos)
 
 #%%
+# a2 = np.loadtxt('../data/zetaCos_v_zetaA2_v2/a1_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran))
+# a2_std = np.loadtxt('../data/zetaCos_v_zetaA2_v2/a1std_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran))
+# newcos = np.loadtxt('../data/zetaCos_v_zetaA2_v2/cos_Nbs{}_nseed{}_Nran{}.gz'.format(Nbs,nseed,Nran))
+
 def plot_fitcurves(newcos,residues_fit,ax):
     xm = np.linspace(0,1,100)
     for k in range(len(cc)):
@@ -268,7 +273,7 @@ ax4.text(.4,.1,'a2{}amplitude of the fit'.format(r'$\simeq$'),\
     fontsize=fs-1,alpha=.7,color='k',transform = ax4.transAxes)
 
 plt.tight_layout()
-plt.savefig(f'../plots/zetaCos_v_zetaA2/a2_Nran{Nran}_Nbs{Nbs}_nseed{nseed}.pdf')
+#plt.savefig(f'../plots/zetaCos_v_zetaA2/a2_Nran{Nran}_Nbs{Nbs}_nseed{nseed}.pdf')
 plt.show()
 # %%
 

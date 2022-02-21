@@ -78,7 +78,7 @@ Code parameters
 """
 Nran = 1000
 Nbs = 100
-nseed = 10
+nseed = 50
 
 cc = np.array([.6,.8,1])
 aa = np.array([1,1,1])
@@ -172,7 +172,7 @@ def plot_zetas(a2,cos,nseed,cc,clrs,ax):
         y = np.array(a2[k::3])
         x = np.mean(cos[k::3],axis=1)
 
-        zy = y/get_a2stdran(a2,nseed)
+        zy = y/get_a2stdran(a2)#,nseed)
         zx = (x-0.5)/np.sqrt(12)
         ax.scatter(zx,zy,color=clrs[k],alpha=.5)
 
@@ -181,7 +181,7 @@ def plot_zetas(a2,cos,nseed,cc,clrs,ax):
                 capsize=5,lw=2)
 
 def plot_a2hist(a2_bs,a2,ax):
-    xtext=np.linspace(0.6,.05,3)
+    #xtext=np.linspace(0.6,.05,3)
     ytext=np.linspace(.6,.35,3)
     for i in range(len(cc)):
         hist = a2_bs[i*Nbs:i*Nbs+Nbs]
@@ -190,14 +190,14 @@ def plot_a2hist(a2_bs,a2,ax):
         ax.axvline(0,ls=':',color='slategrey')
 
 
-        s = r'$\langle a1\rangle=$'+f'{a2[i][0]:.2f}'+\
+        s = r'$\langle a_{1}\rangle=$'+f'{a2[i][0]:.2f}'+\
             r'$\pm$'+f'{a2_std[i][0]:.2f}'
-        ax.text(.025,ytext[i]+.3,s,\
+        ax.text(.025,ytext[2-i]+.3,s,\
             color=clrs[i],transform = ax.transAxes)
         # ax3.text(.5,np.min(ytext)-.1,r'$\eta_{ran}\simeq$'\
         #     +f'{eta_ran:.2f}'+r'$\pm$'+f'{eta_ran_std:.2f}',\
         #     color='slategrey',transform = ax3.transAxes)
-        ax.text(.68,.82,f'{Nbs} bootstrap \n resamplings',\
+        ax.text(.68,.06,f'{Nbs} bootstrap \n   resamplings',\
             color='k',transform = ax.transAxes)
 
 fig = plt.figure(figsize=(13,17))
@@ -222,12 +222,12 @@ ax1.set_xlabel(r'$\cos(\lambda)$')
 ax2.set_xlabel(r'$\cos(\lambda)$')
 ax2.set_ylabel('ECDF')
 ax3.set_xlabel(r'$\cos(\lambda)$')
-ax3.set_ylabel('Residues = ECDF(cosines) - cosines')
+ax3.set_ylabel('Residues')
 ax4.set_xlabel(r'$\cos(\lambda)$')
 ax4.set_ylabel('Residues Fits')
 ax5.set_xlabel(r'$\zeta_{cos}=(\langle cos\rangle -cos_{ran})/\sigma_{cos}}$')
-ax5.set_ylabel(r'$\zeta_{a1}=(a1-a1_{ran})/\sigma_{a1,ran}}$')
-ax6.set_xlabel('a2 [bootstrap resampling]')
+ax5.set_ylabel(r'$\zeta_{a_{1}}=(a_{1}-a_{1,ran})/\sigma_{a_{1},ran}}$')
+ax6.set_xlabel(r'$a_{1}$ [bootstrap resampling]')
 
 #VERTICAL/HORIZONTAL LINES
 ax1.axhline(1,ls='--',lw=1,color='slategrey')
@@ -266,7 +266,7 @@ ax1.text(.6,.9,'Nran={}'.format(Nran),\
     fontsize=fs, alpha=1, color='k', transform = ax1.transAxes)
 ax3.text(.05,.8,'{} realizations \n for each {}'.format(nseed,r'$e^2$'),\
     fontsize=fs,alpha=1,color='k',transform = ax3.transAxes)
-ax4.text(.42,.1,'a1{}amplitude of the curve'.format(r'$\simeq$'),\
+ax4.text(.41,.1,r'$a_{1}\simeq$ amplitude of the curve',\
     fontsize=fs-1,alpha=1,color='k',transform = ax4.transAxes)
 ax4.text(.05,.8,'Mean and {} obtained \n from the {} realizations'\
     .format(r'$\sigma$',nseed),\
