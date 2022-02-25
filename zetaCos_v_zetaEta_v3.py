@@ -230,6 +230,13 @@ ax2.text(.65,.9,r'$\beta=S_\perp/S_\parallel$'.format(Nran),\
 ax5.text(.75,.8,'{} random samples \n for each {}'.format(nseed,r'$e^2$'),\
     fontsize=fs,alpha=.7,color='k',transform = ax5.transAxes)
 
+#PANEL LABELS
+ax1.text(0,1.05,'a)',fontsize=fs, alpha=1, color='k', transform = ax1.transAxes)
+ax0.text(0,1.05,'b)',fontsize=fs, alpha=1, color='k', transform = ax0.transAxes)
+ax2.text(0,1.05,'c)',fontsize=fs, alpha=1, color='k', transform = ax2.transAxes)
+ax3.text(0,1.05,'d)',fontsize=fs, alpha=1, color='k', transform = ax3.transAxes)
+ax5.text(0,1.05,'e)',fontsize=fs, alpha=1, color='k', transform = ax5.transAxes)
+
 ax1.set_xlabel(r'$\cos(\lambda)$')
 ax2.set_xlabel(r'$log_{10}(\beta)$')
 ax3.set_xlabel(r'$\eta$')

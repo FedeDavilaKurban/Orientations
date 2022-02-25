@@ -272,6 +272,15 @@ ax4.text(.05,.8,'Mean and {} obtained \n from the {} realizations'\
     .format(r'$\sigma$',nseed),\
     fontsize=fs-1,alpha=1,color='k',transform = ax4.transAxes)
 
+#PANEL LABELS
+ax1.text(0,1.05,'a)',fontsize=fs, alpha=1, color='k', transform = ax1.transAxes)
+ax0.text(0,1.05,'b)',fontsize=fs, alpha=1, color='k', transform = ax0.transAxes)
+ax2.text(0,1.05,'c)',fontsize=fs, alpha=1, color='k', transform = ax2.transAxes)
+ax3.text(0,1.05,'d)',fontsize=fs, alpha=1, color='k', transform = ax3.transAxes)
+ax6.text(0,1.05,'e)',fontsize=fs, alpha=1, color='k', transform = ax6.transAxes)
+ax4.text(0,1.05,'f)',fontsize=fs, alpha=1, color='k', transform = ax4.transAxes)
+ax5.text(0,1.05,'g)',fontsize=fs, alpha=1, color='k', transform = ax5.transAxes)
+
 plt.tight_layout()
 plt.savefig(f'../plots/zetaCos_v_zetaA2/a2_Nran{Nran}_Nbs{Nbs}_nseed{nseed}_v3.pdf')
 plt.show()
