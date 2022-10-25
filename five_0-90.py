@@ -6,30 +6,30 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, RadioButtons
 
 
-xmin = -1
+xmin = 0
 xmax = 1
  
 def func(x, a0, a1, a2, a3, a4):
     f = a0 + \
-        a1*np.sin( 1.*np.pi*(x+1.)/2. ) + \
-        a2*np.sin( 2.*np.pi*(x+1.)/2. ) + \
-        a3*np.sin( 3.*np.pi*(x+1.)/2. ) + \
-        a4*np.sin( 4.*np.pi*(x+1.)/2. )
+        a1*np.sin( 1.*np.pi*x ) + \
+        a2*np.sin( 2.*np.pi*x ) + \
+        a3*np.sin( 3.*np.pi*x ) + \
+        a4*np.sin( 4.*np.pi*x )
     return f  
 
 def cdf(x, a0, a1, a2, a3, a4):
 
-    f = (x+1)/2 + \
-        a1*np.sin( 1.*np.pi*(x+1.)/2. ) + \
-        a2*np.sin( 2.*np.pi*(x+1.)/2. ) + \
-        a3*np.sin( 3.*np.pi*(x+1.)/2. ) + \
-        a4*np.sin( 4.*np.pi*(x+1.)/2. )
+    f = x + \
+        a1*np.sin( 1.*np.pi*x ) + \
+        a2*np.sin( 2.*np.pi*x ) + \
+        a3*np.sin( 3.*np.pi*x ) + \
+        a4*np.sin( 4.*np.pi*x )
     return f  
  
 def dfdx(x, a0, a1, a2, a3, a4):
     f = a0
     for a, alpha in zip([a1, a2, a3, a4], [1, 2, 3, 4]):
-        s = (a*alpha*np.pi/2) * np.cos(alpha*np.pi*(x+1)/2)
+        s = (a*alpha*np.pi) * np.cos(alpha*np.pi*x)
         f = f + s
     return f  
 
@@ -57,6 +57,13 @@ textsets = {'rotation':'vertical', 'fontstyle':'italic',
             'fontsize':8,
             'color':'rebeccapurple',
             'horizontalalignment':'center'}
+textsets1 = {'rotation':'horizontal', 'fontstyle':'italic',
+            'fontweight':800, 'fontfamily':'serif',
+            'backgroundcolor':(1,1,1,0.5),
+            'fontsize':8,
+            'color':'rebeccapurple',
+            'horizontalalignment':'center'}
+
 
 N = 500
 Nbh = 40  # number of bins in hstograms
@@ -85,9 +92,9 @@ ax = fig.add_subplot(231)
  
 [line01] = ax.plot(theta, dfdx(t, a0, a1, a2, a3, a4), linewidth=3,
                   color=histcolor)
-ax.plot([0, 180],[a0, a0], linestyle='--', linewidth=1, color='slategrey')
+ax.plot([0, 90],[a0, a0], linestyle='--', linewidth=1, color='slategrey')
 
-ax.set_xlim([0, 180])
+ax.set_xlim([0, 90])
 ax.set_ylim([-0.2, 1.2])
 ax.get_xaxis().get_major_formatter().labelOnlyBase = False
 ax.grid(color='whitesmoke', linestyle='-', linewidth=0.5)
@@ -95,9 +102,9 @@ ax.set_title('Angle distribution function  ', y=0.9, loc='right',
         fontdict=sty)
 ax.set_xlabel(r'$\theta$ (deg)')
 ax.set_ylabel(r'f($\theta$)', labelpad=-4)
-ax.text(170, 0., 'antialigned', **textsets)
-ax.text(10, 0., 'aligned', **textsets)
-ax.text(90, 0., 'perpedicular', **textsets)
+ax.text(80, 0., 'perpendicular', **textsets)
+ax.text(10, 0., 'parallel', **textsets)
+#ax.text(90, 0., 'perpedicular', **textsets)
                                                     
  
 # PANEL - - - -
@@ -105,7 +112,7 @@ ax = fig.add_subplot(232)
  
 [line02] = ax.plot(t, dfdx(t, a0, a1, a2, a3, a4), linewidth=3,
                   color=histcolor)
-ax.plot([-1, 1],[a0, a0], linestyle='--', linewidth=1, color='slategrey')
+ax.plot([xmin, xmax],[a0, a0], linestyle='--', linewidth=1, color='slategrey')
 
 ax.set_xlim([xmin, xmax])
 ax.set_ylim([-0.2, 1.2])
@@ -115,16 +122,16 @@ ax.set_title(r'cos($\theta$) distribution function  ', y=0.9, loc='right',
         fontdict=sty)
 ax.set_xlabel(r'cos($\theta$)')
 ax.set_ylabel(r'f(cos($\theta$))', labelpad=-4)
-ax.text(0.75, 0., 'aligned', **textsets)
-ax.text(-0.75, 0., 'antialigned', **textsets)
-ax.text(0., 0., 'perpedicular', **textsets)
+ax.text(0.85, 0., 'parallel', **textsets)
+ax.text(0.15, 0., 'perpendicular', **textsets)
+#ax.text(0., 0., 'perpedicular', **textsets)
 
 # PANEL - - - -
 ax = fig.add_subplot(233)
  
 [line03] = ax.plot(t, cdf(t, a0, a1, a2, a3, a4), linewidth=3,
                   color='salmon')
-ax.plot([-1, 1],[0, 1], linestyle='--', linewidth=1, color='slategrey')
+ax.plot([xmin, xmax],[0, 1], linestyle='--', linewidth=1, color='slategrey')
 
 ax.set_xlim([xmin, xmax])
 ax.set_ylim([-0.2, 1.2])
@@ -153,8 +160,9 @@ ax.grid(color='whitesmoke', linestyle='-', linewidth=0.5)
 ax.set_title('residues w.r.t. uniform dist. CDF  ', y=0.9, loc='right',
         fontdict=sty)
 ax.set_xlabel(r'cos($\theta$)')
-ax.set_ylabel(r'f(cos($\theta$)) - (cos($\theta$)+1)/2', labelpad=-1)
-
+ax.set_ylabel(r'f(cos($\theta$)) - cos($\theta$)', labelpad=-1)
+ax.text(0.5, 0.45, 'parallel', **textsets1)
+ax.text(0.5, 0.55, 'perpendicular', **textsets1)
 
 
 # PANEL - - - -

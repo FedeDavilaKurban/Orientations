@@ -58,7 +58,6 @@ ax.legend(loc = 'lower right')
 ax.set_ylabel(r'$\rho/\bar{\rho}-1$')
 ax.set_xlabel('r (Mpc h{})'.format(r'$^{-1}$'))
 
-#%%
 
 plt.rcParams['figure.figsize'] = (8, 8)
 plt.rcParams['font.size'] = 15

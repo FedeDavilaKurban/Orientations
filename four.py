@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, RadioButtons
 
 
-xmin = -1
+xmin = 0
 xmax = 1
  
 def func(x, a0, a1, a2, a3, a4):

@@ -119,7 +119,7 @@ ax[1].set_xlim([-1.,2.5])
 
 plt.tight_layout()
 #plt.savefig('../plots/data2.png')
-plt.savefig('../plots/data.pdf')
+#plt.savefig('../plots/data.pdf')
 # %%
 
 # import matplotlib.pyplot as plt
