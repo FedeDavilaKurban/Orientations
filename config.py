@@ -1,4 +1,4 @@
-writePath = '/media/fede/TOSHIBA EXT/'
+writePath = '/media/fdavilakurban/TOSHIBA EXT/'
 #writePath = '/media/fdavilakurban/TOSHIBA EXT/'
 #illustrisPath = '/home/fede/'
 illustrisPath = '/home/fdavilakurban/'
