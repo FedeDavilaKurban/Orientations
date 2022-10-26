@@ -105,7 +105,9 @@ for vfilter in ['lo']:
 
         for vtype in ['s']:
             print('vtype:',vtype)
-            
+
+            voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
+
             # eta = []
             # eta_std = []
 
@@ -115,8 +117,6 @@ for vfilter in ['lo']:
             
             # n_gal=[]
             for rmin,rmax in zip(r1,r2):
-
-                voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 
                 zeta_jk = []
                 #n_gal_jk = []
@@ -133,6 +133,7 @@ for vfilter in ['lo']:
                     #N = len(beta)
                     #n_gal_jk.append(N)
 
+                print(zeta_jk)
 
                 if forTable: 
                     filename = '../data/zeta/zeta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}_jk_forTable.txt'
