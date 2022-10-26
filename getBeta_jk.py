@@ -184,10 +184,11 @@ r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 
 for sec in [3]:
     print('sec=',sec)
-    for vtype in ['r']:
-        print('vtype=',vtype)
-        for rmin,rmax in zip(r1,r2):
 
+    for vtype in ['s']:
+        print('vtype=',vtype)
+        
+        for rmin,rmax in zip(r1,r2):
             print('rmin, rmax =',rmin,rmax)
 
             voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
@@ -228,8 +229,8 @@ for sec in [3]:
                         perp.append( np.sqrt(sn**2 - prll[-1]**2) ) # S**2 = S_perp**2 + S_paral**2
 
 
-                r = np.array(r)
-                rrv = np.array(rrv)
+                #r = np.array(r)
+                #rrv = np.array(rrv)
 
                 perp =  np.array(perp)
                 prll = np.array(prll)

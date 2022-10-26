@@ -183,21 +183,19 @@ r2 = np.array([0.9,1.0,1.1,1.2,1.3,1.4,1.5])
 
 for sec in [3]:
     print('sec=',sec)
-    for vtype in ['a','r','s']:
+
+    for vtype in ['s']:
         print('vtype=',vtype)
+
         for rmin,rmax in zip(r1,r2):
             print('rmin, rmax =',rmin,rmax)
-            voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 
+            voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
             nvs = range(len(voids))
 
             for jk in range(len(voids)):
 
                 vrad = []
-                #vtra = []
-
-                #r = []
-                #rrv = []
 
                 for nv in nvs:
 
@@ -222,23 +220,12 @@ for sec in [3]:
                             if gr[axis]<=-(rmax+.5)*vr: gr[axis]+=lbox
                             if gr[axis]>= (rmax+.5)*vr: gr[axis]-=lbox
 
-                        #r.append( np.linalg.norm(gr) )
-                        #rrv.append( r[-1]/vr)
-                        #r_versor = gr/r[-1] #radial direction from void center
                         r_versor = gr/np.linalg.norm(gr)
                         
                         vrad.append( np.dot([gxv,gyv,gzv],r_versor) )
 
-                        #v_norm_squared = gxv**2 + gyv**2 + gzv**2
-                        #vrad_norm_squared = vrad[-1]**2
-                        #vtrans_squared = v_norm_squared-vrad_norm_squared
-
-                        #vtra.append( np.sqrt(vtrans_squared) )
 
                 vrad = np.array(vrad)
-                #vtra = np.array(vtra)
-                #r = np.array(r)
-                #rrv = np.array(rrv)
 
                 ascii.write(np.column_stack([vrad]),\
                             '../data/vel/-1/vel_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}_jk{}.txt'\

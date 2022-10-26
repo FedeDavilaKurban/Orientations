@@ -98,54 +98,50 @@ maxradV = 0.
 
 lowMcut = -1
 
+for vfilter in ['lo']:
 
-for sec in [0]:
-    print(sec)
+    for sec in [3]:
+        print('sec:',sec)
 
-    
-    for vtype in ['a','r','s']:
-        print(vtype)
-        
-        # eta = []
-        # eta_std = []
+        for vtype in ['s']:
+            print('vtype:',vtype)
+            
+            # eta = []
+            # eta_std = []
 
-        # eta_random_mean = []
-        # eta_random_var = []
-        # eta_random_std = []
-        
-        # n_gal=[]
+            # eta_random_mean = []
+            # eta_random_var = []
+            # eta_random_std = []
+            
+            # n_gal=[]
+            for rmin,rmax in zip(r1,r2):
 
-        eta_jk = []
-        n_gal_jk = []
+                voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
 
-        for rmin,rmax in zip(r1,r2):
-            print(rmin,rmax)
+                zeta_jk = []
+                #n_gal_jk = []
+                for jk in range(len(voids)):
 
-            voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
+                    etaTable = ascii.read('../data/eta/eta_minradV{}_maxradV{}_sec{}_vtype{}_jk{}.txt'\
+                                        .format(minradV,maxradV,sec,vtype,jk))['eta','rmin','rmax','N']
 
+                    eta_ran = 1./(np.sqrt(2)-1)
+                    eta_ran_std = np.sqrt(28.1421/etaTable['N'])
 
-            for jk in range(len(voids)):
+                    zeta_jk.append( (etaTable['eta']-eta_ran)/eta_ran_std )
 
-                beta = ascii.read('../data/beta/{}/beta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}_jk{}.txt'\
-                                    .format(str(lowMcut),minradV,maxradV,rmin,rmax,sec,vtype,jk))['beta']
-
-                n_perp = len(np.where(beta>1.)[0])
-                n_prll = len(np.where(beta<1.)[0])
-                eta_jk.append( n_perp / n_prll )
-
-                N = len(beta)
-                n_gal_jk.append(N)
+                    #N = len(beta)
+                    #n_gal_jk.append(N)
 
 
-
-        if forTable: 
-            filename = '../data/eta/eta_minradV{}_maxradV{}_sec{}_vtype{}_jk_forTable.txt'
-        else: 
-            filename = '../data/eta/eta_minradV{}_maxradV{}_sec{}_vtype{}_jk.txt'
-        print(filename)
-        ascii.write(np.column_stack([eta_jk,r1,r2,n_gal_jk]),\
-            filename\
-            .format(minradV,maxradV,sec,vtype),\
-            names=['eta_jk','rmin','rmax','N_jk'],\
-            overwrite=True)
+                if forTable: 
+                    filename = '../data/zeta/zeta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}_jk_forTable.txt'
+                else: 
+                    filename = '../data/zeta/zeta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}_jk.txt'
+                #print(filename)
+                ascii.write(np.column_stack([zeta_jk]),\
+                    filename\
+                    .format(minradV,maxradV,rmin,rmax,sec,vtype,jk),\
+                    names=['zeta_jk'],\
+                    overwrite=True)
 # %%
