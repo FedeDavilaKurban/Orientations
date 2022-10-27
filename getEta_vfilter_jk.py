@@ -103,7 +103,7 @@ for vfilter in ['lo']:
     for sec in [3]:
         print('sec:',sec)
 
-        for vtype in ['s']:
+        for vtype in ['a','r']:
             print('vtype:',vtype)
 
             for rmin,rmax in zip(r1,r2):

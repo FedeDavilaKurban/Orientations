@@ -103,7 +103,7 @@ for vfilter in ['lo']:
     for sec in [3]:
         print('sec:',sec)
 
-        for vtype in ['s']:
+        for vtype in ['a','r']:
             print('vtype:',vtype)
 
             voids = readVoids(minrad=minradV,maxrad=maxradV,vtype=vtype)
@@ -122,8 +122,9 @@ for vfilter in ['lo']:
                 #n_gal_jk = []
                 for jk in range(len(voids)):
 
-                    etaTable = ascii.read('../data/eta/eta_minradV{}_maxradV{}_sec{}_vtype{}_jk{}.txt'\
-                                        .format(minradV,maxradV,sec,vtype,jk))['eta','rmin','rmax','N']
+                    etaTable = ascii.read('../data/eta/eta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}_jk{}.txt'\
+                                        .format(minradV,maxradV,rmin,rmax,sec,vtype,jk))['eta','rmin','rmax','N']
+
 
                     eta_ran = 1./(np.sqrt(2)-1)
                     eta_ran_std = np.sqrt(28.1421/etaTable['N'])
@@ -133,7 +134,7 @@ for vfilter in ['lo']:
                     #N = len(beta)
                     #n_gal_jk.append(N)
 
-                print(zeta_jk)
+                #print(zeta_jk)
 
                 if forTable: 
                     filename = '../data/zeta/zeta_minradV{}_maxradV{}_rmin{:.1f}_rmax{:.1f}_sec{}_vtype{}_jk_forTable.txt'
